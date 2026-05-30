@@ -1,0 +1,24 @@
+=== task-3: Format Tests ===
+Command: go test ./internal/format -v -run 'TestPrintUserInfo|TestFormatUserList'
+
+Function: PrintUserInfo(user, opts)
+  - Repo scope: "Your repo git user is:\n\nuser.name  = X\nuser.email = Y\n"
+  - Global scope: "Your global git user is:\n\nuser.name  = X\nuser.email = Y\n"
+  - ShowSuccess prefix: "Success!\n" before the user info
+
+Test: TestPrintUserInfo_Repo   - PASS
+Test: TestPrintUserInfo_Global - PASS
+Test: TestPrintUserInfo_WithSuccess - PASS
+
+Function: FormatUserList(users []User) string
+  - Empty input → ""
+  - Single user → "0: Name: Alice | Email: a@t.com\n"
+  - Multiple users → padded to longest name length:
+    "0: Name: Alice   | Email: a@t.com\n"
+    "1: Name: Bob     | Email: b@t.com\n"
+    "2: Name: Charlie | Email: c@t.com\n"
+  - Pipes align vertically
+
+Test: TestFormatUserList_Empty          - PASS
+Test: TestFormatUserList_Single         - PASS
+Test: TestFormatUserList_MultipleAligned - PASS

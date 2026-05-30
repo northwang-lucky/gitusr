@@ -1,0 +1,15 @@
+=== task-3: PrintErr Test ===
+Command: go test ./internal/format -v -run TestPrintErr
+
+Function: PrintErr(msg string)
+  - Outputs "gitusr error: {msg}\n" to stderr
+
+Test: TestPrintErr
+  - Capture stderr, call PrintErr("something went wrong")
+  - Expected: "gitusr error: something went wrong\n"
+  - PASS
+
+Test: TestPrintErr_EmptyMsg
+  - Capture stderr, call PrintErr("")
+  - Expected: "gitusr error: \n"
+  - PASS

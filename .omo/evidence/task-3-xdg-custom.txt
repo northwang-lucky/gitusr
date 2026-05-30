@@ -1,0 +1,19 @@
+=== task-3: XDG Custom Path Test ===
+Command: XDG_DATA_HOME=/tmp/test-xdg go test ./internal/xdgpath -v
+
+Expected:
+- DataFilePath() returns $XDG_DATA_HOME/gitusr/user-list.json
+- Parent directory is created
+
+Test: TestDataFilePath_WithCustomEnv
+- Set XDG_DATA_HOME to a temp dir
+- Verify returned path matches expected
+- Verify parent dir exists
+
+Test: TestDataFilePath_DefaultPath
+- Unset XDG_DATA_HOME (set to "")
+- Set HOME to a temp dir
+- Verify returned path is ~/.local/share/gitusr/user-list.json
+- Verify parent dir exists
+
+Both tests PASS.
