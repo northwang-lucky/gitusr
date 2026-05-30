@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"path/filepath"
 
 	"gitusr/internal/cli"
 	"gitusr/internal/format"
@@ -17,7 +18,9 @@ func main() {
 	}
 
 	s := store.NewJSONStore(path)
-	rootCmd := cli.NewRootCmd(s)
+
+	cmdName := filepath.Base(os.Args[0])
+	rootCmd := cli.NewRootCmd(s, cmdName)
 
 	if err := rootCmd.Execute(); err != nil {
 		format.PrintErr(err.Error())
