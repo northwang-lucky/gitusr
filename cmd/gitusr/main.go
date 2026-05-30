@@ -1,10 +1,26 @@
 package main
 
-import "github.com/spf13/cobra"
+import (
+	"os"
+
+	"gitusr/internal/cli"
+	"gitusr/internal/format"
+	"gitusr/internal/store"
+	"gitusr/internal/xdgpath"
+)
 
 func main() {
-	cmd := &cobra.Command{
-		Use: "gitusr",
+	path, err := xdgpath.DataFilePath()
+	if err != nil {
+		format.PrintErr(err.Error())
+		os.Exit(1)
 	}
-	cmd.Execute()
+
+	s := store.NewJSONStore(path)
+	rootCmd := cli.NewRootCmd(s)
+
+	if err := rootCmd.Execute(); err != nil {
+		format.PrintErr(err.Error())
+		os.Exit(1)
+	}
 }
