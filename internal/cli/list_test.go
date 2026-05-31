@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"gitusr/internal/domain"
+	"gitusr/internal/i18n"
 )
 
 // mockStore implements domain.UserStore for testing.
@@ -54,6 +55,9 @@ func captureOutput(f func()) (stdout string, stderr string) {
 }
 
 func TestList_NotInitialized(t *testing.T) {
+	i18n.ResetForTesting()
+	i18n.InitWithLocale("en")
+
 	store := &mockStore{initialized: false}
 	cmd := NewListCmd(store)
 	cmd.SetArgs([]string{})
@@ -77,6 +81,9 @@ func TestList_NotInitialized(t *testing.T) {
 }
 
 func TestList_Empty(t *testing.T) {
+	i18n.ResetForTesting()
+	i18n.InitWithLocale("en")
+
 	store := &mockStore{initialized: true, users: []domain.User{}}
 	cmd := NewListCmd(store)
 	cmd.SetArgs([]string{})
@@ -98,6 +105,9 @@ func TestList_Empty(t *testing.T) {
 }
 
 func TestList_WithUsers(t *testing.T) {
+	i18n.ResetForTesting()
+	i18n.InitWithLocale("en")
+
 	store := &mockStore{
 		initialized: true,
 		users: []domain.User{
@@ -143,6 +153,9 @@ func TestList_WithUsers(t *testing.T) {
 }
 
 func TestList_AliasLS(t *testing.T) {
+	i18n.ResetForTesting()
+	i18n.InitWithLocale("en")
+
 	store := &mockStore{initialized: true, users: []domain.User{}}
 	cmd := NewListCmd(store)
 
@@ -156,5 +169,147 @@ func TestList_AliasLS(t *testing.T) {
 
 	if !found {
 		t.Errorf("expected 'ls' alias, got aliases: %v", cmd.Aliases)
+	}
+}
+
+func TestList_En(t *testing.T) {
+	i18n.ResetForTesting()
+	i18n.InitWithLocale("en")
+
+	store := &mockStore{
+		initialized: true,
+		users: []domain.User{
+			{Name: "Alice", Email: "alice@example.com"},
+			{Name: "Bob", Email: "bob@example.com"},
+		},
+	}
+	cmd := NewListCmd(store)
+	cmd.SetArgs([]string{})
+
+	stdout, stderr := captureOutput(func() {
+		err := cmd.Execute()
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+	})
+
+	if stderr != "" {
+		t.Errorf("stderr should be empty, got %q", stderr)
+	}
+
+	// Verify English Short description
+	if cmd.Short != "show all saved users" {
+		t.Errorf("Short = %q, want %q", cmd.Short, "show all saved users")
+	}
+
+	// Verify English formatted output
+	lines := strings.Split(strings.TrimSuffix(stdout, "\n"), "\n")
+	if len(lines) != 2 {
+		t.Fatalf("expected 2 lines, got %d", len(lines))
+	}
+
+	expected0 := "0: Name: Alice | Email: alice@example.com"
+	expected1 := "1: Name: Bob   | Email: bob@example.com"
+
+	if lines[0] != expected0 {
+		t.Errorf("line 0:\nexpected %q\ngot      %q", expected0, lines[0])
+	}
+	if lines[1] != expected1 {
+		t.Errorf("line 1:\nexpected %q\ngot      %q", expected1, lines[1])
+	}
+}
+
+func TestList_ZhCN(t *testing.T) {
+	i18n.ResetForTesting()
+	i18n.InitWithLocale("zh-CN")
+
+	store := &mockStore{
+		initialized: true,
+		users: []domain.User{
+			{Name: "Alice", Email: "alice@example.com"},
+			{Name: "Bob", Email: "bob@example.com"},
+		},
+	}
+	cmd := NewListCmd(store)
+	cmd.SetArgs([]string{})
+
+	stdout, stderr := captureOutput(func() {
+		err := cmd.Execute()
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+	})
+
+	if stderr != "" {
+		t.Errorf("stderr should be empty, got %q", stderr)
+	}
+
+	// Verify Chinese Short description
+	if cmd.Short != "显示所有已保存用户" {
+		t.Errorf("Short = %q, want %q", cmd.Short, "显示所有已保存用户")
+	}
+
+	// Verify Chinese formatted output
+	lines := strings.Split(strings.TrimSuffix(stdout, "\n"), "\n")
+	if len(lines) != 2 {
+		t.Fatalf("expected 2 lines, got %d", len(lines))
+	}
+
+	expected0 := "0：姓名：Alice | 邮箱：alice@example.com"
+	expected1 := "1：姓名：Bob   | 邮箱：bob@example.com"
+
+	if lines[0] != expected0 {
+		t.Errorf("line 0:\nexpected %q\ngot      %q", expected0, lines[0])
+	}
+	if lines[1] != expected1 {
+		t.Errorf("line 1:\nexpected %q\ngot      %q", expected1, lines[1])
+	}
+}
+
+func TestList_Empty_En(t *testing.T) {
+	i18n.ResetForTesting()
+	i18n.InitWithLocale("en")
+
+	store := &mockStore{initialized: true, users: []domain.User{}}
+	cmd := NewListCmd(store)
+	cmd.SetArgs([]string{})
+
+	stdout, stderr := captureOutput(func() {
+		err := cmd.Execute()
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+	})
+
+	if stderr != "" {
+		t.Errorf("stderr should be empty, got %q", stderr)
+	}
+
+	if stdout != "" {
+		t.Errorf("stdout should be empty for empty list, got %q", stdout)
+	}
+}
+
+func TestList_Empty_ZhCN(t *testing.T) {
+	i18n.ResetForTesting()
+	i18n.InitWithLocale("zh-CN")
+
+	store := &mockStore{initialized: true, users: []domain.User{}}
+	cmd := NewListCmd(store)
+	cmd.SetArgs([]string{})
+
+	stdout, stderr := captureOutput(func() {
+		err := cmd.Execute()
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+	})
+
+	if stderr != "" {
+		t.Errorf("stderr should be empty, got %q", stderr)
+	}
+
+	if stdout != "" {
+		t.Errorf("stdout should be empty for empty list, got %q", stdout)
 	}
 }

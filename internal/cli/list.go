@@ -7,6 +7,7 @@ import (
 
 	"gitusr/internal/domain"
 	"gitusr/internal/format"
+	"gitusr/internal/i18n"
 )
 
 // NewListCmd creates the "list" command that shows all saved users.
@@ -14,10 +15,10 @@ func NewListCmd(store domain.UserStore) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "list",
 		Aliases: []string{"ls"},
-		Short:   "show all saved users",
+		Short:   i18n.T("cli.list.short", nil),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !store.IsInitialized() {
-				format.PrintErr("no users saved yet, run 'gitusr add' first")
+				format.PrintErr(i18n.T("cli.list.no_users", nil))
 				return fmt.Errorf("store not initialized")
 			}
 
