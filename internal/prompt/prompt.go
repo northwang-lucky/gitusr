@@ -7,6 +7,7 @@ import (
 
 	"github.com/AlecAivazis/survey/v2"
 	"gitusr/internal/domain"
+	"gitusr/internal/i18n"
 )
 
 const emailRegex = `\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*`
@@ -17,7 +18,7 @@ var compiledEmailRegex = regexp.MustCompile("^" + emailRegex + "$")
 // expected by this package.
 func validateEmail(email string) error {
 	if !compiledEmailRegex.MatchString(email) {
-		return errors.New("invalid email format")
+		return errors.New(i18n.T("prompt.invalid_email", nil))
 	}
 	return nil
 }
@@ -27,7 +28,7 @@ func validateEmail(email string) error {
 func AskNewUser() (domain.User, error) {
 	var name string
 	err := survey.AskOne(&survey.Input{
-		Message: "Please enter the user.name:",
+		Message: i18n.T("prompt.ask_name", nil),
 	}, &name)
 	if err != nil {
 		return domain.User{}, err
@@ -35,13 +36,13 @@ func AskNewUser() (domain.User, error) {
 
 	var email string
 	err = survey.AskOne(&survey.Input{
-		Message: "Please enter the user.email:",
+		Message: i18n.T("prompt.ask_email", nil),
 	}, &email, survey.WithValidator(survey.ComposeValidators(
 		survey.Required,
 		func(val interface{}) error {
 			s, ok := val.(string)
 			if !ok {
-				return errors.New("internal error: expected string value")
+				return errors.New(i18n.T("prompt.internal_error", nil))
 			}
 			return validateEmail(s)
 		},
@@ -70,7 +71,11 @@ func formatSelectOptions(users []domain.User) []string {
 
 	options := make([]string, len(users))
 	for i, u := range users {
-		options[i] = fmt.Sprintf("Name: %-*s | Email: %s", maxNameLen, u.Name, u.Email)
+		paddedName := fmt.Sprintf("%-*s", maxNameLen, u.Name)
+		options[i] = i18n.T("prompt.select_option_format", map[string]interface{}{
+			"NamePad": paddedName,
+			"Email":   u.Email,
+		})
 	}
 	return options
 }
@@ -80,14 +85,14 @@ func formatSelectOptions(users []domain.User) []string {
 // user cancels the prompt.
 func SelectUser(users []domain.User) (int, error) {
 	if len(users) == 0 {
-		return 0, errors.New("no users to select from")
+		return 0, errors.New(i18n.T("prompt.no_users", nil))
 	}
 
 	options := formatSelectOptions(users)
 
 	var selected int
 	err := survey.AskOne(&survey.Select{
-		Message: "Select a user:",
+		Message: i18n.T("prompt.select_user", nil),
 		Options: options,
 	}, &selected)
 	if err != nil {

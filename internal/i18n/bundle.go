@@ -25,6 +25,18 @@ var (
 	mu        sync.Mutex
 )
 
+// ResetForTesting clears the internal locale state so subsequent
+// calls to Init() or InitWithLocale() are not no-ops.
+//
+// This is intended for tests that need to switch locales between
+// test cases. It must NOT be used in production code.
+func ResetForTesting() {
+	mu.Lock()
+	defer mu.Unlock()
+	bundle = nil
+	localizer = nil
+}
+
 // Init initializes the i18n package with locale detection from environment
 // variables. It checks GITUSR_LANG first, then LANGUAGE, then LANG, and
 // defaults to "en" if none are set.
