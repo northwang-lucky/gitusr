@@ -149,6 +149,10 @@ other = "按邮箱切换"
 hash = "sha1:df5c58c137cfa04f76bd0b6f2d845f7a8f9af6f8"
 other = "按索引切换"
 
+[cli.use.flag_silent]
+hash = "sha1:placeholder"
+other = "用户未变更时静默模式"
+
 # ================================================
 # CLI list 命令（internal/cli/list.go）
 # ================================================
@@ -264,6 +268,74 @@ other = "新用户邮箱"
 [cli.replace.flag_with_index]
 hash = "sha1:b00e2864171b45023efe5b53fd519e1ab5085e9a"
 other = "新用户索引"
+
+# ================================================
+# CLI hook 命令（internal/cli/hook.go）
+# ================================================
+
+[cli.hook.use]
+hash = "sha1:placeholder"
+other = "管理用于自动切换 git 用户的 shell 钩子"
+
+[cli.hook.short]
+hash = "sha1:placeholder"
+other = "管理 shell 钩子"
+
+[cli.hook.install.use]
+hash = "sha1:placeholder"
+other = "安装 shell 钩子"
+
+[cli.hook.install.short]
+hash = "sha1:placeholder"
+other = "安装钩子"
+
+[cli.hook.install.flag_type]
+hash = "sha1:placeholder"
+other = "钩子类型：clone 或 commit"
+
+[cli.hook.install.success]
+hash = "sha1:placeholder"
+other = "{{.Type}}钩子安装成功"
+
+[cli.hook.install.already_installed]
+hash = "sha1:placeholder"
+other = "{{.Type}}钩子已安装"
+
+[cli.hook.uninstall.use]
+hash = "sha1:placeholder"
+other = "卸载 shell 钩子"
+
+[cli.hook.uninstall.short]
+hash = "sha1:placeholder"
+other = "卸载钩子"
+
+[cli.hook.uninstall.success]
+hash = "sha1:placeholder"
+other = "{{.Type}}钩子卸载成功"
+
+[cli.hook.uninstall.not_installed]
+hash = "sha1:placeholder"
+other = "{{.Type}}钩子未安装"
+
+[cli.hook.env.use]
+hash = "sha1:placeholder"
+other = "生成用于 cd 自动切换的 shell 代码"
+
+[cli.hook.env.short]
+hash = "sha1:placeholder"
+other = "生成 cd 钩子代码"
+
+[cli.hook.env.flag_shell]
+hash = "sha1:placeholder"
+other = "Shell 类型：bash 或 zsh"
+
+[cli.hook.rc.not_found]
+hash = "sha1:placeholder"
+other = ".gitusrrc 中指定的用户在已保存用户中未找到"
+
+[cli.hook.rc.invalid_json]
+hash = "sha1:placeholder"
+other = ".gitusrrc 中的 JSON 格式无效"
 
 # ================================================
 # CLI 共享错误消息（多个命令使用）

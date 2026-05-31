@@ -153,6 +153,10 @@ other = "switch by email"
 hash = "sha1:df5c58c137cfa04f76bd0b6f2d845f7a8f9af6f8"
 other = "switch by index"
 
+[cli.use.flag_silent]
+hash = "sha1:placeholder"
+other = "Silent mode if user unchanged"
+
 # ================================================
 # CLI list command (internal/cli/list.go)
 # ================================================
@@ -268,6 +272,74 @@ other = "new user email"
 [cli.replace.flag_with_index]
 hash = "sha1:b00e2864171b45023efe5b53fd519e1ab5085e9a"
 other = "new user index"
+
+# ================================================
+# CLI hook command (internal/cli/hook.go)
+# ================================================
+
+[cli.hook.use]
+hash = "sha1:placeholder"
+other = "Manage shell hooks for automatic git user switching"
+
+[cli.hook.short]
+hash = "sha1:placeholder"
+other = "Manage shell hooks"
+
+[cli.hook.install.use]
+hash = "sha1:placeholder"
+other = "Install a shell hook"
+
+[cli.hook.install.short]
+hash = "sha1:placeholder"
+other = "Install hook"
+
+[cli.hook.install.flag_type]
+hash = "sha1:placeholder"
+other = "Hook type: clone or commit"
+
+[cli.hook.install.success]
+hash = "sha1:placeholder"
+other = "Hook {{.Type}} successfully installed"
+
+[cli.hook.install.already_installed]
+hash = "sha1:placeholder"
+other = "Hook {{.Type}} is already installed"
+
+[cli.hook.uninstall.use]
+hash = "sha1:placeholder"
+other = "Uninstall a shell hook"
+
+[cli.hook.uninstall.short]
+hash = "sha1:placeholder"
+other = "Uninstall hook"
+
+[cli.hook.uninstall.success]
+hash = "sha1:placeholder"
+other = "Hook {{.Type}} successfully uninstalled"
+
+[cli.hook.uninstall.not_installed]
+hash = "sha1:placeholder"
+other = "Hook {{.Type}} is not installed"
+
+[cli.hook.env.use]
+hash = "sha1:placeholder"
+other = "Generate shell code for cd-based auto-switching"
+
+[cli.hook.env.short]
+hash = "sha1:placeholder"
+other = "Generate cd hook code"
+
+[cli.hook.env.flag_shell]
+hash = "sha1:placeholder"
+other = "Shell type: bash or zsh"
+
+[cli.hook.rc.not_found]
+hash = "sha1:placeholder"
+other = "User specified in .gitusrrc not found in saved users"
+
+[cli.hook.rc.invalid_json]
+hash = "sha1:placeholder"
+other = "Invalid JSON format in .gitusrrc"
 
 # ================================================
 # Shared CLI error messages (used by multiple cmds)
