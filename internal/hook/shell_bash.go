@@ -75,7 +75,7 @@ func GenerateBashWrapper() string {
             fi
         fi
 
-        # Apply gitusr user identity
+        # Apply gitusr user identity (only if --gu-name or --gu-email provided)
         if [ -n "$gu_name" ] || [ -n "$gu_email" ]; then
             if [ -n "$gu_name" ] && [ -n "$gu_email" ]; then
                 gitusr use --name "$gu_name" --email "$gu_email"
@@ -84,8 +84,6 @@ func GenerateBashWrapper() string {
             else
                 gitusr use --email "$gu_email"
             fi
-        else
-            gitusr use
         fi
 
         return $clone_exit
