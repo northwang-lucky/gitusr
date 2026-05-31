@@ -6,6 +6,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"gitusr/internal/domain"
+	"gitusr/internal/i18n"
 	"gitusr/internal/prompt"
 )
 
@@ -17,10 +18,10 @@ var askNewUser = prompt.AskNewUser
 func NewAddCmd(store domain.UserStore) *cobra.Command {
 	return &cobra.Command{
 		Use:   "add",
-		Short: "add and save a user",
+		Short: i18n.T("cli.add.short", nil),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !store.IsInitialized() {
-				return fmt.Errorf("store not initialized")
+				return fmt.Errorf("%s", i18n.T("cli.error.store_not_init", nil))
 			}
 
 			user, err := askNewUser()
@@ -35,10 +36,10 @@ func NewAddCmd(store domain.UserStore) *cobra.Command {
 
 			for _, u := range users {
 				if u.Name == user.Name {
-					return fmt.Errorf("user with name %q already exists", user.Name)
+					return fmt.Errorf("%s", i18n.T("cli.add.dup_name", map[string]interface{}{"Name": user.Name}))
 				}
 				if u.Email == user.Email {
-					return fmt.Errorf("user with email %q already exists", user.Email)
+					return fmt.Errorf("%s", i18n.T("cli.add.dup_email", map[string]interface{}{"Email": user.Email}))
 				}
 			}
 
@@ -46,7 +47,7 @@ func NewAddCmd(store domain.UserStore) *cobra.Command {
 				return fmt.Errorf("add user: %w", err)
 			}
 
-			fmt.Printf("Success! User (name: %s | email: %s) has been saved!\n", user.Name, user.Email)
+			fmt.Print(i18n.T("cli.add.success", map[string]interface{}{"Name": user.Name, "Email": user.Email}) + "\n")
 			return nil
 		},
 	}

@@ -60,7 +60,7 @@ func runGitusr(t *testing.T, env map[string]string, args ...string) (string, err
 	t.Helper()
 
 	cmd := exec.Command(gitusrBin, args...)
-	cmd.Env = os.Environ()
+	cmd.Env = append(os.Environ(), "GITUSR_LANG=en")
 	for k, v := range env {
 		cmd.Env = append(cmd.Env, k+"="+v)
 	}
@@ -82,7 +82,7 @@ func runGitusrStdin(t *testing.T, env map[string]string, stdin string, args ...s
 	t.Helper()
 
 	cmd := exec.Command(gitusrBin, args...)
-	cmd.Env = os.Environ()
+	cmd.Env = append(os.Environ(), "GITUSR_LANG=en")
 	for k, v := range env {
 		cmd.Env = append(cmd.Env, k+"="+v)
 	}
@@ -106,7 +106,7 @@ func runGitusrInDir(t *testing.T, env map[string]string, dir string, args ...str
 
 	cmd := exec.Command(gitusrBin, args...)
 	cmd.Dir = dir
-	cmd.Env = os.Environ()
+	cmd.Env = append(os.Environ(), "GITUSR_LANG=en")
 	for k, v := range env {
 		cmd.Env = append(cmd.Env, k+"="+v)
 	}

@@ -4,6 +4,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"gitusr/internal/domain"
+	"gitusr/internal/i18n"
 )
 
 // NewRootCmd creates the root cobra command for gitusr and registers all
@@ -13,7 +14,7 @@ import (
 func NewRootCmd(store domain.UserStore, name string) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:           name,
-		Short:         "A CLI that allows you to switch git users.",
+		Short:         i18n.T("cli.root.short", nil),
 		SilenceErrors: true,
 		SilenceUsage:  true,
 	}
