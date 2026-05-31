@@ -1,0 +1,286 @@
+# Gitusr — 简体中文翻译文件
+# ================================================
+# 按源码包分组。命名约定：
+# package.message_type.identifier
+# 参数字符串使用 {{.VarName}} 语法。
+# ================================================
+
+# ================================================
+# Format 包消息（internal/format/）
+# ================================================
+
+[format.error_prefix]
+hash = "sha1:14e60b9ae9140b40f60c4c280aee01aad62a0a50"
+other = "gitusr 错误：{{.Msg}}"
+
+[format.success_banner]
+hash = "sha1:7ce01f6381463362cf6aef2f843a59261e8f5587"
+other = "成功！"
+
+[format.userinfo_header]
+hash = "sha1:298fb4b9dce8418c05144ca61f1cf6870c0008f8"
+other = "您的 {{.Scope}} git 用户为："
+
+[format.user_name_label]
+hash = "sha1:98982d4ac829813b1c938bdb5976f5f03049adcf"
+other = "user.name  = {{.Name}}"
+
+[format.user_email_label]
+hash = "sha1:d11fe98bf04adc3973169b9503cb1fb3359f2b0b"
+other = "user.email = {{.Email}}"
+
+[format.userlist_row]
+hash = "sha1:e798d82ad225e5a74668dd339c2d74d627fdbff2"
+other = "{{.Index}}：姓名：{{.NamePad}} | 邮箱：{{.Email}}"
+
+# ================================================
+# Prompt 包消息（internal/prompt/）
+# ================================================
+
+[prompt.ask_name]
+hash = "sha1:d6a338512c7e2c880d877111c7ea2ca302466cc2"
+other = "请输入 user.name："
+
+[prompt.ask_email]
+hash = "sha1:8827458f4264dda2412fe8e73e831727c6c06f76"
+other = "请输入 user.email："
+
+[prompt.select_user]
+hash = "sha1:e127d761ab082d65ac70c55f076a7dff42c643ad"
+other = "选择一个用户："
+
+[prompt.no_users]
+hash = "sha1:ad50a6123132f944b567f41db4bb3672e349b135"
+other = "没有可供选择的用户"
+
+[prompt.invalid_email]
+hash = "sha1:7ebedcb31dd31e29e275ca6f935b4a81ffcd6218"
+other = "邮箱格式无效"
+
+[prompt.internal_error]
+hash = "sha1:abc2d92a1e561a639b40074568ad54366e9f2139"
+other = "内部错误：期望字符串值"
+
+[prompt.select_option_format]
+hash = "sha1:3a2102832f5af16544568f0011e16ac9c43cbcd5"
+other = "姓名：{{.NamePad}} | 邮箱：{{.Email}}"
+
+# ================================================
+# CLI 根命令（internal/cli/root.go）
+# ================================================
+
+[cli.root.short]
+hash = "sha1:0c7c17c2f5861525ef0e13edba16d1772ef53dff"
+other = "用于切换 git 用户的 CLI 工具。"
+
+# ================================================
+# CLI add 命令（internal/cli/add.go）
+# ================================================
+
+[cli.add.short]
+hash = "sha1:4ad9781aa0e50651a7981b00af34691c9c492b0f"
+other = "添加并保存用户"
+
+[cli.add.dup_name]
+hash = "sha1:7cdc8d37ac07a77150d6a68223293ffa0957cb07"
+other = "用户名为\"{{.Name}}\"的用户已存在"
+
+[cli.add.dup_email]
+hash = "sha1:5854e66fad6d7f3b5dc6db5d458904e1e1588eed"
+other = "邮箱为\"{{.Email}}\"的用户已存在"
+
+[cli.add.success]
+hash = "sha1:0dd7b1a256ff4c22b5ce7bb9b8561b247184df44"
+other = "成功！用户（姓名：{{.Name}} | 邮箱：{{.Email}}）已保存！"
+
+# ================================================
+# CLI current 命令（internal/cli/current.go）
+# ================================================
+
+[cli.current.short]
+hash = "sha1:a6f2a5c4c10c1b3ee9fdcb8c730f4da369557b7d"
+other = "显示当前仓库/全局用户"
+
+[cli.current.flag_global]
+hash = "sha1:c3d2739f418b9cd3c7415787288e5c84ca6dc9a6"
+other = "显示全局用户"
+
+# ================================================
+# CLI use 命令（internal/cli/use.go）
+# ================================================
+
+[cli.use.short]
+hash = "sha1:8e9ec1ea995c60d278e4c4a835942f993033e4ff"
+other = "在 git 仓库中或全局切换用户"
+
+[cli.use.no_users]
+hash = "sha1:41ae5e7c57333337f8eae51258230d76d2df8580"
+other = "暂无已保存用户，请先运行 \"gitusr add\""
+
+[cli.use.flag_global]
+hash = "sha1:4cc75b3b2a7c37cf4651f7d82ec67c058589a7e1"
+other = "切换全局用户"
+
+[cli.use.flag_name]
+hash = "sha1:ac39b8bd354205bf321af003b482441bfef5e3ed"
+other = "按名称切换"
+
+[cli.use.flag_email]
+hash = "sha1:e1c4f565adf08dfbc72b13965b95fd5569282e55"
+other = "按邮箱切换"
+
+[cli.use.flag_index]
+hash = "sha1:df5c58c137cfa04f76bd0b6f2d845f7a8f9af6f8"
+other = "按索引切换"
+
+# ================================================
+# CLI list 命令（internal/cli/list.go）
+# ================================================
+
+[cli.list.short]
+hash = "sha1:35c12305c31ff91743a4f893ca9102d6fa22b51a"
+other = "显示所有已保存用户"
+
+[cli.list.no_users]
+hash = "sha1:41ae5e7c57333337f8eae51258230d76d2df8580"
+other = "暂无已保存用户，请先运行 \"gitusr add\""
+
+# ================================================
+# CLI remove 命令（internal/cli/remove.go）
+# ================================================
+
+[cli.remove.short]
+hash = "sha1:0e7bf95158988e8bd19990143f7db99e08b6ac4d"
+other = "删除用户"
+
+[cli.remove.success]
+hash = "sha1:a4d41f04ab1db6a0db1c2c71a33a2310671a8e2d"
+other = "成功！用户（姓名：{{.Name}} | 邮箱：{{.Email}}）已删除！"
+
+[cli.remove.flag_name]
+hash = "sha1:a3437ee9e89caf4650a6ad8a414aa7d7f2f2d69e"
+other = "按名称删除用户"
+
+[cli.remove.flag_email]
+hash = "sha1:047f21a7f887a7ad05075d15751e34a1f9851030"
+other = "按邮箱删除用户"
+
+[cli.remove.flag_index]
+hash = "sha1:197008c36d8f058fe67fae4a7a5abc6f631f45e2"
+other = "按索引删除用户"
+
+# ================================================
+# CLI init 命令（internal/cli/init.go）
+# ================================================
+
+[cli.init.short]
+hash = "sha1:e49335f7eac441122a4dadc7b0b315c0db2a738b"
+other = "从 git 全局配置初始化"
+
+[cli.init.flag_force]
+hash = "sha1:e996c2d84add88301442411318fae5d5015c4651"
+other = "强制覆盖现有用户"
+
+[cli.init.override_confirm]
+hash = "sha1:f7b0aab6221ba6daeadb2ebf246aa208bfbe25cc"
+other = "覆盖现有用户？"
+
+[cli.init.migrate_confirm]
+hash = "sha1:e4dd3c3fcbe85cb324d2f112fe2bd6acb6bd5313"
+other = "在 ~/.gitusr/user-list.json 找到旧配置。迁移到 XDG 目录？"
+
+[cli.init.migrate_skip]
+hash = "sha1:acfc3590485e5c58efa09bcaa1d90444f7a2d5c3"
+other = "迁移已跳过。"
+
+[cli.init.migrate_count]
+hash = "sha1:356121144bd1bae202ac63201cffb40b31062a35"
+other = "已从旧配置迁移 {{.Count}} 个用户。"
+
+# ================================================
+# CLI replace 命令（internal/cli/replace.go）
+# ================================================
+
+[cli.replace.short]
+hash = "sha1:f539734c5bad88f97251ca2a1eca8d982b23e9d1"
+other = "替换 git 历史记录中的作者"
+
+[cli.replace.uncommitted]
+hash = "sha1:5321517f0f69caeded1ce85f66c73a6bc876de10"
+other = "检测到未提交的更改，请先提交或暂存"
+
+[cli.replace.backup_created]
+hash = "sha1:e9d2de86c39dfed0cfd9ab2d362c0387387a170d"
+other = "已创建备份分支：{{.Branch}}"
+
+[cli.replace.switch_confirm]
+hash = "sha1:7ad5a98f23c4ca829021e5c80b17934ae42b2243"
+other = "将仓库用户切换为 {{.Name}} <{{.Email}}>？"
+
+[cli.replace.flag_with_name]
+hash = "sha1:a54a79c4e6a1b3bd45ef579cf93adb56ceb10511"
+other = "新用户名"
+
+[cli.replace.flag_with_email]
+hash = "sha1:c3e1703c5c505ba40a97cb764e4f6607376228ad"
+other = "新用户邮箱"
+
+[cli.replace.flag_with_index]
+hash = "sha1:b00e2864171b45023efe5b53fd519e1ab5085e9a"
+other = "新用户索引"
+
+# ================================================
+# CLI 共享错误消息（多个命令使用）
+# ================================================
+
+[cli.error.store_not_init]
+hash = "sha1:13a4727050bd087c56e50a696640d3e18dd33e17"
+other = "存储未初始化"
+
+[cli.error.not_repo]
+hash = "sha1:44d196c079080bda09ce9e13a894b1da02c17ba3"
+other = "不是 git 仓库（或其任何父目录）：.git"
+
+# ================================================
+# Select 包消息（internal/select/）
+# ================================================
+
+[select.no_users]
+hash = "sha1:ee53e686a409c193080f1b74daccd35d73aa15e4"
+other = "没有已保存的用户"
+
+[select.index_out_of_range]
+hash = "sha1:09f21f468cbc1ca8be65f80efa945e14bf4fde7d"
+other = "索引 {{.Index}} 超出范围（0-{{.Max}}）"
+
+[select.email_not_found]
+hash = "sha1:0429ec125274a1316e6797ab6fc1245cc9af7688"
+other = "邮箱为\"{{.Email}}\"的用户未找到"
+
+[select.name_not_found]
+hash = "sha1:f76107c1490b11a2437cbb45b2b96847882e5b3a"
+other = "用户名为\"{{.Name}}\"的用户未找到"
+
+# ================================================
+# Store 包消息（internal/store/）
+# ================================================
+
+[store.dup_name]
+hash = "sha1:7cdc8d37ac07a77150d6a68223293ffa0957cb07"
+other = "用户名为\"{{.Name}}\"的用户已存在"
+
+[store.dup_email]
+hash = "sha1:5854e66fad6d7f3b5dc6db5d458904e1e1588eed"
+other = "邮箱为\"{{.Email}}\"的用户已存在"
+
+[store.index_out_of_bounds]
+hash = "sha1:70239e6bc5f24b82fa78c859c25fff3cfdef9c20"
+other = "索引 {{.Index}} 超出界限（0-{{.Max}}）"
+
+# ================================================
+# Gitcmd 包消息（internal/gitcmd/）
+# ================================================
+
+[gitcmd.filter_repo_not_installed]
+hash = "sha1:41b9ac2acf28c0344182fa28e3f4c1b2c774fc32"
+other = "未安装 git-filter-repo。请使用以下命令安装：pip install git-filter-repo"
