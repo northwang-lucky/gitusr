@@ -208,19 +208,23 @@ func TestHookUninstall_Error(t *testing.T) {
 }
 
 // TestHookCmd_Subcommands verifies the parent hook command correctly groups
-// install, uninstall, and env as subcommands.
+// install, uninstall, env, and apply-rc as subcommands (apply-rc is hidden).
 func TestHookCmd_Subcommands(t *testing.T) {
 	store := &mockStore{initialized: true}
 	cmd := NewHookCmd(store)
 
 	subs := cmd.Commands()
-	if len(subs) != 3 {
-		t.Fatalf("expected 3 subcommands, got %d", len(subs))
+	if len(subs) != 4 {
+		t.Fatalf("expected 4 subcommands, got %d", len(subs))
 	}
 
 	names := make(map[string]bool)
+	hidden := make(map[string]bool)
 	for _, s := range subs {
 		names[s.Name()] = true
+		if s.Hidden {
+			hidden[s.Name()] = true
+		}
 	}
 
 	if !names["install"] {
@@ -228,6 +232,15 @@ func TestHookCmd_Subcommands(t *testing.T) {
 	}
 	if !names["uninstall"] {
 		t.Error("expected 'uninstall' subcommand")
+	}
+	if !names["env"] {
+		t.Error("expected 'env' subcommand")
+	}
+	if !names["apply-rc"] {
+		t.Error("expected 'apply-rc' subcommand")
+	}
+	if !hidden["apply-rc"] {
+		t.Error("expected 'apply-rc' subcommand to be hidden")
 	}
 }
 
