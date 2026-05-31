@@ -328,6 +328,137 @@ func TestUse_Help_ZhCN(t *testing.T) {
 	}
 }
 
+// --- Silent-if-unchanged tests ---
+
+// TestUse_SilentIfUnchanged_SameUser verifies that when --silent-if-unchanged
+// is set and the current git config already matches the target user, no output
+// is produced and the command succeeds.
+func TestUse_SilentIfUnchanged_SameUser(t *testing.T) {
+	i18n.ResetForTesting()
+	i18n.InitWithLocale("en")
+
+	dir := t.TempDir()
+	initGitRepo(t, dir)
+	t.Chdir(dir)
+
+	store := &mockStore{
+		initialized: true,
+		users: []domain.User{
+			{Name: "Alice", Email: "alice@example.com"},
+		},
+	}
+
+	// Override getConfigFn to return the target user's config
+	origGet := getConfigFn
+	t.Cleanup(func() { getConfigFn = origGet })
+	getConfigFn = func(key string, global bool) (string, error) {
+		switch key {
+		case "name":
+			return "Alice", nil
+		case "email":
+			return "alice@example.com", nil
+		}
+		return "", nil
+	}
+
+	cmd := NewUseCmd(store)
+	stdout, stderr, err := executeCmd(cmd, "-s", "--index", "0")
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if stdout != "" {
+		t.Errorf("expected empty stdout when user unchanged, got %q", stdout)
+	}
+	if stderr != "" {
+		t.Errorf("expected empty stderr when user unchanged, got %q", stderr)
+	}
+}
+
+// TestUse_SilentIfUnchanged_DifferentUser verifies that when
+// --silent-if-unchanged is set but the current git config differs from the
+// target user, the switch proceeds normally with output.
+func TestUse_SilentIfUnchanged_DifferentUser(t *testing.T) {
+	i18n.ResetForTesting()
+	i18n.InitWithLocale("en")
+
+	dir := t.TempDir()
+	initGitRepo(t, dir)
+	t.Chdir(dir)
+
+	store := &mockStore{
+		initialized: true,
+		users: []domain.User{
+			{Name: "Alice", Email: "alice@example.com"},
+		},
+	}
+
+	// Override getConfigFn to return a different user's config
+	origGet := getConfigFn
+	t.Cleanup(func() { getConfigFn = origGet })
+	getConfigFn = func(key string, global bool) (string, error) {
+		switch key {
+		case "name":
+			return "Bob", nil
+		case "email":
+			return "bob@example.com", nil
+		}
+		return "", nil
+	}
+
+	cmd := NewUseCmd(store)
+	stdout, _, err := executeCmd(cmd, "-s", "--index", "0")
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if !strings.Contains(stdout, "Success") {
+		t.Errorf("expected 'Success' in stdout when user differs, got %q", stdout)
+	}
+}
+
+// TestUse_SilentIfUnchanged_NotSet verifies that without the --silent-if-unchanged
+// flag, the normal behavior (output on success) is preserved even when the
+// current git config matches the target user.
+func TestUse_SilentIfUnchanged_NotSet(t *testing.T) {
+	i18n.ResetForTesting()
+	i18n.InitWithLocale("en")
+
+	dir := t.TempDir()
+	initGitRepo(t, dir)
+	t.Chdir(dir)
+
+	store := &mockStore{
+		initialized: true,
+		users: []domain.User{
+			{Name: "Alice", Email: "alice@example.com"},
+		},
+	}
+
+	// Override getConfigFn to return the target user's config
+	origGet := getConfigFn
+	t.Cleanup(func() { getConfigFn = origGet })
+	getConfigFn = func(key string, global bool) (string, error) {
+		switch key {
+		case "name":
+			return "Alice", nil
+		case "email":
+			return "alice@example.com", nil
+		}
+		return "", nil
+	}
+
+	cmd := NewUseCmd(store)
+	stdout, _, err := executeCmd(cmd, "--index", "0")
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if !strings.Contains(stdout, "Success") {
+		t.Errorf("expected 'Success' in stdout without -s flag, got %q", stdout)
+	}
+}
+
 // containsAny reports whether s contains any of the given substrings.
 func containsAny(s string, subs ...string) bool {
 	for _, sub := range subs {
