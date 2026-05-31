@@ -87,7 +87,7 @@ if commit.author_email == b'%s':
 // installation instructions is returned.
 func FilterRepo(oldEmail string, newName string, newEmail string) error {
 	// Verify git-filter-repo is installed
-	checkCmd := exec.Command("git", "filter-repo", "--help")
+	checkCmd := exec.Command("git", "filter-repo", "--version")
 	if err := checkCmd.Run(); err != nil {
 		return fmt.Errorf(
 			"git-filter-repo is not installed. Install it with: pip install git-filter-repo",
