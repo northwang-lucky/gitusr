@@ -256,6 +256,168 @@ func TestAddSuccess_ZhCN(t *testing.T) {
 }
 
 // TestAddDupName_En verifies the duplicate-name error in English.
+// --- non-TTY flag tests ----------------------------------------------------
+
+// TestAdd_WithFlags_Success verifies that --name and --email flags add a user
+// without invoking the interactive prompt.
+func TestAdd_WithFlags_Success(t *testing.T) {
+	initI18nForTest("en")
+
+	store := &addTestStore{
+		initialized: true,
+		users:       []domain.User{},
+	}
+
+	cmd := NewAddCmd(store)
+	stdout, stderr, err := executeCmd(cmd, "--name", "FlagUser", "--email", "flag@test.com")
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if stderr != "" {
+		t.Errorf("stderr should be empty, got: %q", stderr)
+	}
+
+	if !strings.Contains(stdout, "Success!") {
+		t.Errorf("stdout should contain 'Success!', got: %q", stdout)
+	}
+
+	if !strings.Contains(stdout, "FlagUser") {
+		t.Errorf("stdout should contain user name 'FlagUser', got: %q", stdout)
+	}
+
+	if !strings.Contains(stdout, "flag@test.com") {
+		t.Errorf("stdout should contain email 'flag@test.com', got: %q", stdout)
+	}
+
+	// Verify the user was added to the store
+	if len(store.addedUsers) != 1 {
+		t.Fatalf("expected 1 user added, got %d", len(store.addedUsers))
+	}
+
+	added := store.addedUsers[0]
+	if added.Name != "FlagUser" {
+		t.Errorf("added user name = %q, want %q", added.Name, "FlagUser")
+	}
+	if added.Email != "flag@test.com" {
+		t.Errorf("added user email = %q, want %q", added.Email, "flag@test.com")
+	}
+}
+
+// TestAdd_WithFlags_Partial verifies that --name without --email returns an
+// error about requiring both flags.
+func TestAdd_WithFlags_Partial(t *testing.T) {
+	initI18nForTest("en")
+
+	store := &addTestStore{
+		initialized: true,
+		users:       []domain.User{},
+	}
+
+	cmd := NewAddCmd(store)
+	_, stderr, err := executeCmd(cmd, "--name", "OnlyName")
+
+	if err == nil {
+		t.Fatal("expected error when only --name is provided")
+	}
+
+	if !strings.Contains(err.Error(), "required") {
+		t.Errorf("error should contain 'required', got: %q", err.Error())
+	}
+
+	if !strings.Contains(stderr, "required") {
+		t.Errorf("stderr should contain 'required', got: %q", stderr)
+	}
+
+	// Verify no user was added
+	if len(store.addedUsers) != 0 {
+		t.Errorf("expected 0 users added, got %d", len(store.addedUsers))
+	}
+
+	// Also test --email only
+	cmd2 := NewAddCmd(&addTestStore{initialized: true, users: []domain.User{}})
+	_, _, err2 := executeCmd(cmd2, "--email", "only@email.com")
+
+	if err2 == nil {
+		t.Fatal("expected error when only --email is provided")
+	}
+
+	if !strings.Contains(err2.Error(), "required") {
+		t.Errorf("error should contain 'required', got: %q", err2.Error())
+	}
+}
+
+// TestAdd_WithFlags_InvalidEmail verifies that an invalid --email value is
+// rejected with a format error.
+func TestAdd_WithFlags_InvalidEmail(t *testing.T) {
+	initI18nForTest("en")
+
+	store := &addTestStore{
+		initialized: true,
+		users:       []domain.User{},
+	}
+
+	cmd := NewAddCmd(store)
+	_, stderr, err := executeCmd(cmd, "--name", "BadEmail", "--email", "not-an-email")
+
+	if err == nil {
+		t.Fatal("expected error for invalid email format")
+	}
+
+	if !strings.Contains(err.Error(), "invalid email") {
+		t.Errorf("error should contain 'invalid email', got: %q", err.Error())
+	}
+
+	if !strings.Contains(stderr, "invalid email") {
+		t.Errorf("stderr should contain 'invalid email', got: %q", stderr)
+	}
+
+	// Verify no user was added
+	if len(store.addedUsers) != 0 {
+		t.Errorf("expected 0 users added, got %d", len(store.addedUsers))
+	}
+}
+
+// TestAdd_WithFlags_DuplicateName verifies that adding a duplicate name via
+// flags returns the same duplicate error as interactive mode.
+func TestAdd_WithFlags_DuplicateName(t *testing.T) {
+	initI18nForTest("en")
+
+	store := &addTestStore{
+		initialized: true,
+		users: []domain.User{
+			{Name: "Alice", Email: "alice@example.com"},
+		},
+	}
+
+	cmd := NewAddCmd(store)
+	_, stderr, err := executeCmd(cmd, "--name", "Alice", "--email", "alice2@example.com")
+
+	if err == nil {
+		t.Fatal("expected error for duplicate name")
+	}
+
+	if !strings.Contains(err.Error(), "already exists") {
+		t.Errorf("error should contain 'already exists', got: %q", err.Error())
+	}
+
+	if !strings.Contains(err.Error(), "Alice") {
+		t.Errorf("error should contain duplicate name 'Alice', got: %q", err.Error())
+	}
+
+	if !strings.Contains(stderr, "already exists") {
+		t.Errorf("stderr should contain 'already exists', got: %q", stderr)
+	}
+
+	// Verify no user was added
+	if len(store.addedUsers) != 0 {
+		t.Errorf("expected 0 users added, got %d", len(store.addedUsers))
+	}
+}
+
+// --- existing tests ----------------------------------------------------
+
 func TestAddDupName_En(t *testing.T) {
 	i18n.ResetForTesting()
 	i18n.InitWithLocale("en")

@@ -766,6 +766,154 @@ func TestInit_Override_ZhCN(t *testing.T) {
 }
 
 // ---------------------------------------------------------------------------
+// TestInit_WithFlags_EmptyStore — flags bypass git-config and prompts
+// ---------------------------------------------------------------------------
+func TestInit_WithFlags_EmptyStore(t *testing.T) {
+	useLocale(t, "en")
+
+	// getConfig should NOT be called
+	origGet := getConfigFn
+	t.Cleanup(func() { getConfigFn = origGet })
+	getConfigCalled := false
+	getConfigFn = func(key string, global bool) (string, error) {
+		getConfigCalled = true
+		return "", nil
+	}
+
+	// askNewUser should NOT be called
+	origAsk := askNewUserFn
+	t.Cleanup(func() { askNewUserFn = origAsk })
+	askCalled := false
+	askNewUserFn = func() (domain.User, error) {
+		askCalled = true
+		return domain.User{}, nil
+	}
+
+	// Capture printUserInfo
+	var printedUser domain.User
+	var printedOpts format.PrintOptions
+	origPrint := printUserInfoFn
+	t.Cleanup(func() { printUserInfoFn = origPrint })
+	printUserInfoFn = func(user domain.User, opts format.PrintOptions) {
+		printedUser = user
+		printedOpts = opts
+	}
+
+	s := testStore(t)
+	cmd := NewInitCmd(s)
+	cmd.SetArgs([]string{"--name", "FlagInit", "--email", "flag@init.com"})
+	if err := cmd.Execute(); err != nil {
+		t.Fatalf("init --name/--email failed: %v", err)
+	}
+
+	users, err := s.List()
+	if err != nil {
+		t.Fatalf("List() failed: %v", err)
+	}
+	if len(users) != 1 {
+		t.Fatalf("expected 1 user, got %d", len(users))
+	}
+	if users[0].Name != "FlagInit" {
+		t.Errorf("Name = %q, want %q", users[0].Name, "FlagInit")
+	}
+	if users[0].Email != "flag@init.com" {
+		t.Errorf("Email = %q, want %q", users[0].Email, "flag@init.com")
+	}
+
+	if getConfigCalled {
+		t.Error("getConfig was called unexpectedly when flags are provided")
+	}
+	if askCalled {
+		t.Error("askNewUser was called unexpectedly when flags are provided")
+	}
+
+	if printedUser.Name != "FlagInit" {
+		t.Errorf("printed Name = %q, want %q", printedUser.Name, "FlagInit")
+	}
+	if !printedOpts.Global {
+		t.Error("expected Global=true in PrintOptions")
+	}
+	if !printedOpts.ShowSuccess {
+		t.Error("expected ShowSuccess=true in PrintOptions")
+	}
+}
+
+// ---------------------------------------------------------------------------
+// TestInit_WithFlags_Override — --yes skips override confirmation
+// ---------------------------------------------------------------------------
+func TestInit_WithFlags_Override(t *testing.T) {
+	useLocale(t, "en")
+
+	origConfirm := confirmFn
+	t.Cleanup(func() { confirmFn = origConfirm })
+	confirmFn = func(msg string, defaultVal bool) (bool, error) {
+		t.Error("confirm was called unexpectedly with --yes flag")
+		return false, nil
+	}
+
+	existing := []domain.User{
+		{Name: "Old", Email: "old@example.com"},
+	}
+	s := preloadedStore(t, existing)
+
+	cmd := NewInitCmd(s)
+	cmd.SetArgs([]string{"--name", "NewOverride", "--email", "new@override.com", "--yes"})
+	if err := cmd.Execute(); err != nil {
+		t.Fatalf("init --name/--email --yes failed: %v", err)
+	}
+
+	users, err := s.List()
+	if err != nil {
+		t.Fatalf("List() failed: %v", err)
+	}
+	if len(users) != 1 {
+		t.Fatalf("expected 1 user after override, got %d", len(users))
+	}
+	if users[0].Name != "NewOverride" {
+		t.Errorf("Name = %q, want %q", users[0].Name, "NewOverride")
+	}
+	if users[0].Email != "new@override.com" {
+		t.Errorf("Email = %q, want %q", users[0].Email, "new@override.com")
+	}
+}
+
+// ---------------------------------------------------------------------------
+// TestInit_WithFlags_Partial — only one flag returns error
+// ---------------------------------------------------------------------------
+func TestInit_WithFlags_Partial(t *testing.T) {
+	useLocale(t, "en")
+
+	origGet := getConfigFn
+	t.Cleanup(func() { getConfigFn = origGet })
+	getConfigFn = func(key string, global bool) (string, error) {
+		return "", fmt.Errorf("should not be called")
+	}
+
+	s := testStore(t)
+	cmd := NewInitCmd(s)
+	cmd.SetArgs([]string{"--name", "OnlyName"})
+	err := cmd.Execute()
+
+	if err == nil {
+		t.Fatal("expected error when only --name is provided")
+	}
+	if !strings.Contains(err.Error(), "err_name_and_email_required") {
+		t.Errorf("error should mention name and email required, got: %q", err.Error())
+	}
+
+	cmd2 := NewInitCmd(testStore(t))
+	cmd2.SetArgs([]string{"--email", "only@email.com"})
+	err2 := cmd2.Execute()
+
+	if err2 == nil {
+		t.Fatal("expected error when only --email is provided")
+	}
+	if !strings.Contains(err2.Error(), "err_name_and_email_required") {
+		t.Errorf("error should mention name and email required, got: %q", err2.Error())
+	}
+}
+
+// ---------------------------------------------------------------------------
 // TestInit_Migrate_ZhCN — migration success in Chinese
 // ---------------------------------------------------------------------------
 func TestInit_Migrate_ZhCN(t *testing.T) {

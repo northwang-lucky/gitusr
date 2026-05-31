@@ -342,6 +342,73 @@ func TestReplace_ResolveInteractive(t *testing.T) {
 	}
 }
 
+// TestReplace_WithYes_SkipsConfirm verifies that the --yes flag bypasses the
+// interactive confirmation prompt after git-filter-repo completes.
+func TestReplace_WithYes_SkipsConfirm(t *testing.T) {
+	initI18nForTest("en")
+
+	dir := t.TempDir()
+	initGitRepo(t, dir)
+	t.Chdir(dir)
+
+	store := &mockStore{initialized: true, users: []domain.User{
+		{Name: "Alice", Email: "alice@example.com"},
+	}}
+
+	origFilterRepo := filterRepoFunc
+	origConfirm := confirmFunc
+	defer func() {
+		filterRepoFunc = origFilterRepo
+		confirmFunc = origConfirm
+	}()
+
+	filterRepoCalled := false
+	filterRepoFunc = func(oldEmail, newName, newEmail string) error {
+		filterRepoCalled = true
+		return nil
+	}
+
+	confirmCalled := false
+	confirmFunc = func(msg string, defaultVal bool) (bool, error) {
+		confirmCalled = true
+		return false, nil
+	}
+
+	cmd := NewReplaceCmd(store)
+	_, _, err := executeCmd(cmd, "old@example.com", "--with-name", "Alice", "--yes")
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if !filterRepoCalled {
+		t.Error("filterRepoFunc was not called")
+	}
+
+	if confirmCalled {
+		t.Error("confirmFunc was called with --yes flag, should have been skipped")
+	}
+
+	// Verify repo user config was updated (bypassed confirm means yes)
+	gitCmd := exec.Command("git", "config", "--get", "user.name")
+	out, err := gitCmd.Output()
+	if err != nil {
+		t.Fatalf("git config --get user.name failed: %v", err)
+	}
+	if strings.TrimSpace(string(out)) != "Alice" {
+		t.Errorf("user.name = %q, want %q", strings.TrimSpace(string(out)), "Alice")
+	}
+
+	gitCmd = exec.Command("git", "config", "--get", "user.email")
+	out, err = gitCmd.Output()
+	if err != nil {
+		t.Fatalf("git config --get user.email failed: %v", err)
+	}
+	if strings.TrimSpace(string(out)) != "alice@example.com" {
+		t.Errorf("user.email = %q, want %q", strings.TrimSpace(string(out)), "alice@example.com")
+	}
+}
+
 // TestReplace_FlagRegistration checks that all expected flags are registered.
 func TestReplace_FlagRegistration(t *testing.T) {
 	store := &mockStore{initialized: true}
