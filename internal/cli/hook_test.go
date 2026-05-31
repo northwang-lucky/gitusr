@@ -60,6 +60,32 @@ func TestHookInstall_AlreadyInstalled(t *testing.T) {
 	}
 }
 
+func TestHookInstall_Success_CD(t *testing.T) {
+	i18n.ResetForTesting()
+	i18n.InitWithLocale("en")
+
+	origInstall := installFunc
+	t.Cleanup(func() { installFunc = origInstall })
+
+	installFunc = func(hookType hook.HookType, shells []hook.ShellType) ([]hook.HookInstallResult, error) {
+		return []hook.HookInstallResult{
+			{Type: hookType, Shell: hook.ShellTypeBash, FilePath: "/tmp/git-wrapper-cd.sh"},
+		}, nil
+	}
+
+	store := &mockStore{initialized: true}
+	cmd := NewHookInstallCmd(store)
+	stdout, _, err := executeCmd(cmd, "--type", "cd")
+
+	if err != nil {
+		t.Fatalf("NewHookInstallCmd().Execute(--type cd) unexpected error: %v", err)
+	}
+
+	if !strings.Contains(stdout, "successfully installed") {
+		t.Errorf("expected 'successfully installed', got %q", stdout)
+	}
+}
+
 func TestHookInstall_InvalidType(t *testing.T) {
 	i18n.ResetForTesting()
 	i18n.InitWithLocale("en")
@@ -166,6 +192,30 @@ func TestHookUninstall_NotInstalled(t *testing.T) {
 	}
 }
 
+func TestHookUninstall_Success_CD(t *testing.T) {
+	i18n.ResetForTesting()
+	i18n.InitWithLocale("en")
+
+	origUninstall := uninstallFunc
+	t.Cleanup(func() { uninstallFunc = origUninstall })
+
+	uninstallFunc = func(hookType hook.HookType, shells []hook.ShellType) error {
+		return nil
+	}
+
+	store := &mockStore{initialized: true}
+	cmd := NewHookUninstallCmd(store)
+	stdout, _, err := executeCmd(cmd, "--type", "cd")
+
+	if err != nil {
+		t.Fatalf("NewHookUninstallCmd().Execute(--type cd) unexpected error: %v", err)
+	}
+
+	if !strings.Contains(stdout, "successfully uninstalled") {
+		t.Errorf("expected 'successfully uninstalled', got %q", stdout)
+	}
+}
+
 func TestHookUninstall_InvalidType(t *testing.T) {
 	i18n.ResetForTesting()
 	i18n.InitWithLocale("en")
@@ -208,14 +258,14 @@ func TestHookUninstall_Error(t *testing.T) {
 }
 
 // TestHookCmd_Subcommands verifies the parent hook command correctly groups
-// install, uninstall, env, and apply-rc as subcommands (apply-rc is hidden).
+// install, uninstall, and apply-rc as subcommands (apply-rc is hidden).
 func TestHookCmd_Subcommands(t *testing.T) {
 	store := &mockStore{initialized: true}
 	cmd := NewHookCmd(store)
 
 	subs := cmd.Commands()
-	if len(subs) != 4 {
-		t.Fatalf("expected 4 subcommands, got %d", len(subs))
+	if len(subs) != 3 {
+		t.Fatalf("expected 3 subcommands, got %d", len(subs))
 	}
 
 	names := make(map[string]bool)
@@ -232,9 +282,6 @@ func TestHookCmd_Subcommands(t *testing.T) {
 	}
 	if !names["uninstall"] {
 		t.Error("expected 'uninstall' subcommand")
-	}
-	if !names["env"] {
-		t.Error("expected 'env' subcommand")
 	}
 	if !names["apply-rc"] {
 		t.Error("expected 'apply-rc' subcommand")

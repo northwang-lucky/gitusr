@@ -295,7 +295,7 @@ other = "Install hook"
 
 [cli.hook.install.flag_type]
 hash = "sha1:5c28af393afe64b321c9c2011157edcacf35f79a"
-other = "Hook type: clone or commit"
+other = "Hook type: clone, commit, or cd"
 
 [cli.hook.install.success]
 hash = "sha1:74a7d7d492d8038de893e39e01de4fbb003ec867"
@@ -336,6 +336,10 @@ other = "Shell type: bash or zsh"
 [cli.hook.env.not_installed]
 hash = "sha1:dummy"
 other = "Please run 'hook install' first"
+
+[cli.hook.env.deprecated]
+hash = "sha1:dummy"
+other = "Warning: 'hook env' is deprecated. Use 'gitusr hook install --type=cd' instead."
 
 [cli.hook.rc.not_found]
 hash = "sha1:305b30f92787fcb6334f09d509dd086791f8d4d7"

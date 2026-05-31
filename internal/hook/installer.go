@@ -10,6 +10,12 @@ var shellGenerators = map[ShellType]func() string{
 	ShellTypeZsh:  GenerateZshWrapper,
 }
 
+// cdShellGenerators maps shell types to their cd-hook environment generation functions.
+var cdShellGenerators = map[ShellType]func() string{
+	ShellTypeBash: GenerateBashEnv,
+	ShellTypeZsh:  GenerateZshEnv,
+}
+
 // Install installs hook wrappers for the specified hook type and shells.
 // It is idempotent — if the hook type is already installed, it returns early.
 // For each shell, it generates the wrapper code, writes it to disk via
@@ -27,8 +33,13 @@ func Install(hookType HookType, shells []ShellType) ([]HookInstallResult, error)
 
 	var results []HookInstallResult
 
+	generators := shellGenerators
+	if hookType == HookTypeCD {
+		generators = cdShellGenerators
+	}
+
 	for _, shell := range shells {
-		generate, ok := shellGenerators[shell]
+		generate, ok := generators[shell]
 		if !ok {
 			return results, fmt.Errorf("unsupported shell type: %s", shell)
 		}

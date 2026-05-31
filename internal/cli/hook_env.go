@@ -13,15 +13,16 @@ import (
 // generateEnvFn is a package-level variable that can be overridden in tests.
 var generateEnvFn = hook.GenerateEnv
 
-// NewHookEnvCmd creates the "hook env" command which generates shell code
-// for cd-based auto-switching. The output is designed to be eval'd:
-//
-//	eval "$(gitusr hook env --shell bash)"
+// NewHookEnvCmd creates the deprecated "hook env" command.
+// Use "hook install --type=cd" instead.
 func NewHookEnvCmd(store domain.UserStore) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "env",
-		Short: i18n.T("cli.hook.env.short", nil),
+		Use:    "env",
+		Short:  i18n.T("cli.hook.env.short", nil),
+		Hidden: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			fmt.Fprintln(cmd.ErrOrStderr(), i18n.T("cli.hook.env.deprecated", nil))
+
 			shell, err := cmd.Flags().GetString("shell")
 			if err != nil {
 				return err

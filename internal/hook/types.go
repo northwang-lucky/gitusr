@@ -6,6 +6,7 @@ type HookType string
 const (
 	HookTypeClone  HookType = "clone"
 	HookTypeCommit HookType = "commit"
+	HookTypeCD     HookType = "cd"
 )
 
 // ShellType represents the shell type (bash or zsh)

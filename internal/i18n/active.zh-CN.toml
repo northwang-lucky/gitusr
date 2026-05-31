@@ -291,7 +291,7 @@ other = "安装钩子"
 
 [cli.hook.install.flag_type]
 hash = "sha1:5c28af393afe64b321c9c2011157edcacf35f79a"
-other = "钩子类型：clone 或 commit"
+other = "钩子类型：clone、commit 或 cd"
 
 [cli.hook.install.success]
 hash = "sha1:74a7d7d492d8038de893e39e01de4fbb003ec867"
@@ -332,6 +332,10 @@ other = "Shell 类型：bash 或 zsh"
 [cli.hook.env.not_installed]
 hash = "sha1:dummy"
 other = "请先执行 hook install"
+
+[cli.hook.env.deprecated]
+hash = "sha1:dummy"
+other = "警告：'hook env' 已弃用。请使用 'gitusr hook install --type=cd' 代替。"
 
 [cli.hook.rc.not_found]
 hash = "sha1:305b30f92787fcb6334f09d509dd086791f8d4d7"

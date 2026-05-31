@@ -72,9 +72,9 @@ func TestHookInstallUninstall_Clone(t *testing.T) {
 }
 
 // ---------------------------------------------------------------------------
-// TestHookEnv_GeneratesValidCode — hook env produces valid shell code
+// TestHookInstallUninstall_CD — install/uninstall cd hook flow
 // ---------------------------------------------------------------------------
-func TestHookEnv_GeneratesValidCode(t *testing.T) {
+func TestHookInstallUninstall_CD(t *testing.T) {
 	homeDir := t.TempDir()
 	xdgDataHome := t.TempDir()
 
@@ -83,7 +83,7 @@ func TestHookEnv_GeneratesValidCode(t *testing.T) {
 		"XDG_DATA_HOME": xdgDataHome,
 	}
 
-	// Initialize store with 2 users
+	// Initialize store with 2 users (required for wrapper to work)
 	storePath := gitusrStore(xdgDataHome)
 	users := []map[string]string{
 		{"name": "Alice", "email": "alice@example.com"},
@@ -91,20 +91,51 @@ func TestHookEnv_GeneratesValidCode(t *testing.T) {
 	}
 	writeJSONFile(t, storePath, users)
 
-	// Install clone hook first (required for env to work)
-	_, err := runGitusr(t, env, "hook", "install", "--type", "clone")
+	// Install cd hook
+	output, err := runGitusr(t, env, "hook", "install", "--type", "cd")
 	if err != nil {
-		t.Fatalf("hook install failed: %v", err)
+		t.Fatalf("hook install --type cd failed: %v\noutput: %s", err, output)
+	}
+	if !strings.Contains(output, "successfully installed") {
+		t.Errorf("expected 'successfully installed' in output, got: %s", output)
 	}
 
-	// Run hook env --shell bash
-	output, err := runGitusr(t, env, "hook", "env", "--shell", "bash")
+	// Verify .bashrc contains the hook begin marker
+	bashrcPath := filepath.Join(homeDir, ".bashrc")
+	bashrc, err := os.ReadFile(bashrcPath)
 	if err != nil {
-		t.Fatalf("hook env --shell bash failed: %v\noutput: %s", err, output)
+		t.Fatalf("read .bashrc: %v", err)
+	}
+	if !strings.Contains(string(bashrc), "# gitusr hook begin") {
+		t.Errorf(".bashrc should contain '# gitusr hook begin', got:\n%s", string(bashrc))
 	}
 
-	if !strings.Contains(output, "__gitusr_use_if_found") {
-		t.Errorf("expected output to contain '__gitusr_use_if_found', got: %s", output)
+	// Verify wrapper file exists and contains cd-specific code
+	wrapperPath := filepath.Join(xdgDataHome, "gitusr", "hooks", "git-wrapper.sh")
+	wrapper, err := os.ReadFile(wrapperPath)
+	if err != nil {
+		t.Fatalf("read wrapper file: %v", err)
+	}
+	if !strings.Contains(string(wrapper), "__gitusr_use_if_found") {
+		t.Errorf("wrapper should contain '__gitusr_use_if_found', got:\n%s", string(wrapper))
+	}
+
+	// Uninstall cd hook
+	output, err = runGitusr(t, env, "hook", "uninstall", "--type", "cd")
+	if err != nil {
+		t.Fatalf("hook uninstall --type cd failed: %v\noutput: %s", err, output)
+	}
+	if !strings.Contains(output, "successfully uninstalled") {
+		t.Errorf("expected 'successfully uninstalled' in output, got: %s", output)
+	}
+
+	// Verify .bashrc no longer contains the hook block
+	bashrc, err = os.ReadFile(bashrcPath)
+	if err != nil {
+		t.Fatalf("read .bashrc after uninstall: %v", err)
+	}
+	if strings.Contains(string(bashrc), "# gitusr hook begin") {
+		t.Errorf(".bashrc should NOT contain '# gitusr hook begin' after uninstall, got:\n%s", string(bashrc))
 	}
 }
 

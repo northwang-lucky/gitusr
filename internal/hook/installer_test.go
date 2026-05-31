@@ -196,6 +196,53 @@ func TestInstall_MultipleShells(t *testing.T) {
 	}
 }
 
+func TestInstall_CD_FirstTime(t *testing.T) {
+	tmpDir := t.TempDir()
+	t.Setenv("HOME", tmpDir)
+	t.Setenv("XDG_DATA_HOME", tmpDir)
+
+	results, err := Install(HookTypeCD, []ShellType{ShellTypeBash})
+	if err != nil {
+		t.Fatalf("Install(HookTypeCD) returned error: %v", err)
+	}
+
+	if len(results) != 1 {
+		t.Fatalf("expected 1 result, got %d", len(results))
+	}
+
+	r := results[0]
+	if r.Type != HookTypeCD {
+		t.Errorf("result.Type = %q, want %q", r.Type, HookTypeCD)
+	}
+	if r.Shell != ShellTypeBash {
+		t.Errorf("result.Shell = %q, want %q", r.Shell, ShellTypeBash)
+	}
+
+	// Verify .bashrc was updated
+	verifyBashrcHasBlock(t, tmpDir, r.FilePath)
+
+	// Verify wrapper file exists
+	verifyWrapperFileExists(t, r.FilePath)
+
+	// Verify state was saved
+	installed, err := IsInstalled(HookTypeCD)
+	if err != nil {
+		t.Fatalf("IsInstalled() returned error: %v", err)
+	}
+	if !installed {
+		t.Error("expected IsInstalled(HookTypeCD) to be true after install")
+	}
+
+	// Verify wrapper contains cd-specific code
+	wrapper, err := os.ReadFile(r.FilePath)
+	if err != nil {
+		t.Fatalf("read wrapper file: %v", err)
+	}
+	if !strings.Contains(string(wrapper), "__gitusr_use_if_found") {
+		t.Error("cd wrapper should contain __gitusr_use_if_found")
+	}
+}
+
 func TestAppendSourceLine_MarkersAlreadyExist(t *testing.T) {
 	tmpDir := t.TempDir()
 	t.Setenv("HOME", tmpDir)

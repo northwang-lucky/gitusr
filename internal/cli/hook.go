@@ -32,7 +32,6 @@ func NewHookCmd(store domain.UserStore) *cobra.Command {
 	cmd.AddCommand(
 		NewHookInstallCmd(store),
 		NewHookUninstallCmd(store),
-		NewHookEnvCmd(store),
 		NewHookApplyRCCmd(store),
 	)
 
@@ -57,9 +56,9 @@ func NewHookInstallCmd(store domain.UserStore) *cobra.Command {
 			}
 
 			hookType := hook.HookType(typeStr)
-			if hookType != hook.HookTypeClone && hookType != hook.HookTypeCommit {
-				return fmt.Errorf("invalid hook type: %q, must be %q or %q",
-					typeStr, hook.HookTypeClone, hook.HookTypeCommit)
+			if hookType != hook.HookTypeClone && hookType != hook.HookTypeCommit && hookType != hook.HookTypeCD {
+				return fmt.Errorf("invalid hook type: %q, must be %q, %q, or %q",
+					typeStr, hook.HookTypeClone, hook.HookTypeCommit, hook.HookTypeCD)
 			}
 
 			results, err := installFunc(hookType, defaultShells())
@@ -103,9 +102,9 @@ func NewHookUninstallCmd(store domain.UserStore) *cobra.Command {
 			}
 
 			hookType := hook.HookType(typeStr)
-			if hookType != hook.HookTypeClone && hookType != hook.HookTypeCommit {
-				return fmt.Errorf("invalid hook type: %q, must be %q or %q",
-					typeStr, hook.HookTypeClone, hook.HookTypeCommit)
+			if hookType != hook.HookTypeClone && hookType != hook.HookTypeCommit && hookType != hook.HookTypeCD {
+				return fmt.Errorf("invalid hook type: %q, must be %q, %q, or %q",
+					typeStr, hook.HookTypeClone, hook.HookTypeCommit, hook.HookTypeCD)
 			}
 
 			err = uninstallFunc(hookType, defaultShells())
