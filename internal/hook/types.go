@@ -9,6 +9,9 @@ const (
 	HookTypeCD     HookType = "cd"
 )
 
+// AllHookTypes lists all hook types in their canonical iteration order.
+var AllHookTypes = []HookType{HookTypeClone, HookTypeCommit, HookTypeCD}
+
 // ShellType represents the shell type (bash or zsh)
 type ShellType string
 
