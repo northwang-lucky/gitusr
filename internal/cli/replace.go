@@ -7,11 +7,11 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"gitusr/internal/domain"
-	"gitusr/internal/gitcmd"
-	"gitusr/internal/i18n"
-	"gitusr/internal/prompt"
-	sel "gitusr/internal/select"
+	"github.com/northwang-lucky/gitusr/internal/domain"
+	"github.com/northwang-lucky/gitusr/internal/gitcmd"
+	"github.com/northwang-lucky/gitusr/internal/i18n"
+	"github.com/northwang-lucky/gitusr/internal/prompt"
+	sel "github.com/northwang-lucky/gitusr/internal/select"
 )
 
 // Package-level variables allow tests to inject mocks for git-filter-repo

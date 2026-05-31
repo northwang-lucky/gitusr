@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"gitusr/internal/domain"
+	"github.com/northwang-lucky/gitusr/internal/domain"
 )
 
 // helper to create a temp file path

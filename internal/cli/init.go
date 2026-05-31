@@ -8,11 +8,11 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"gitusr/internal/domain"
-	"gitusr/internal/format"
-	"gitusr/internal/gitcmd"
-	"gitusr/internal/i18n"
-	"gitusr/internal/prompt"
+	"github.com/northwang-lucky/gitusr/internal/domain"
+	"github.com/northwang-lucky/gitusr/internal/format"
+	"github.com/northwang-lucky/gitusr/internal/gitcmd"
+	"github.com/northwang-lucky/gitusr/internal/i18n"
+	"github.com/northwang-lucky/gitusr/internal/prompt"
 )
 
 // Package-level function vars allow tests to inject mock implementations.

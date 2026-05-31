@@ -5,8 +5,8 @@ import (
 	"os"
 	"strings"
 
-	"gitusr/internal/domain"
-	"gitusr/internal/i18n"
+	"github.com/northwang-lucky/gitusr/internal/domain"
+	"github.com/northwang-lucky/gitusr/internal/i18n"
 )
 
 // PrintErr writes the given message prefixed with a localised error label to stderr.

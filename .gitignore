@@ -27,3 +27,9 @@ bin/
 
 # omo
 .omo/
+
+# Dist
+dist/
+
+# Node modules
+node_modules/

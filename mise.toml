@@ -2,8 +2,8 @@
 go = "1.26.3"
 
 [tasks.build]
-description = "构建二进制文件到 bin/gitusr"
-run = "go build -o bin/gitusr ./cmd/gitusr"
+description = "构建二进制文件到 bin/gitusr（注入版本信息）"
+run = "go build -ldflags \"-s -w -X github.com/northwang-lucky/gitusr/internal/version.Version=$(git describe --tags --always --dirty 2>/dev/null || echo dev)\" -o bin/gitusr ./cmd/gitusr"
 
 [tasks.test]
 description = "运行全部测试（单元 + 集成）"

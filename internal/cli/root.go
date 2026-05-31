@@ -5,8 +5,9 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"gitusr/internal/domain"
-	"gitusr/internal/i18n"
+	"github.com/northwang-lucky/gitusr/internal/domain"
+	"github.com/northwang-lucky/gitusr/internal/i18n"
+	"github.com/northwang-lucky/gitusr/internal/version"
 )
 
 // NewRootCmd creates the root cobra command for gitusr and registers all
@@ -19,6 +20,7 @@ func NewRootCmd(store domain.UserStore, name string) *cobra.Command {
 		Short:         i18n.T("cli.root.short", nil),
 		SilenceErrors: true,
 		SilenceUsage:  true,
+		Version:       version.Version,
 	}
 
 	cmd.AddCommand(

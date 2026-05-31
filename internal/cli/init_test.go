@@ -10,10 +10,10 @@ import (
 	"strings"
 	"testing"
 
-	"gitusr/internal/domain"
-	"gitusr/internal/format"
-	"gitusr/internal/i18n"
-	"gitusr/internal/store"
+	"github.com/northwang-lucky/gitusr/internal/domain"
+	"github.com/northwang-lucky/gitusr/internal/format"
+	"github.com/northwang-lucky/gitusr/internal/i18n"
+	"github.com/northwang-lucky/gitusr/internal/store"
 )
 
 // captureStdout runs fn and returns captured stdout as a string.

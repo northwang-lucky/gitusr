@@ -6,8 +6,8 @@ import (
 	"regexp"
 
 	"github.com/AlecAivazis/survey/v2"
-	"gitusr/internal/domain"
-	"gitusr/internal/i18n"
+	"github.com/northwang-lucky/gitusr/internal/domain"
+	"github.com/northwang-lucky/gitusr/internal/i18n"
 )
 
 const emailRegex = `\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*`

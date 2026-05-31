@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"gitusr/internal/domain"
+	"github.com/northwang-lucky/gitusr/internal/domain"
 )
 
 // JSONStore implements domain.UserStore using a JSON file as persistence.

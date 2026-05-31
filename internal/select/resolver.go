@@ -4,8 +4,8 @@ import (
 	"errors"
 	"fmt"
 
-	"gitusr/internal/domain"
-	"gitusr/internal/prompt"
+	"github.com/northwang-lucky/gitusr/internal/domain"
+	"github.com/northwang-lucky/gitusr/internal/prompt"
 )
 
 // SelectFunc is the function used for interactive user selection.

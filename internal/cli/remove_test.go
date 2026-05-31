@@ -4,9 +4,9 @@ import (
 	"strings"
 	"testing"
 
-	"gitusr/internal/domain"
-	"gitusr/internal/i18n"
-	"gitusr/internal/store"
+	"github.com/northwang-lucky/gitusr/internal/domain"
+	"github.com/northwang-lucky/gitusr/internal/i18n"
+	"github.com/northwang-lucky/gitusr/internal/store"
 )
 
 func TestRemove_ByIndex(t *testing.T) {

@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 
-	"gitusr/internal/domain"
-	"gitusr/internal/i18n"
+	"github.com/northwang-lucky/gitusr/internal/domain"
+	"github.com/northwang-lucky/gitusr/internal/i18n"
 )
 
 // addTestStore implements domain.UserStore with configurable behaviour for add tests.

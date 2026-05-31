@@ -8,9 +8,9 @@ import (
 	"strings"
 	"testing"
 
-	"gitusr/internal/domain"
-	"gitusr/internal/i18n"
-	sel "gitusr/internal/select"
+	"github.com/northwang-lucky/gitusr/internal/domain"
+	"github.com/northwang-lucky/gitusr/internal/i18n"
+	sel "github.com/northwang-lucky/gitusr/internal/select"
 )
 
 // initI18nForTest resets and initializes i18n with the given locale.

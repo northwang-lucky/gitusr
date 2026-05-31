@@ -1,0 +1,10 @@
+{
+  "release-type": "go",
+  "bump-minor-pre-major": true,
+  "prerelease": true,
+  "changelog-sections": [
+    {"type": "feat", "section": "Features"},
+    {"type": "fix", "section": "Bug Fixes"},
+    {"type": "chore", "section": "Other"}
+  ]
+}

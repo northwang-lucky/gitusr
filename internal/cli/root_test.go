@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"gitusr/internal/i18n"
+	"github.com/northwang-lucky/gitusr/internal/i18n"
 )
 
 func TestRootHelp_En(t *testing.T) {

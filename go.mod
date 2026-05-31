@@ -1,4 +1,4 @@
-module gitusr
+module github.com/northwang-lucky/gitusr
 
 go 1.26.3
 

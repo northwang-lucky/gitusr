@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"gitusr/internal/domain"
-	"gitusr/internal/i18n"
+	"github.com/northwang-lucky/gitusr/internal/domain"
+	"github.com/northwang-lucky/gitusr/internal/i18n"
 )
 
 // mockStore implements domain.UserStore for testing.

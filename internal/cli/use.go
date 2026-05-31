@@ -5,11 +5,11 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"gitusr/internal/domain"
-	"gitusr/internal/format"
-	"gitusr/internal/gitcmd"
-	"gitusr/internal/i18n"
-	sel "gitusr/internal/select"
+	"github.com/northwang-lucky/gitusr/internal/domain"
+	"github.com/northwang-lucky/gitusr/internal/format"
+	"github.com/northwang-lucky/gitusr/internal/gitcmd"
+	"github.com/northwang-lucky/gitusr/internal/i18n"
+	sel "github.com/northwang-lucky/gitusr/internal/select"
 )
 
 // NewUseCmd creates the "use" command which switches the active git user

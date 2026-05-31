@@ -4,9 +4,9 @@ import (
 	"strings"
 	"testing"
 
-	"gitusr/internal/domain"
-	"gitusr/internal/gitcmd"
-	"gitusr/internal/i18n"
+	"github.com/northwang-lucky/gitusr/internal/domain"
+	"github.com/northwang-lucky/gitusr/internal/gitcmd"
+	"github.com/northwang-lucky/gitusr/internal/i18n"
 )
 
 // --- Existing tests (updated with i18n init) ---

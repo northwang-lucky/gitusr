@@ -4,9 +4,9 @@ import (
 	"errors"
 	"testing"
 
-	"gitusr/internal/domain"
+	"github.com/northwang-lucky/gitusr/internal/domain"
 
-	sel "gitusr/internal/select"
+	sel "github.com/northwang-lucky/gitusr/internal/select"
 )
 
 // mockStore implements domain.UserStore for testing.

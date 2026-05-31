@@ -4,11 +4,11 @@ import (
 	"os"
 	"path/filepath"
 
-	"gitusr/internal/cli"
-	"gitusr/internal/format"
-	"gitusr/internal/i18n"
-	"gitusr/internal/store"
-	"gitusr/internal/xdgpath"
+	"github.com/northwang-lucky/gitusr/internal/cli"
+	"github.com/northwang-lucky/gitusr/internal/format"
+	"github.com/northwang-lucky/gitusr/internal/i18n"
+	"github.com/northwang-lucky/gitusr/internal/store"
+	"github.com/northwang-lucky/gitusr/internal/xdgpath"
 )
 
 func main() {
