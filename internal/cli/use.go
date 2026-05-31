@@ -8,6 +8,7 @@ import (
 	"gitusr/internal/domain"
 	"gitusr/internal/format"
 	"gitusr/internal/gitcmd"
+	"gitusr/internal/i18n"
 	sel "gitusr/internal/select"
 )
 
@@ -16,7 +17,7 @@ import (
 func NewUseCmd(store domain.UserStore) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "use",
-		Short: "switch user in a git repo or globally",
+		Short: i18n.T("cli.use.short", nil),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			global, err := cmd.Flags().GetBool("global")
 			if err != nil {
@@ -24,11 +25,11 @@ func NewUseCmd(store domain.UserStore) *cobra.Command {
 			}
 
 			if !global && !gitcmd.IsGitRepo() {
-				return errors.New("not a git repository (or any of the parent directories): .git")
+				return errors.New(i18n.T("cli.error.not_repo", nil))
 			}
 
 			if !store.IsInitialized() {
-				return errors.New("no users saved yet, run 'gitusr add' first")
+				return errors.New(i18n.T("cli.use.no_users", nil))
 			}
 
 			filter, err := buildFilter(cmd)
@@ -58,10 +59,10 @@ func NewUseCmd(store domain.UserStore) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().BoolP("global", "g", false, "switch global user")
-	cmd.Flags().StringP("name", "n", "", "switch by name")
-	cmd.Flags().StringP("email", "e", "", "switch by email")
-	cmd.Flags().IntP("index", "i", -1, "switch by index")
+	cmd.Flags().BoolP("global", "g", false, i18n.T("cli.use.flag_global", nil))
+	cmd.Flags().StringP("name", "n", "", i18n.T("cli.use.flag_name", nil))
+	cmd.Flags().StringP("email", "e", "", i18n.T("cli.use.flag_email", nil))
+	cmd.Flags().IntP("index", "i", -1, i18n.T("cli.use.flag_index", nil))
 
 	return cmd
 }
