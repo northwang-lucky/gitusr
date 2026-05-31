@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.0.0](https://github.com/northwang-lucky/gitusr/compare/v0.2.1...v1.0.0) (2026-05-31)
+
+
+### ⚠ BREAKING CHANGES
+
+* 项目达到稳定状态，API 和 CLI 接口已确定，发布 1.0.0 正式版本。
+
+### Features
+
+* 正式发布 v1.0.0 ([c6d6a60](https://github.com/northwang-lucky/gitusr/commit/c6d6a60bddf6ef1f633d422803a823cd19757e2e))
+
 ## [0.2.1](https://github.com/northwang-lucky/gitusr/compare/v0.2.0...v0.2.1) (2026-05-31)
 
 
