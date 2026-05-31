@@ -297,6 +297,18 @@ other = "Install hook"
 hash = "sha1:5c28af393afe64b321c9c2011157edcacf35f79a"
 other = "Hook type: clone, commit, or cd"
 
+[cli.hook.install.flag_all]
+hash = "sha1:dummy"
+other = "Install all hook types (clone, commit, cd)"
+
+[cli.hook.install.type_all_exclusive]
+hash = "sha1:dummy"
+other = "--type and --all are mutually exclusive"
+
+[cli.hook.install.require_one]
+hash = "sha1:dummy"
+other = "either --type or --all is required"
+
 [cli.hook.install.success]
 hash = "sha1:74a7d7d492d8038de893e39e01de4fbb003ec867"
 other = "Hook {{.Type}} successfully installed"
@@ -304,6 +316,10 @@ other = "Hook {{.Type}} successfully installed"
 [cli.hook.install.already_installed]
 hash = "sha1:dc8412416d0833c9cc38cebe6b97f53c63dc6fbe"
 other = "Hook {{.Type}} is already installed"
+
+[cli.hook.install.all_success]
+hash = "sha1:dummy"
+other = "All hooks successfully installed"
 
 [cli.hook.uninstall.use]
 hash = "sha1:30f7edf8f8808f65496f28a526ea77c39aa4ecf9"
@@ -313,6 +329,14 @@ other = "Uninstall a shell hook"
 hash = "sha1:f054137b946afc81dc801a35d2428f6ed97f1928"
 other = "Uninstall hook"
 
+[cli.hook.uninstall.flag_all]
+hash = "sha1:dummy"
+other = "Uninstall all hook types (clone, commit, cd)"
+
+[cli.hook.uninstall.require_one]
+hash = "sha1:dummy"
+other = "either --type or --all is required"
+
 [cli.hook.uninstall.success]
 hash = "sha1:14140b298e0454f98e154b6adadb3f2611c1c08d"
 other = "Hook {{.Type}} successfully uninstalled"
@@ -320,6 +344,10 @@ other = "Hook {{.Type}} successfully uninstalled"
 [cli.hook.uninstall.not_installed]
 hash = "sha1:4e2047d9d8a570c75fdc3330bc2403cbff7f504c"
 other = "Hook {{.Type}} is not installed"
+
+[cli.hook.uninstall.all_success]
+hash = "sha1:dummy"
+other = "All hooks successfully uninstalled"
 
 [cli.hook.rc.not_found]
 hash = "sha1:305b30f92787fcb6334f09d509dd086791f8d4d7"

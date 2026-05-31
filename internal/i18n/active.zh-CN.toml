@@ -293,6 +293,18 @@ other = "安装钩子"
 hash = "sha1:5c28af393afe64b321c9c2011157edcacf35f79a"
 other = "钩子类型：clone、commit 或 cd"
 
+[cli.hook.install.flag_all]
+hash = "sha1:dummy"
+other = "安装所有钩子类型（clone、commit、cd）"
+
+[cli.hook.install.type_all_exclusive]
+hash = "sha1:dummy"
+other = "--type 和 --all 互斥"
+
+[cli.hook.install.require_one]
+hash = "sha1:dummy"
+other = "必须指定 --type 或 --all"
+
 [cli.hook.install.success]
 hash = "sha1:74a7d7d492d8038de893e39e01de4fbb003ec867"
 other = "{{.Type}}钩子安装成功"
@@ -300,6 +312,10 @@ other = "{{.Type}}钩子安装成功"
 [cli.hook.install.already_installed]
 hash = "sha1:dc8412416d0833c9cc38cebe6b97f53c63dc6fbe"
 other = "{{.Type}}钩子已安装"
+
+[cli.hook.install.all_success]
+hash = "sha1:dummy"
+other = "所有钩子安装成功"
 
 [cli.hook.uninstall.use]
 hash = "sha1:30f7edf8f8808f65496f28a526ea77c39aa4ecf9"
@@ -309,6 +325,14 @@ other = "卸载 shell 钩子"
 hash = "sha1:f054137b946afc81dc801a35d2428f6ed97f1928"
 other = "卸载钩子"
 
+[cli.hook.uninstall.flag_all]
+hash = "sha1:dummy"
+other = "卸载所有钩子类型（clone、commit、cd）"
+
+[cli.hook.uninstall.require_one]
+hash = "sha1:dummy"
+other = "必须指定 --type 或 --all"
+
 [cli.hook.uninstall.success]
 hash = "sha1:14140b298e0454f98e154b6adadb3f2611c1c08d"
 other = "{{.Type}}钩子卸载成功"
@@ -316,6 +340,10 @@ other = "{{.Type}}钩子卸载成功"
 [cli.hook.uninstall.not_installed]
 hash = "sha1:4e2047d9d8a570c75fdc3330bc2403cbff7f504c"
 other = "{{.Type}}钩子未安装"
+
+[cli.hook.uninstall.all_success]
+hash = "sha1:dummy"
+other = "所有钩子卸载成功"
 
 [cli.hook.rc.not_found]
 hash = "sha1:305b30f92787fcb6334f09d509dd086791f8d4d7"
