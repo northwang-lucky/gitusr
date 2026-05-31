@@ -81,6 +81,26 @@ other = "A CLI that allows you to switch git users."
 hash = "sha1:4ad9781aa0e50651a7981b00af34691c9c492b0f"
 other = "Add and save a user"
 
+[cli.add.flag_name]
+hash = "sha1:dummy"
+other = "specify user.name (non-interactive)"
+
+[cli.add.flag_email]
+hash = "sha1:dummy"
+other = "specify user.email (non-interactive)"
+
+[cli.add.partial_flags]
+hash = "sha1:dummy"
+other = "both --name and --email are required when using flags"
+
+[cli.add.invalid_email_flag]
+hash = "sha1:dummy"
+other = "invalid email format"
+
+[cli.add.required_flags]
+hash = "sha1:dummy"
+other = "both --name and --email are required"
+
 [cli.add.dup_name]
 hash = "sha1:7cdc8d37ac07a77150d6a68223293ffa0957cb07"
 other = "user with name \"{{.Name}}\" already exists"
@@ -181,6 +201,22 @@ other = "Initialize from git global config"
 hash = "sha1:e996c2d84add88301442411318fae5d5015c4651"
 other = "force override existing users"
 
+[cli.init.flag_name]
+hash = "sha1:dummy"
+other = "specify user.name (non-interactive)"
+
+[cli.init.flag_email]
+hash = "sha1:dummy"
+other = "specify user.email (non-interactive)"
+
+[cli.init.flag_yes]
+hash = "sha1:dummy"
+other = "skip confirmation prompts"
+
+[cli.init.partial_flags]
+hash = "sha1:dummy"
+other = "both --name and --email are required when using flags"
+
 [cli.init.override_confirm]
 hash = "sha1:f7b0aab6221ba6daeadb2ebf246aa208bfbe25cc"
 other = "Override existing users?"
@@ -192,6 +228,22 @@ other = "Found legacy config at ~/.gitusr/user-list.json. Migrate to XDG?"
 [cli.init.migrate_skip]
 hash = "sha1:acfc3590485e5c58efa09bcaa1d90444f7a2d5c3"
 other = "Migration skipped."
+
+[cli.init.flag_name]
+hash = "sha1:dummy"
+other = "user name for non-interactive initialization"
+
+[cli.init.flag_email]
+hash = "sha1:dummy"
+other = "user email for non-interactive initialization"
+
+[cli.init.flag_yes]
+hash = "sha1:dummy"
+other = "skip confirmation prompts"
+
+[cli.init.err_name_and_email_required]
+hash = "sha1:dummy"
+other = "--name and --email must be specified together"
 
 [cli.init.migrate_count]
 hash = "sha1:356121144bd1bae202ac63201cffb40b31062a35"
@@ -217,6 +269,10 @@ other = "Created backup branch: {{.Branch}}"
 hash = "sha1:7ad5a98f23c4ca829021e5c80b17934ae42b2243"
 other = "Switch repo user to {{.Name}} <{{.Email}}>?"
 
+[cli.replace.flag_yes]
+hash = "sha1:dummy"
+other = "skip confirmation after history rewrite"
+
 [cli.replace.flag_with_name]
 hash = "sha1:a54a79c4e6a1b3bd45ef579cf93adb56ceb10511"
 other = "new user name"
@@ -228,6 +284,10 @@ other = "new user email"
 [cli.replace.flag_with_index]
 hash = "sha1:b00e2864171b45023efe5b53fd519e1ab5085e9a"
 other = "new user index"
+
+[cli.replace.flag_yes]
+hash = "sha1:0000000000000000000000000000000000000000"
+other = "skip confirmation prompt"
 
 # ================================================
 # Shared CLI error messages (used by multiple cmds)

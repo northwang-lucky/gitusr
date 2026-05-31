@@ -33,15 +33,21 @@ func NewInitCmd(store domain.UserStore) *cobra.Command {
 		Short: i18n.T("cli.init.short", nil),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			force, _ := cmd.Flags().GetBool("force")
-			return runInit(store, force)
+			name, _ := cmd.Flags().GetString("name")
+			email, _ := cmd.Flags().GetString("email")
+			yes, _ := cmd.Flags().GetBool("yes")
+			return runInit(store, force, name, email, yes)
 		},
 	}
 	cmd.Flags().BoolP("force", "f", false, i18n.T("cli.init.flag_force", nil))
+	cmd.Flags().StringP("name", "n", "", i18n.T("cli.init.flag_name", nil))
+	cmd.Flags().StringP("email", "e", "", i18n.T("cli.init.flag_email", nil))
+	cmd.Flags().BoolP("yes", "y", false, i18n.T("cli.init.flag_yes", nil))
 	return cmd
 }
 
 // runInit contains the core logic extracted for testability.
-func runInit(store domain.UserStore, force bool) error {
+func runInit(store domain.UserStore, force bool, name string, email string, yes bool) error {
 	// Step 0: Legacy config migration
 	if migrated, err := migrateLegacy(store); err != nil {
 		return err
@@ -49,14 +55,22 @@ func runInit(store domain.UserStore, force bool) error {
 		return nil
 	}
 
-	// Step 1: Obtain global user from git config or prompt
-	globalUser, err := getOrPromptGlobalUser()
-	if err != nil {
-		return err
+	// Step 1: Obtain global user from git config, prompt, or flags
+	var globalUser domain.User
+	if name != "" && email != "" {
+		globalUser = domain.User{Name: name, Email: email}
+	} else if name != "" || email != "" {
+		return fmt.Errorf("%s", i18n.T("cli.init.err_name_and_email_required", nil))
+	} else {
+		var err error
+		globalUser, err = getOrPromptGlobalUser()
+		if err != nil {
+			return err
+		}
 	}
 
 	// Step 2: Check if store is already initialized
-	if store.IsInitialized() && !force {
+	if store.IsInitialized() && !force && !yes {
 		confirmed, err := confirmFn(i18n.T("cli.init.override_confirm", nil), false)
 		if err != nil {
 			return err
