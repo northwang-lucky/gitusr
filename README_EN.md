@@ -19,50 +19,14 @@ Additionally, `gitusr` provides **history author rewriting** so you can safely f
 
 ## Installation
 
-### Prerequisites
-
-- [Go](https://go.dev/) 1.26.3 or later
-- [mise](https://mise.jdx.dev/) (recommended, for task management)
-- Git
-
-### Install via mise (recommended)
+### Install via Homebrew / LinuxBrew (recommended)
 
 ```bash
-# Clone the repository
-git clone https://github.com/northwang-lucky/gitusr.git
-cd gitusr
-
-# Build and install to ~/.local/bin/ (also creates the `gu` shortcut)
-mise run install
+brew tap northwang-lucky/gitusr
+brew install gitusr
 ```
 
-Make sure `~/.local/bin` is in your `PATH`:
-
-```bash
-export PATH="$HOME/.local/bin:$PATH"
-```
-
-### Install via go install
-
-```bash
-go install github.com/northwang-lucky/gitusr/cmd/gitusr@latest
-```
-
-> Note: `go install` does not automatically create the `gu` shortcut symlink.
-
-### Build manually
-
-```bash
-git clone https://github.com/northwang-lucky/gitusr.git
-cd gitusr
-
-# Build binary to bin/gitusr
-go build -o bin/gitusr ./cmd/gitusr
-
-# Copy to PATH manually
-cp bin/gitusr ~/.local/bin/gitusr
-ln -sf ~/.local/bin/gitusr ~/.local/bin/gu
-```
+After installation, Homebrew automatically places both `gitusr` and the `gu` shortcut in your `PATH`.
 
 ## Quick Start
 
@@ -338,13 +302,12 @@ gitusr replace old@wrong.com --with-name "North Wang" --with-email "north@exampl
 ## Uninstall
 
 ```bash
-mise run uninstall
+brew uninstall gitusr
 ```
 
-Or manually:
+User data files are not automatically removed. To clean them up manually:
 
 ```bash
-rm -f ~/.local/bin/gitusr ~/.local/bin/gu
 rm -rf "${XDG_DATA_HOME:-$HOME/.local/share}/gitusr"
 ```
 

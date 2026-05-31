@@ -19,50 +19,14 @@
 
 ## 安装指南
 
-### 前提条件
-
-- [Go](https://go.dev/) 1.26.3 或更高版本
-- [mise](https://mise.jdx.dev/)（推荐，用于任务管理）
-- Git
-
-### 使用 mise 安装（推荐）
+### 使用 Homebrew / LinuxBrew 安装（推荐）
 
 ```bash
-# 克隆仓库
-git clone https://github.com/northwang-lucky/gitusr.git
-cd gitusr
-
-# 构建并安装到 ~/.local/bin/（同时创建 gu 快捷命令）
-mise run install
+brew tap northwang-lucky/gitusr
+brew install gitusr
 ```
 
-安装完成后，确保 `~/.local/bin` 在你的 `PATH` 中：
-
-```bash
-export PATH="$HOME/.local/bin:$PATH"
-```
-
-### 使用 go install 安装
-
-```bash
-go install github.com/northwang-lucky/gitusr/cmd/gitusr@latest
-```
-
-> 注意：通过 `go install` 安装不会自动创建 `gu` 快捷链接。
-
-### 手动构建
-
-```bash
-git clone https://github.com/northwang-lucky/gitusr.git
-cd gitusr
-
-# 构建二进制文件到 bin/gitusr
-go build -o bin/gitusr ./cmd/gitusr
-
-# 手动复制到 PATH
-cp bin/gitusr ~/.local/bin/gitusr
-ln -sf ~/.local/bin/gitusr ~/.local/bin/gu
-```
+安装完成后，Homebrew 会自动将 `gitusr` 和快捷命令 `gu` 放入你的 `PATH` 中。
 
 ## 快速上手
 
@@ -338,13 +302,12 @@ gitusr replace old@wrong.com --with-name "North Wang" --with-email "north@exampl
 ## 卸载
 
 ```bash
-mise run uninstall
+brew uninstall gitusr
 ```
 
-或手动执行：
+卸载后，用户数据文件不会自动删除，如需清理可手动执行：
 
 ```bash
-rm -f ~/.local/bin/gitusr ~/.local/bin/gu
 rm -rf "${XDG_DATA_HOME:-$HOME/.local/share}/gitusr"
 ```
 
