@@ -42,11 +42,20 @@ func NewUseCmd(store domain.UserStore) *cobra.Command {
 				return err
 			}
 
-			if err := gitcmd.SetConfig("name", user.Name, global); err != nil {
+			silent, _ := cmd.Flags().GetBool("silent-if-unchanged")
+			if silent {
+				currentName, nameErr := getConfigFn("name", global)
+				currentEmail, emailErr := getConfigFn("email", global)
+				if nameErr == nil && emailErr == nil && currentName == user.Name && currentEmail == user.Email {
+					return nil
+				}
+			}
+
+			if err := setConfigFn("name", user.Name, global); err != nil {
 				return err
 			}
 
-			if err := gitcmd.SetConfig("email", user.Email, global); err != nil {
+			if err := setConfigFn("email", user.Email, global); err != nil {
 				return err
 			}
 
@@ -63,6 +72,7 @@ func NewUseCmd(store domain.UserStore) *cobra.Command {
 	cmd.Flags().StringP("name", "n", "", i18n.T("cli.use.flag_name", nil))
 	cmd.Flags().StringP("email", "e", "", i18n.T("cli.use.flag_email", nil))
 	cmd.Flags().IntP("index", "i", -1, i18n.T("cli.use.flag_index", nil))
+	cmd.Flags().BoolP("silent-if-unchanged", "s", false, i18n.T("cli.use.flag_silent", nil))
 
 	return cmd
 }

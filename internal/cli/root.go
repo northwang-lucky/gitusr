@@ -26,6 +26,7 @@ func NewRootCmd(store domain.UserStore, name string) *cobra.Command {
 	cmd.AddCommand(
 		NewAddCmd(store),
 		NewCurrentCmd(),
+		NewHookCmd(store),
 		NewInitCmd(store),
 		NewListCmd(store),
 		NewRemoveCmd(store),

@@ -146,6 +146,7 @@ func gitConfig(t *testing.T, dir string, key string) string {
 
 	cmd := exec.Command("git", "config", "user."+key)
 	cmd.Dir = dir
+	cmd.Env = append(os.Environ(), "HOME="+dir)
 	out, err := cmd.Output()
 	if err != nil {
 		t.Fatalf("git config user.%s failed in %s: %v", key, dir, err)
