@@ -15,7 +15,10 @@ Developers frequently need to switch between different Git identities for **pers
 
 Manually editing `git config user.name` and `git config user.email` is tedious and error-prone. `gitusr` lets you save your commonly used Git identities and switch between them at the repository or global level with a single command — no need to memorize complex `git config` syntax.
 
-Additionally, `gitusr` provides **history author rewriting** so you can safely fix incorrect author information in past commits.
+Additionally, `gitusr` provides:
+
+- **History author rewriting**: safely fix incorrect author information in past commits
+- **Shell Hook auto-switch**: automatically detect `.gitusrrc` configuration and apply the corresponding Git user identity during `git clone`, `git commit`, `cd`, and other operations
 
 ## Installation
 
@@ -296,6 +299,89 @@ gitusr replace old@wrong.com --with-index 1
 # Replace and automatically switch repo user (skip confirmation)
 gitusr replace old@wrong.com --with-name "North Wang" --with-email "north@example.com" --yes
 ```
+
+---
+
+### `gitusr hook` — Manage Shell Auto-Switch Hooks
+
+After installing Shell hooks, `gitusr` can automatically detect and switch Git user identities during `git clone`, `git commit`, `cd`, and other operations.
+
+**Usage:**
+
+```bash
+gitusr hook <subcommand> [flags]
+```
+
+**Subcommands:**
+
+| Subcommand | Description |
+|------------|-------------|
+| `install` | Install shell hooks |
+| `uninstall` | Uninstall shell hooks |
+
+#### `gitusr hook install`
+
+Install auto-switch hooks for the current shell (bash and zsh). Supports three types:
+
+- **`clone`** — Automatically detects `--gu-name` / `--gu-email` arguments during `git clone` and applies the user
+- **`commit`** — Automatically reads `.gitusrrc` during `git commit` and applies the user
+- **`cd`** — Automatically applies the user when `cd`ing into a directory containing `.gitusrrc`
+
+**Flags:**
+
+| Flag | Short | Description |
+|------|-------|-------------|
+| `--type` | | Hook type: `clone`, `commit`, or `cd` |
+| `--all` | `-a` | Install all three hook types |
+
+**Examples:**
+
+```bash
+# Install cd hook (auto-apply .gitusrrc when switching directories)
+gitusr hook install --type cd
+
+# Install clone hook (auto-switch user during git clone)
+gitusr hook install --type clone
+
+# Install all hooks
+gitusr hook install --all
+```
+
+#### `gitusr hook uninstall`
+
+Uninstall installed shell hooks.
+
+**Flags:**
+
+| Flag | Short | Description |
+|------|-------|-------------|
+| `--type` | | Hook type: `clone`, `commit`, or `cd` |
+| `--all` | `-a` | Uninstall all hooks |
+
+**Examples:**
+
+```bash
+# Uninstall cd hook
+gitusr hook uninstall --type cd
+
+# Uninstall all hooks
+gitusr hook uninstall --all
+```
+
+#### `.gitusrrc` File
+
+Create a `.gitusrrc` file in the root of a Git repository. When `cd`ing into that directory or running `git commit`, the hook will automatically match and apply the corresponding Git user.
+
+**Format:**
+
+```json
+{
+  "name": "Zhang San",
+  "email": "zhangsan@company.com"
+}
+```
+
+Matching priority: **email > name**. Only one field is required.
 
 ---
 
