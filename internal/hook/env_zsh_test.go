@@ -34,8 +34,8 @@ func TestGenerateZshEnv_ChecksRC(t *testing.T) {
 
 func TestGenerateZshEnv_SingleUserCheck(t *testing.T) {
 	script := GenerateZshEnv()
-	if !strings.Contains(script, "gitusr hook count-users") {
-		t.Error("generated script should check user count via gitusr hook count-users")
+	if !strings.Contains(script, "gitusr list 2>/dev/null | wc -l") {
+		t.Error("generated script should check user count via gitusr list | wc -l")
 	}
 	if !strings.Contains(script, "gu_count") {
 		t.Error("generated script should use a gu_count variable")

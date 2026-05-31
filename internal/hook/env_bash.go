@@ -9,7 +9,7 @@ package hook
 func GenerateBashEnv() string {
 	return `__gitusr_use_if_found() {
     local gu_count
-    gu_count=$(gitusr hook count-users 2>/dev/null || echo 0)
+    gu_count=$(gitusr list 2>/dev/null | wc -l)
     [ "$gu_count" -le 1 ] && return
 
     if [ -f .gitusrrc ]; then
