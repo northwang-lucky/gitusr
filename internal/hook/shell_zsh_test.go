@@ -55,6 +55,27 @@ func TestGenerateZshWrapper_HandlesClone(t *testing.T) {
 	}
 }
 
+func TestGenerateZshWrapper_ReturnsToOriginalDir(t *testing.T) {
+	script := GenerateZshWrapper()
+	if !strings.Contains(script, "original_dir=$(pwd)") {
+		t.Error("generated script should save the original directory with 'original_dir=$(pwd)'")
+	}
+	if !strings.Contains(script, `\cd "$original_dir"`) {
+		t.Error("generated script should return to the original directory with '\\cd \"$original_dir\"'")
+	}
+}
+
+func TestGenerateZshWrapper_AlwaysCallsGitusrUse(t *testing.T) {
+	script := GenerateZshWrapper()
+	if !strings.Contains(script, "else") {
+		t.Error("generated script should have an else branch for unconditional gitusr use")
+	}
+	count := strings.Count(script, "gitusr use")
+	if count < 4 {
+		t.Errorf("generated script should call 'gitusr use' at least 4 times (including fallback), got %d", count)
+	}
+}
+
 func TestGenerateZshWrapper_HandlesCommit(t *testing.T) {
 	script := GenerateZshWrapper()
 	if !strings.Contains(script, "commit") {
