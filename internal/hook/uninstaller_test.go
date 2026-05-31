@@ -1,7 +1,6 @@
 package hook
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -105,7 +104,7 @@ func TestUninstall_LastType(t *testing.T) {
 
 	// Prepare: create .bashrc with hook block
 	bashrcPath := filepath.Join(tmpHome, ".bashrc")
-	block := fmt.Sprintf("\n%s\nsource %s\n%s\n", markerBegin, bashWrapper, markerEnd)
+	block := "\n# gitusr hook begin\nsource " + bashWrapper + "\n# gitusr hook end\n"
 	if err := os.WriteFile(bashrcPath, []byte(block), 0644); err != nil {
 		t.Fatal(err)
 	}
@@ -126,7 +125,7 @@ func TestUninstall_LastType(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if strings.Contains(string(data), markerBegin) {
+	if strings.Contains(string(data), "# gitusr hook begin") {
 		t.Error("expected hook block to be removed from .bashrc")
 	}
 
