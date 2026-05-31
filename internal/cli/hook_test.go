@@ -386,4 +386,260 @@ func TestHookUninstall_Success_ZhCN(t *testing.T) {
 	}
 }
 
+// TestHookInstall_All verifies --all installs all three hook types.
+func TestHookInstall_All(t *testing.T) {
+	i18n.ResetForTesting()
+	i18n.InitWithLocale("en")
+
+	origInstall := installFunc
+	t.Cleanup(func() { installFunc = origInstall })
+
+	callCount := 0
+	installFunc = func(hookType hook.HookType, shells []hook.ShellType) ([]hook.HookInstallResult, error) {
+		callCount++
+		return []hook.HookInstallResult{
+			{Type: hookType, Shell: hook.ShellTypeBash, FilePath: "/tmp/git-wrapper.sh"},
+		}, nil
+	}
+
+	store := &mockStore{initialized: true}
+	cmd := NewHookInstallCmd(store)
+	stdout, _, err := executeCmd(cmd, "--all")
+
+	if err != nil {
+		t.Fatalf("--all unexpected error: %v", err)
+	}
+	if callCount != 3 {
+		t.Errorf("expected 3 install calls, got %d", callCount)
+	}
+	for _, typ := range []string{"clone", "commit", "cd"} {
+		if !strings.Contains(stdout, typ) {
+			t.Errorf("expected output to mention %q, got: %s", typ, stdout)
+		}
+	}
+	if !strings.Contains(stdout, "All hooks successfully installed") {
+		t.Errorf("expected 'All hooks successfully installed', got: %s", stdout)
+	}
+}
+
+// TestHookInstall_All_AlreadyInstalled verifies --all when all types are already installed.
+func TestHookInstall_All_AlreadyInstalled(t *testing.T) {
+	i18n.ResetForTesting()
+	i18n.InitWithLocale("en")
+
+	origInstall := installFunc
+	t.Cleanup(func() { installFunc = origInstall })
+
+	callCount := 0
+	installFunc = func(hookType hook.HookType, shells []hook.ShellType) ([]hook.HookInstallResult, error) {
+		callCount++
+		return nil, nil
+	}
+
+	store := &mockStore{initialized: true}
+	cmd := NewHookInstallCmd(store)
+	stdout, _, err := executeCmd(cmd, "--all")
+
+	if err != nil {
+		t.Fatalf("--all unexpected error: %v", err)
+	}
+	if callCount != 3 {
+		t.Errorf("expected 3 install calls, got %d", callCount)
+	}
+	for _, typ := range []string{"clone", "commit", "cd"} {
+		if !strings.Contains(stdout, typ) {
+			t.Errorf("expected output to mention %q, got: %s", typ, stdout)
+		}
+	}
+	if !strings.Contains(stdout, "already installed") {
+		t.Errorf("expected 'already installed' messages, got: %s", stdout)
+	}
+}
+
+// TestHookInstall_All_PartialError verifies --all aborts on the first real error.
+func TestHookInstall_All_PartialError(t *testing.T) {
+	i18n.ResetForTesting()
+	i18n.InitWithLocale("en")
+
+	origInstall := installFunc
+	t.Cleanup(func() { installFunc = origInstall })
+
+	callCount := 0
+	installFunc = func(hookType hook.HookType, shells []hook.ShellType) ([]hook.HookInstallResult, error) {
+		callCount++
+		if callCount == 2 {
+			return nil, fmt.Errorf("write error: permission denied")
+		}
+		return []hook.HookInstallResult{
+			{Type: hookType, Shell: hook.ShellTypeBash, FilePath: "/tmp/git-wrapper.sh"},
+		}, nil
+	}
+
+	store := &mockStore{initialized: true}
+	cmd := NewHookInstallCmd(store)
+	_, _, err := executeCmd(cmd, "--all")
+
+	if err == nil {
+		t.Fatal("expected error from second install failure")
+	}
+	if !strings.Contains(err.Error(), "permission denied") {
+		t.Errorf("error should contain 'permission denied', got: %q", err.Error())
+	}
+	if callCount != 2 {
+		t.Errorf("expected abort after 2 calls, got %d", callCount)
+	}
+}
+
+// TestHookInstall_All_And_Type_Exclusive verifies --all and --type are mutually exclusive.
+func TestHookInstall_All_And_Type_Exclusive(t *testing.T) {
+	i18n.ResetForTesting()
+	i18n.InitWithLocale("en")
+
+	store := &mockStore{initialized: true}
+	cmd := NewHookInstallCmd(store)
+	_, _, err := executeCmd(cmd, "--all", "--type", "clone")
+
+	if err == nil {
+		t.Fatal("expected error for mutually exclusive flags")
+	}
+	if !strings.Contains(err.Error(), "mutually exclusive") {
+		t.Errorf("error should mention 'mutually exclusive', got: %q", err.Error())
+	}
+}
+
+// TestHookUninstall_All verifies --all uninstalls all three hook types.
+func TestHookUninstall_All(t *testing.T) {
+	i18n.ResetForTesting()
+	i18n.InitWithLocale("en")
+
+	origUninstall := uninstallFunc
+	t.Cleanup(func() { uninstallFunc = origUninstall })
+
+	callCount := 0
+	uninstallFunc = func(hookType hook.HookType, shells []hook.ShellType) error {
+		callCount++
+		return nil
+	}
+
+	store := &mockStore{initialized: true}
+	cmd := NewHookUninstallCmd(store)
+	stdout, _, err := executeCmd(cmd, "--all")
+
+	if err != nil {
+		t.Fatalf("--all unexpected error: %v", err)
+	}
+	if callCount != 3 {
+		t.Errorf("expected 3 uninstall calls, got %d", callCount)
+	}
+	for _, typ := range []string{"clone", "commit", "cd"} {
+		if !strings.Contains(stdout, typ) {
+			t.Errorf("expected output to mention %q, got: %s", typ, stdout)
+		}
+	}
+	if !strings.Contains(stdout, "All hooks successfully uninstalled") {
+		t.Errorf("expected 'All hooks successfully uninstalled', got: %s", stdout)
+	}
+}
+
+// TestHookUninstall_All_NotInstalled verifies --all skips not-installed types.
+func TestHookUninstall_All_NotInstalled(t *testing.T) {
+	i18n.ResetForTesting()
+	i18n.InitWithLocale("en")
+
+	origUninstall := uninstallFunc
+	t.Cleanup(func() { uninstallFunc = origUninstall })
+
+	callCount := 0
+	uninstallFunc = func(hookType hook.HookType, shells []hook.ShellType) error {
+		callCount++
+		return fmt.Errorf("hook %s is not installed", hookType)
+	}
+
+	store := &mockStore{initialized: true}
+	cmd := NewHookUninstallCmd(store)
+	stdout, _, err := executeCmd(cmd, "--all")
+
+	if err != nil {
+		t.Fatalf("--all should not error when all not installed: %v", err)
+	}
+	if callCount != 3 {
+		t.Errorf("expected 3 uninstall calls, got %d", callCount)
+	}
+	for _, typ := range []string{"clone", "commit", "cd"} {
+		if !strings.Contains(stdout, typ) {
+			t.Errorf("expected output to mention %q, got: %s", typ, stdout)
+		}
+	}
+	if !strings.Contains(stdout, "not installed") {
+		t.Errorf("expected 'not installed' messages, got: %s", stdout)
+	}
+}
+
+// TestHookUninstall_All_And_Type_Exclusive verifies --all and --type are mutually exclusive for uninstall.
+func TestHookUninstall_All_And_Type_Exclusive(t *testing.T) {
+	i18n.ResetForTesting()
+	i18n.InitWithLocale("en")
+
+	store := &mockStore{initialized: true}
+	cmd := NewHookUninstallCmd(store)
+	_, _, err := executeCmd(cmd, "--all", "--type", "clone")
+
+	if err == nil {
+		t.Fatal("expected error for mutually exclusive flags")
+	}
+	if !strings.Contains(err.Error(), "mutually exclusive") {
+		t.Errorf("error should mention 'mutually exclusive', got: %q", err.Error())
+	}
+}
+
+// TestHookInstall_All_ZhCN verifies Chinese messages for --all install.
+func TestHookInstall_All_ZhCN(t *testing.T) {
+	i18n.ResetForTesting()
+	i18n.InitWithLocale("zh-CN")
+
+	origInstall := installFunc
+	t.Cleanup(func() { installFunc = origInstall })
+
+	installFunc = func(hookType hook.HookType, shells []hook.ShellType) ([]hook.HookInstallResult, error) {
+		return []hook.HookInstallResult{
+			{Type: hookType, Shell: hook.ShellTypeBash, FilePath: "/tmp/git-wrapper.sh"},
+		}, nil
+	}
+
+	store := &mockStore{initialized: true}
+	cmd := NewHookInstallCmd(store)
+	stdout, _, err := executeCmd(cmd, "--all")
+
+	if err != nil {
+		t.Fatalf("--all unexpected error: %v", err)
+	}
+	if !strings.Contains(stdout, "所有钩子安装成功") {
+		t.Errorf("expected Chinese all-success message, got: %s", stdout)
+	}
+}
+
+// TestHookUninstall_All_ZhCN verifies Chinese messages for --all uninstall.
+func TestHookUninstall_All_ZhCN(t *testing.T) {
+	i18n.ResetForTesting()
+	i18n.InitWithLocale("zh-CN")
+
+	origUninstall := uninstallFunc
+	t.Cleanup(func() { uninstallFunc = origUninstall })
+
+	uninstallFunc = func(hookType hook.HookType, shells []hook.ShellType) error {
+		return nil
+	}
+
+	store := &mockStore{initialized: true}
+	cmd := NewHookUninstallCmd(store)
+	stdout, _, err := executeCmd(cmd, "--all")
+
+	if err != nil {
+		t.Fatalf("--all unexpected error: %v", err)
+	}
+	if !strings.Contains(stdout, "所有钩子卸载成功") {
+		t.Errorf("expected Chinese all-success message, got: %s", stdout)
+	}
+}
+
 
