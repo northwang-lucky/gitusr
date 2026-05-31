@@ -139,6 +139,104 @@ func TestHookInstallUninstall_CD(t *testing.T) {
 	}
 }
 
+func TestHookInstallUninstall_All(t *testing.T) {
+	homeDir := t.TempDir()
+	xdgDataHome := t.TempDir()
+
+	env := map[string]string{
+		"HOME":          homeDir,
+		"XDG_DATA_HOME": xdgDataHome,
+	}
+
+	storePath := gitusrStore(xdgDataHome)
+	users := []map[string]string{
+		{"name": "Alice", "email": "alice@example.com"},
+		{"name": "Bob", "email": "bob@example.com"},
+	}
+	writeJSONFile(t, storePath, users)
+
+	output, err := runGitusr(t, env, "hook", "install", "--all")
+	if err != nil {
+		t.Fatalf("hook install --all failed: %v\noutput: %s", err, output)
+	}
+	for _, want := range []string{
+		"Hook clone successfully installed",
+		"Hook commit successfully installed",
+		"Hook cd successfully installed",
+		"All hooks successfully installed",
+	} {
+		if !strings.Contains(output, want) {
+			t.Errorf("hook install --all output should contain %q, got: %s", want, output)
+		}
+	}
+
+	bashrcPath := filepath.Join(homeDir, ".bashrc")
+	zshrcPath := filepath.Join(homeDir, ".zshrc")
+	for _, rcPath := range []string{bashrcPath, zshrcPath} {
+		rc, err := os.ReadFile(rcPath)
+		if err != nil {
+			t.Fatalf("read %s after install --all: %v", rcPath, err)
+		}
+		if !strings.Contains(string(rc), "# gitusr hook begin") {
+			t.Errorf("%s should contain hook marker after install --all, got:\n%s", rcPath, string(rc))
+		}
+	}
+
+	statePath := filepath.Join(xdgDataHome, "gitusr", "hook-state.json")
+	state, err := os.ReadFile(statePath)
+	if err != nil {
+		t.Fatalf("read hook-state.json after install --all: %v", err)
+	}
+	for _, hookType := range []string{"clone", "commit", "cd"} {
+		if !strings.Contains(string(state), hookType) {
+			t.Errorf("hook-state.json should contain %q after install --all, got:\n%s", hookType, string(state))
+		}
+	}
+
+	wrapperPath := filepath.Join(xdgDataHome, "gitusr", "hooks", "git-wrapper.sh")
+	if _, err := os.Stat(wrapperPath); os.IsNotExist(err) {
+		t.Fatalf("wrapper file does not exist at %s after install --all", wrapperPath)
+	}
+
+	output, err = runGitusr(t, env, "hook", "uninstall", "--all")
+	if err != nil {
+		t.Fatalf("hook uninstall --all failed: %v\noutput: %s", err, output)
+	}
+	for _, want := range []string{
+		"Hook clone successfully uninstalled",
+		"Hook commit successfully uninstalled",
+		"Hook cd successfully uninstalled",
+		"All hooks successfully uninstalled",
+	} {
+		if !strings.Contains(output, want) {
+			t.Errorf("hook uninstall --all output should contain %q, got: %s", want, output)
+		}
+	}
+
+	for _, rcPath := range []string{bashrcPath, zshrcPath} {
+		rc, err := os.ReadFile(rcPath)
+		if err != nil {
+			t.Fatalf("read %s after uninstall --all: %v", rcPath, err)
+		}
+		if strings.Contains(string(rc), "# gitusr hook begin") {
+			t.Errorf("%s should not contain hook marker after uninstall --all, got:\n%s", rcPath, string(rc))
+		}
+	}
+
+	state, err = os.ReadFile(statePath)
+	if err != nil {
+		t.Fatalf("read hook-state.json after uninstall --all: %v", err)
+	}
+	for _, hookType := range []string{"clone", "commit", "cd"} {
+		if strings.Contains(string(state), hookType) {
+			t.Errorf("hook-state.json should not contain %q after uninstall --all, got:\n%s", hookType, string(state))
+		}
+	}
+	if _, err := os.Stat(wrapperPath); !os.IsNotExist(err) {
+		t.Fatalf("wrapper file should be removed after uninstall --all, stat error: %v", err)
+	}
+}
+
 // ---------------------------------------------------------------------------
 // TestHookSingleUserNoTrigger — wrapper code includes single-user pass-through
 // ---------------------------------------------------------------------------

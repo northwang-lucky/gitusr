@@ -33,7 +33,7 @@ echo "[sandbox] Build complete"
 # ─── Helper ────────────────────────────────────────────────────────────────
 # gitusr wrapper that always sets XDG_DATA_HOME for isolated store access.
 gitusr() {
-    XDG_DATA_HOME=/tmp/xdg /tmp/gitusr "$@"
+    GITUSR_LANG=en XDG_DATA_HOME=/tmp/xdg /tmp/gitusr "$@"
 }
 
 # ─── 8-step E2E workflow ──────────────────────────────────────────────────
@@ -118,50 +118,61 @@ fi
 
 # Step 9-14: Hook subcommand tests
 echo ""
-echo "--- Step 9/14: hook install --type=clone ---"
-gitusr hook install --type=clone
-# Verify wrapper file exists
+echo "--- Step 9/14: hook install --all ---"
+gitusr hook install --all | tee /tmp/hook-install-all-output.txt
+grep -q "Hook clone successfully installed" /tmp/hook-install-all-output.txt || { echo "  FAIL: clone hook was not installed by --all"; exit 1; }
+grep -q "Hook commit successfully installed" /tmp/hook-install-all-output.txt || { echo "  FAIL: commit hook was not installed by --all"; exit 1; }
+grep -q "Hook cd successfully installed" /tmp/hook-install-all-output.txt || { echo "  FAIL: cd hook was not installed by --all"; exit 1; }
+grep -q "All hooks successfully installed" /tmp/hook-install-all-output.txt || { echo "  FAIL: --all install did not report aggregate success"; exit 1; }
 if [[ -f "$XDG_DATA_HOME/gitusr/hooks/git-wrapper.sh" ]]; then
-    echo "  Step 9 PASSED (clone hook installed, wrapper exists)"
+    echo "  Step 9 PASSED (all hooks installed, wrapper exists)"
 else
     echo "  FAIL: git-wrapper.sh not found after install"
     exit 1
 fi
 
 echo ""
-echo "--- Step 10/14: hook install --type=commit ---"
-gitusr hook install --type=commit
-echo "  Step 10 PASSED (commit hook installed)"
+echo "--- Step 10/14: hook install --all idempotency ---"
+gitusr hook install --all | tee /tmp/hook-install-all-idempotent-output.txt
+grep -q "Hook clone is already installed" /tmp/hook-install-all-idempotent-output.txt || { echo "  FAIL: clone hook was not reported already installed"; exit 1; }
+grep -q "Hook commit is already installed" /tmp/hook-install-all-idempotent-output.txt || { echo "  FAIL: commit hook was not reported already installed"; exit 1; }
+grep -q "Hook cd is already installed" /tmp/hook-install-all-idempotent-output.txt || { echo "  FAIL: cd hook was not reported already installed"; exit 1; }
+echo "  Step 10 PASSED (--all install is idempotent)"
 
 echo ""
-echo "--- Step 11/14: hook install --type=cd ---"
-gitusr hook install --type=cd
+echo "--- Step 11/14: hook install --all state verification ---"
 WRAPPER_FILE="$XDG_DATA_HOME/gitusr/hooks/git-wrapper.sh"
-if [[ -f "$WRAPPER_FILE" ]] && grep -q "__gitusr_use_if_found" "$WRAPPER_FILE"; then
-    echo "  Step 11 PASSED (cd hook installed, wrapper contains cd code)"
+HOOK_STATE="$XDG_DATA_HOME/gitusr/hook-state.json"
+if [[ -f "$WRAPPER_FILE" ]] && [[ -f "$HOOK_STATE" ]] && grep -q '"clone"' "$HOOK_STATE" && grep -q '"commit"' "$HOOK_STATE" && grep -q '"cd"' "$HOOK_STATE"; then
+    echo "  Step 11 PASSED (--all state contains clone, commit, cd)"
 else
-    echo "  FAIL: cd hook wrapper not found or missing expected function"
+    echo "  FAIL: --all state verification failed"
     exit 1
 fi
 
 echo ""
-echo "--- Step 12/14: hook uninstall --type=cd ---"
-gitusr hook uninstall --type=cd
-echo "  Step 12 PASSED (cd hook uninstalled)"
+echo "--- Step 12/14: hook uninstall --all ---"
+gitusr hook uninstall --all | tee /tmp/hook-uninstall-all-output.txt
+grep -q "Hook clone successfully uninstalled" /tmp/hook-uninstall-all-output.txt || { echo "  FAIL: clone hook was not uninstalled by --all"; exit 1; }
+grep -q "Hook commit successfully uninstalled" /tmp/hook-uninstall-all-output.txt || { echo "  FAIL: commit hook was not uninstalled by --all"; exit 1; }
+grep -q "Hook cd successfully uninstalled" /tmp/hook-uninstall-all-output.txt || { echo "  FAIL: cd hook was not uninstalled by --all"; exit 1; }
+grep -q "All hooks successfully uninstalled" /tmp/hook-uninstall-all-output.txt || { echo "  FAIL: --all uninstall did not report aggregate success"; exit 1; }
+echo "  Step 12 PASSED (all hooks uninstalled)"
 
 echo ""
-echo "--- Step 13/14: hook uninstall --type=clone ---"
-gitusr hook uninstall --type=clone
-echo "  Step 13 PASSED (clone hook uninstalled)"
+echo "--- Step 13/14: hook uninstall --all idempotency ---"
+gitusr hook uninstall --all | tee /tmp/hook-uninstall-all-idempotent-output.txt
+grep -q "Hook clone is not installed" /tmp/hook-uninstall-all-idempotent-output.txt || { echo "  FAIL: clone hook was not reported not installed"; exit 1; }
+grep -q "Hook commit is not installed" /tmp/hook-uninstall-all-idempotent-output.txt || { echo "  FAIL: commit hook was not reported not installed"; exit 1; }
+grep -q "Hook cd is not installed" /tmp/hook-uninstall-all-idempotent-output.txt || { echo "  FAIL: cd hook was not reported not installed"; exit 1; }
+echo "  Step 13 PASSED (--all uninstall skips missing hooks)"
 
 echo ""
-echo "--- Step 14/14: hook uninstall --type=commit ---"
-gitusr hook uninstall --type=commit
-# Verify wrapper files are cleaned up when all hooks uninstalled
-if [[ ! -f "$XDG_DATA_HOME/gitusr/hooks/git-wrapper.sh" ]]; then
-    echo "  Step 14 PASSED (commit hook uninstalled, wrapper cleaned up)"
+echo "--- Step 14/14: hook uninstall --all cleanup verification ---"
+if [[ ! -f "$XDG_DATA_HOME/gitusr/hooks/git-wrapper.sh" ]] && ! grep -q '"clone"\|"commit"\|"cd"' "$HOOK_STATE"; then
+    echo "  Step 14 PASSED (--all cleanup removed wrappers and state)"
 else
-    echo "  FAIL: wrapper files not cleaned up after uninstall"
+    echo "  FAIL: --all cleanup did not remove wrappers or state"
     exit 1
 fi
 
@@ -225,7 +236,7 @@ cd /tmp
 rm -rf /tmp/single-user-test
 git clone "$TMP_BARE_REPO" single-user-test 2>&1 || true
 cd /tmp/single-user-test
-SINGLE_USER_CONFIG=$(git config user.email)
+SINGLE_USER_CONFIG=$(git config user.email || true)
 # With single user, hook should not trigger (no config set)
 if [[ -z "$SINGLE_USER_CONFIG" ]]; then
     echo "  Step 17 PASSED (single user protection working - hook skipped)"
