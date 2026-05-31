@@ -65,6 +65,9 @@ func TestUseGlobal(t *testing.T) {
 	i18n.ResetForTesting()
 	i18n.InitWithLocale("en")
 
+	// Isolate HOME to prevent polluting ~/.gitconfig
+	t.Setenv("HOME", t.TempDir())
+
 	dir := t.TempDir()
 	initGitRepo(t, dir)
 	t.Chdir(dir)
