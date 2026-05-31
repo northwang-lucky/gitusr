@@ -54,17 +54,20 @@ bwrap \
     --tmpfs /tmp \
     --tmpfs /root \
     --ro-bind "$GOROOT" /usr/local/go \
-    --ro-bind /usr/bin/git /usr/bin/git \
-    --ro-bind /usr/bin/python3 /usr/bin/python3 \
+    --ro-bind /bin /bin \
+    --ro-bind /usr/bin /usr/bin \
     --ro-bind /usr/lib /usr/lib \
     --ro-bind /lib /lib \
     --ro-bind /lib64 /lib64 \
+    --ro-bind /etc/ssl/certs /etc/ssl/certs \
+    --ro-bind /usr/include /usr/include \
     --bind "$PROJECT_ROOT" /src \
     --proc /proc \
     --dev /dev \
     --ro-bind /etc/resolv.conf /etc/resolv.conf \
     --chdir /src \
     --setenv HOME /root \
+    --setenv GOROOT /usr/local/go \
     --setenv PATH "/usr/local/go/bin:/usr/bin:/bin" \
     bash /src/scripts/e2e-test.sh
 

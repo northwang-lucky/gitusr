@@ -100,11 +100,21 @@ grep -q "Personal" /tmp/list-after-remove.txt && {
 }
 echo "  Step 7 PASSED"
 
-# Step 8: replace — rename work@test.com to Freelance
+# Step 8: replace — rename work@test.com to an existing user
 echo ""
 echo "--- Step 8/8: replace ---"
-gitusr replace work@test.com --with-name "Freelance" --yes
-echo "  Step 8 PASSED"
+if git filter-repo --help &>/dev/null; then
+    cd /tmp/repo
+    # Create an initial commit authored by Work so that git-filter-repo has history
+    git config user.email "work@test.com"
+    git config user.name "Work"
+    touch README.md && git add README.md && git commit -m "initial commit" --no-gpg-sign
+    # Replace Work-authored commits with Dev identity (Dev already exists in store)
+    gitusr replace work@test.com --with-index 0 --yes
+    echo "  Step 8 PASSED"
+else
+    echo "  Step 8 SKIPPED (git-filter-repo not available)"
+fi
 
 echo ""
 echo "========== ALL 8 E2E STEPS PASSED =========="
