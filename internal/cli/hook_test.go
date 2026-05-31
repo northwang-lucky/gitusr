@@ -208,14 +208,14 @@ func TestHookUninstall_Error(t *testing.T) {
 }
 
 // TestHookCmd_Subcommands verifies the parent hook command correctly groups
-// install and uninstall as subcommands.
+// install, uninstall, and env as subcommands.
 func TestHookCmd_Subcommands(t *testing.T) {
 	store := &mockStore{initialized: true}
 	cmd := NewHookCmd(store)
 
 	subs := cmd.Commands()
-	if len(subs) != 2 {
-		t.Fatalf("expected 2 subcommands, got %d", len(subs))
+	if len(subs) != 3 {
+		t.Fatalf("expected 3 subcommands, got %d", len(subs))
 	}
 
 	names := make(map[string]bool)

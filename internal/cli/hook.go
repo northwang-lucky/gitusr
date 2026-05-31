@@ -32,6 +32,7 @@ func NewHookCmd(store domain.UserStore) *cobra.Command {
 	cmd.AddCommand(
 		NewHookInstallCmd(store),
 		NewHookUninstallCmd(store),
+		NewHookEnvCmd(store),
 	)
 
 	return cmd
