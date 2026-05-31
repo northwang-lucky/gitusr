@@ -14,6 +14,13 @@ description = "安装到 ~/.local/bin/ 并创建 gu 软链接"
 depends = ["build"]
 run = "mkdir -p ~/.local/bin/ && cp bin/gitusr ~/.local/bin/gitusr && ln -sf ~/.local/bin/gitusr ~/.local/bin/gu"
 
+[tasks.uninstall]
+description = "完整卸载 gitusr（删除二进制、软链接和数据文件）"
+run = """
+rm -f ~/.local/bin/gitusr ~/.local/bin/gu
+rm -rf "${XDG_DATA_HOME:-$HOME/.local/share}/gitusr"
+"""
+
 [tasks.clean]
 description = "清理构建产物"
 run = "rm -rf bin/"
