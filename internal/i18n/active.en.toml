@@ -245,6 +245,38 @@ other = "not a git repository (or any of the parent directories): .git"
 # Select package messages (internal/select/)
 # ================================================
 
+[cli.framework.available_commands]
+hash = "sha1:dummy"
+other = "Available Commands:"
+
+[cli.framework.flags]
+hash = "sha1:dummy"
+other = "Flags:"
+
+[cli.framework.global_flags]
+hash = "sha1:dummy"
+other = "Global Flags:"
+
+[cli.framework.additional_help]
+hash = "sha1:dummy"
+other = "Additional help topics:"
+
+[cli.framework.use_help]
+hash = "sha1:dummy"
+other = "Use \"{{`{{.Use}}`}} [command] --help\" for more information about a command."
+
+[cli.framework.help_flag]
+hash = "sha1:dummy"
+other = "help for {{.Command}}"
+
+[cli.completion.short]
+hash = "sha1:dummy"
+other = "Generate the autocompletion script for the specified shell"
+
+[cli.help.short]
+hash = "sha1:dummy"
+other = "Help about any command"
+
 [select.no_users]
 hash = "sha1:ee53e686a409c193080f1b74daccd35d73aa15e4"
 other = "no saved users"
@@ -288,35 +320,3 @@ other = "git-filter-repo is not installed. Install it with: pip install git-filt
 # ================================================
 # Cobra framework strings
 # ================================================
-
-[cli.framework.available_commands]
-hash = "sha1:dummy"
-other = "Available Commands:"
-
-[cli.framework.flags]
-hash = "sha1:dummy"
-other = "Flags:"
-
-[cli.framework.global_flags]
-hash = "sha1:dummy"
-other = "Global Flags:"
-
-[cli.framework.additional_help]
-hash = "sha1:dummy"
-other = "Additional help topics:"
-
-[cli.framework.use_help]
-hash = "sha1:dummy"
-other = "Use \"{{`{{.Use}}`}} [command] --help\" for more information about a command."
-
-[cli.framework.help_flag]
-hash = "sha1:dummy"
-other = "help for {{.Command}}"
-
-[cli.completion.short]
-hash = "sha1:dummy"
-other = "Generate the autocompletion script for the specified shell"
-
-[cli.help.short]
-hash = "sha1:dummy"
-other = "Help about any command"

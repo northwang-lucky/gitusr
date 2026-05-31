@@ -245,6 +245,38 @@ other = "不是 git 仓库（或其任何父目录）：.git"
 # Select 包消息（internal/select/）
 # ================================================
 
+[cli.framework.available_commands]
+hash = "sha1:dummy"
+other = "可用命令："
+
+[cli.framework.flags]
+hash = "sha1:dummy"
+other = "标志："
+
+[cli.framework.global_flags]
+hash = "sha1:dummy"
+other = "全局标志："
+
+[cli.framework.additional_help]
+hash = "sha1:dummy"
+other = "其他帮助主题："
+
+[cli.framework.use_help]
+hash = "sha1:dummy"
+other = "使用 \"{{`{{.Use}}`}} [command] --help\" 获取有关命令的更多信息。"
+
+[cli.framework.help_flag]
+hash = "sha1:dummy"
+other = "{{.Command}} 的帮助"
+
+[cli.completion.short]
+hash = "sha1:dummy"
+other = "生成指定 shell 的自动补全脚本"
+
+[cli.help.short]
+hash = "sha1:dummy"
+other = "查看任何命令的帮助"
+
 [select.no_users]
 hash = "sha1:ee53e686a409c193080f1b74daccd35d73aa15e4"
 other = "没有已保存的用户"
@@ -288,35 +320,3 @@ other = "未安装 git-filter-repo。请使用以下命令安装：pip install g
 # ================================================
 # Cobra 框架字符串
 # ================================================
-
-[cli.framework.available_commands]
-hash = "sha1:dummy"
-other = "可用命令："
-
-[cli.framework.flags]
-hash = "sha1:dummy"
-other = "标志："
-
-[cli.framework.global_flags]
-hash = "sha1:dummy"
-other = "全局标志："
-
-[cli.framework.additional_help]
-hash = "sha1:dummy"
-other = "其他帮助主题："
-
-[cli.framework.use_help]
-hash = "sha1:dummy"
-other = "使用 \"{{`{{.Use}}`}} [command] --help\" 获取有关命令的更多信息。"
-
-[cli.framework.help_flag]
-hash = "sha1:dummy"
-other = "{{.Command}} 的帮助"
-
-[cli.completion.short]
-hash = "sha1:dummy"
-other = "生成指定 shell 的自动补全脚本"
-
-[cli.help.short]
-hash = "sha1:dummy"
-other = "查看任何命令的帮助"
