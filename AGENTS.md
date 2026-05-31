@@ -67,16 +67,16 @@
 ## COMMANDS
 ```bash
 # Build binary to bin/gitusr
-make build
+mise run build
 
 # Run all tests (unit + integration)
-make test
+mise run test
 
 # Install to /usr/local/bin/gitusr + symlink gu
-make install
+mise run install
 
 # Clean build artifacts
-make clean
+mise run clean
 ```
 
 ## NOTES

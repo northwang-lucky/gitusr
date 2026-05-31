@@ -1,2 +1,19 @@
 [tools]
 go = "1.26.3"
+
+[tasks.build]
+description = "构建二进制文件到 bin/gitusr"
+run = "go build -o bin/gitusr ./cmd/gitusr"
+
+[tasks.test]
+description = "运行全部测试（单元 + 集成）"
+run = "go test ./... -v"
+
+[tasks.install]
+description = "安装到 ~/.local/bin/ 并创建 gu 软链接"
+depends = ["build"]
+run = "mkdir -p ~/.local/bin/ && cp bin/gitusr ~/.local/bin/gitusr && ln -sf ~/.local/bin/gitusr ~/.local/bin/gu"
+
+[tasks.clean]
+description = "清理构建产物"
+run = "rm -rf bin/"
