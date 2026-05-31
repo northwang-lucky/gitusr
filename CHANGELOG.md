@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.1](https://github.com/northwang-lucky/gitusr/compare/v0.2.0...v0.2.1) (2026-05-31)
+
+
+### Bug Fixes
+
+* **hook:** git clone wrapper 总是调用 gitusr use 并回到原目录 ([ab2eb89](https://github.com/northwang-lucky/gitusr/commit/ab2eb89359133558c0b58c69590ff02fdc2e1fe6))
+* **hook:** git clone wrapper 总是调用 gitusr use 并回到原目录 ([85f036d](https://github.com/northwang-lucky/gitusr/commit/85f036daccf4d4d6fc4f5ff604d5b09a3cb5114f))
+
 ## [0.2.0](https://github.com/northwang-lucky/gitusr/compare/v0.1.1...v0.2.0) (2026-05-31)
 
 
