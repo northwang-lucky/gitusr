@@ -88,21 +88,29 @@ func NewReplaceCmd(store domain.UserStore) *cobra.Command {
 			}
 
 			// 8. Optionally update the repository-level git config
-			yes, err := confirmFunc(
-				i18n.T("cli.replace.switch_confirm", map[string]interface{}{"Name": newUser.Name, "Email": newUser.Email}),
-				false,
-			)
+			yesFlag, err := cmd.Flags().GetBool("yes")
 			if err != nil {
-				return fmt.Errorf("confirm: %w", err)
+				return err
 			}
 
-			if yes {
-				if err := gitcmd.SetConfig("name", newUser.Name, false); err != nil {
-					return fmt.Errorf("set name config: %w", err)
+			if !yesFlag {
+				yes, err := confirmFunc(
+					i18n.T("cli.replace.switch_confirm", map[string]interface{}{"Name": newUser.Name, "Email": newUser.Email}),
+					false,
+				)
+				if err != nil {
+					return fmt.Errorf("confirm: %w", err)
 				}
-				if err := gitcmd.SetConfig("email", newUser.Email, false); err != nil {
-					return fmt.Errorf("set email config: %w", err)
+				if !yes {
+					return nil
 				}
+			}
+
+			if err := gitcmd.SetConfig("name", newUser.Name, false); err != nil {
+				return fmt.Errorf("set name config: %w", err)
+			}
+			if err := gitcmd.SetConfig("email", newUser.Email, false); err != nil {
+				return fmt.Errorf("set email config: %w", err)
 			}
 
 			return nil
@@ -112,6 +120,7 @@ func NewReplaceCmd(store domain.UserStore) *cobra.Command {
 	cmd.Flags().String("with-name", "", i18n.T("cli.replace.flag_with_name", nil))
 	cmd.Flags().String("with-email", "", i18n.T("cli.replace.flag_with_email", nil))
 	cmd.Flags().Int("with-index", -1, i18n.T("cli.replace.flag_with_index", nil))
+	cmd.Flags().BoolP("yes", "y", false, i18n.T("cli.replace.flag_yes", nil))
 
 	return cmd
 }

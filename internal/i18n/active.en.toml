@@ -229,22 +229,6 @@ other = "Found legacy config at ~/.gitusr/user-list.json. Migrate to XDG?"
 hash = "sha1:acfc3590485e5c58efa09bcaa1d90444f7a2d5c3"
 other = "Migration skipped."
 
-[cli.init.flag_name]
-hash = "sha1:dummy"
-other = "user name for non-interactive initialization"
-
-[cli.init.flag_email]
-hash = "sha1:dummy"
-other = "user email for non-interactive initialization"
-
-[cli.init.flag_yes]
-hash = "sha1:dummy"
-other = "skip confirmation prompts"
-
-[cli.init.err_name_and_email_required]
-hash = "sha1:dummy"
-other = "--name and --email must be specified together"
-
 [cli.init.migrate_count]
 hash = "sha1:356121144bd1bae202ac63201cffb40b31062a35"
 other = "Migrated {{.Count}} users from legacy config."
@@ -284,10 +268,6 @@ other = "new user email"
 [cli.replace.flag_with_index]
 hash = "sha1:b00e2864171b45023efe5b53fd519e1ab5085e9a"
 other = "new user index"
-
-[cli.replace.flag_yes]
-hash = "sha1:0000000000000000000000000000000000000000"
-other = "skip confirmation prompt"
 
 # ================================================
 # Shared CLI error messages (used by multiple cmds)
