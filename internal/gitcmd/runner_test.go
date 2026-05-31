@@ -54,6 +54,7 @@ func isFilterRepoInstalled() bool {
 
 func TestIsGitRepo_InRepo(t *testing.T) {
 	dir := t.TempDir()
+	t.Setenv("HOME", t.TempDir())
 	initGitRepo(t, dir)
 	t.Chdir(dir)
 
@@ -89,6 +90,7 @@ func TestIsGitRepo_Worktree(t *testing.T) {
 
 func TestGetConfig_Existing(t *testing.T) {
 	dir := t.TempDir()
+	t.Setenv("HOME", t.TempDir())
 	initGitRepo(t, dir)
 	t.Chdir(dir)
 
@@ -103,6 +105,7 @@ func TestGetConfig_Existing(t *testing.T) {
 
 func TestGetConfig_Missing(t *testing.T) {
 	dir := t.TempDir()
+	t.Setenv("HOME", t.TempDir())
 	initGitRepo(t, dir)
 	t.Chdir(dir)
 
@@ -116,6 +119,7 @@ func TestGetConfig_Missing(t *testing.T) {
 
 func TestSetConfig(t *testing.T) {
 	dir := t.TempDir()
+	t.Setenv("HOME", t.TempDir())
 	initGitRepo(t, dir)
 	t.Chdir(dir)
 
@@ -131,6 +135,7 @@ func TestSetConfig(t *testing.T) {
 
 func TestSetConfig_MultipleKeys(t *testing.T) {
 	dir := t.TempDir()
+	t.Setenv("HOME", t.TempDir())
 	initGitRepo(t, dir)
 	t.Chdir(dir)
 
@@ -153,6 +158,7 @@ func TestSetConfig_MultipleKeys(t *testing.T) {
 
 func TestCreateBackupBranch(t *testing.T) {
 	dir := t.TempDir()
+	t.Setenv("HOME", t.TempDir())
 	initGitRepo(t, dir)
 	t.Chdir(dir)
 
@@ -173,6 +179,7 @@ func TestCreateBackupBranch(t *testing.T) {
 
 func TestCreateBackupBranch_Duplicate(t *testing.T) {
 	dir := t.TempDir()
+	t.Setenv("HOME", t.TempDir())
 	initGitRepo(t, dir)
 	t.Chdir(dir)
 
@@ -190,6 +197,7 @@ func TestCreateBackupBranch_Duplicate(t *testing.T) {
 
 func TestFilterRepo_NotInstalled(t *testing.T) {
 	dir := t.TempDir()
+	t.Setenv("HOME", t.TempDir())
 	initGitRepo(t, dir)
 	t.Chdir(dir)
 
@@ -215,6 +223,7 @@ func TestFilterRepo_NotInstalled(t *testing.T) {
 
 func TestHasUncommittedChanges_Clean(t *testing.T) {
 	dir := t.TempDir()
+	t.Setenv("HOME", t.TempDir())
 	initGitRepo(t, dir)
 	t.Chdir(dir)
 
@@ -225,6 +234,7 @@ func TestHasUncommittedChanges_Clean(t *testing.T) {
 
 func TestHasUncommittedChanges_Modified(t *testing.T) {
 	dir := t.TempDir()
+	t.Setenv("HOME", t.TempDir())
 	initGitRepo(t, dir)
 	t.Chdir(dir)
 
@@ -247,6 +257,7 @@ func TestHasUncommittedChanges_Modified(t *testing.T) {
 
 func TestHasUncommittedChanges_Untracked(t *testing.T) {
 	dir := t.TempDir()
+	t.Setenv("HOME", t.TempDir())
 	initGitRepo(t, dir)
 	t.Chdir(dir)
 
@@ -262,6 +273,7 @@ func TestHasUncommittedChanges_Untracked(t *testing.T) {
 
 func TestHasUncommittedChanges_NotInRepo(t *testing.T) {
 	dir := t.TempDir()
+	t.Setenv("HOME", t.TempDir())
 	t.Chdir(dir)
 
 	// Outside a git repo, git status --porcelain will fail, so the function
