@@ -333,6 +333,10 @@ other = "Generate cd hook code"
 hash = "sha1:8778eb5d33cc7fed61382cef86263d763680fd3b"
 other = "Shell type: bash or zsh"
 
+[cli.hook.env.not_installed]
+hash = "sha1:dummy"
+other = "Please run 'hook install' first"
+
 [cli.hook.rc.not_found]
 hash = "sha1:305b30f92787fcb6334f09d509dd086791f8d4d7"
 other = "User specified in .gitusrrc not found in saved users"

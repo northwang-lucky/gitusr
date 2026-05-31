@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/northwang-lucky/gitusr/internal/domain"
+	"github.com/northwang-lucky/gitusr/internal/i18n"
 )
 
 // GenerateEnv generates the environment script for the given shell type.
@@ -16,7 +17,7 @@ func GenerateEnv(shell ShellType) (string, error) {
 	}
 
 	if len(state.InstalledTypes) == 0 {
-		return "", errors.New("请先执行 hook install")
+		return "", errors.New(i18n.T("cli.hook.env.not_installed", nil))
 	}
 
 	switch shell {

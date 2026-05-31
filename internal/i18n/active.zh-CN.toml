@@ -329,6 +329,10 @@ other = "生成 cd 钩子代码"
 hash = "sha1:8778eb5d33cc7fed61382cef86263d763680fd3b"
 other = "Shell 类型：bash 或 zsh"
 
+[cli.hook.env.not_installed]
+hash = "sha1:dummy"
+other = "请先执行 hook install"
+
 [cli.hook.rc.not_found]
 hash = "sha1:305b30f92787fcb6334f09d509dd086791f8d4d7"
 other = ".gitusrrc 中指定的用户在已保存用户中未找到"

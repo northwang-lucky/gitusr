@@ -19,12 +19,6 @@ func Uninstall(hookType HookType, shells []ShellType) error {
 		return fmt.Errorf("hook %s is not installed", hookType)
 	}
 
-	for _, shell := range shells {
-		if err := RemoveSourceBlock(shell); err != nil {
-			return err
-		}
-	}
-
 	// Update state - remove hookType from InstalledTypes
 	state, err := LoadState()
 	if err != nil {
@@ -43,8 +37,13 @@ func Uninstall(hookType HookType, shells []ShellType) error {
 		return err
 	}
 
-	// If no hook types remain installed, clean up all wrapper files
-	if len(state.InstalledTypes) == 0 {
+	// Only remove source blocks and wrapper files when no hook types remain
+	if len(updated) == 0 {
+		for _, shell := range shells {
+			if err := RemoveSourceBlock(shell); err != nil {
+				return err
+			}
+		}
 		if err := deleteWrapperFiles(); err != nil {
 			return err
 		}

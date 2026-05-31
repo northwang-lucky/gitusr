@@ -85,8 +85,8 @@ func TestGenerateEnv_NoHooksInstalled(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected error when no hooks are installed")
 	}
-	if !strings.Contains(err.Error(), "请先执行 hook install") {
-		t.Errorf("error should contain '请先执行 hook install', got: %q", err.Error())
+	if !strings.Contains(err.Error(), "hook.env.not_installed") {
+		t.Errorf("error should contain i18n key 'hook.env.not_installed', got: %q", err.Error())
 	}
 }
 
