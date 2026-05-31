@@ -116,6 +116,59 @@ else
     echo "  Step 8 SKIPPED (git-filter-repo not available)"
 fi
 
+# Step 9-14: Hook subcommand tests
 echo ""
-echo "========== ALL 8 E2E STEPS PASSED =========="
+echo "--- Step 9/14: hook install --type=clone ---"
+gitusr hook install --type=clone
+# Verify wrapper file exists
+if [[ -f "$XDG_DATA_HOME/gitusr/hooks/git-wrapper.sh" ]]; then
+    echo "  Step 9 PASSED (clone hook installed, wrapper exists)"
+else
+    echo "  FAIL: git-wrapper.sh not found after install"
+    exit 1
+fi
+
+echo ""
+echo "--- Step 10/14: hook install --type=commit ---"
+gitusr hook install --type=commit
+echo "  Step 10 PASSED (commit hook installed)"
+
+echo ""
+echo "--- Step 11/14: hook env --shell bash ---"
+ENV_OUTPUT=$(gitusr hook env --shell bash 2>&1)
+if echo "$ENV_OUTPUT" | grep -q "__gitusr_use_if_found"; then
+    echo "  Step 11 PASSED (env generates valid bash code)"
+else
+    echo "  FAIL: env output doesn't contain expected function"
+    exit 1
+fi
+
+echo ""
+echo "--- Step 12/14: hook env --shell zsh ---"
+ENV_OUTPUT=$(gitusr hook env --shell zsh 2>&1)
+if echo "$ENV_OUTPUT" | grep -q "add-zsh-hook"; then
+    echo "  Step 12 PASSED (env generates valid zsh code)"
+else
+    echo "  FAIL: env output doesn't contain zsh hook code"
+    exit 1
+fi
+
+echo ""
+echo "--- Step 13/14: hook uninstall --type=clone ---"
+gitusr hook uninstall --type=clone
+echo "  Step 13 PASSED (clone hook uninstalled)"
+
+echo ""
+echo "--- Step 14/14: hook uninstall --type=commit ---"
+gitusr hook uninstall --type=commit
+# Verify wrapper files are cleaned up when all hooks uninstalled
+if [[ ! -f "$XDG_DATA_HOME/gitusr/hooks/git-wrapper.sh" ]]; then
+    echo "  Step 14 PASSED (commit hook uninstalled, wrapper cleaned up)"
+else
+    echo "  FAIL: wrapper files not cleaned up after uninstall"
+    exit 1
+fi
+
+echo ""
+echo "========== ALL 14 E2E STEPS PASSED =========="
 exit 0
