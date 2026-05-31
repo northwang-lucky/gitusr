@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -18,13 +19,11 @@ func NewListCmd(store domain.UserStore) *cobra.Command {
 		Short:   i18n.T("cli.list.short", nil),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !store.IsInitialized() {
-				format.PrintErr(i18n.T("cli.list.no_users", nil))
-				return fmt.Errorf("store not initialized")
+				return errors.New(i18n.T("cli.list.no_users", nil))
 			}
 
 			users, err := store.List()
 			if err != nil {
-				format.PrintErr(err.Error())
 				return err
 			}
 
