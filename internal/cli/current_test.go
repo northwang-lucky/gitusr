@@ -8,6 +8,8 @@ import (
 	"strings"
 	"testing"
 
+	"gitusr/internal/i18n"
+
 	"github.com/spf13/cobra"
 )
 
@@ -63,6 +65,8 @@ func executeCmd(cmd *cobra.Command, args ...string) (stdout, stderr string, err 
 // --- TestCurrent_InRepo ---
 
 func TestCurrent_InRepo(t *testing.T) {
+	i18n.InitWithLocale("en")
+
 	dir := t.TempDir()
 	initGitRepo(t, dir)
 	t.Chdir(dir)
@@ -88,6 +92,8 @@ func TestCurrent_InRepo(t *testing.T) {
 // --- TestCurrent_Global ---
 
 func TestCurrent_Global(t *testing.T) {
+	i18n.InitWithLocale("en")
+
 	dir := t.TempDir()
 	initGitRepo(t, dir)
 	t.Chdir(dir)
@@ -107,6 +113,8 @@ func TestCurrent_Global(t *testing.T) {
 // --- TestCurrent_GlobalShortFlag ---
 
 func TestCurrent_GlobalShortFlag(t *testing.T) {
+	i18n.InitWithLocale("en")
+
 	dir := t.TempDir()
 	initGitRepo(t, dir)
 	t.Chdir(dir)
@@ -126,6 +134,8 @@ func TestCurrent_GlobalShortFlag(t *testing.T) {
 // --- TestCurrent_NotInRepo ---
 
 func TestCurrent_NotInRepo(t *testing.T) {
+	i18n.InitWithLocale("en")
+
 	dir := t.TempDir()
 	t.Chdir(dir)
 
@@ -150,6 +160,8 @@ func TestCurrent_NotInRepo(t *testing.T) {
 // --- TestCurrent_GlobalOutsideRepo ---
 
 func TestCurrent_GlobalOutsideRepo(t *testing.T) {
+	i18n.InitWithLocale("en")
+
 	dir := t.TempDir()
 	t.Chdir(dir)
 
@@ -194,5 +206,135 @@ func TestCurrent_FlagRegistration(t *testing.T) {
 	}
 	if globalFlag.Shorthand != "g" {
 		t.Errorf("--global flag shorthand = %q, want %q", globalFlag.Shorthand, "g")
+	}
+}
+
+// --- TestCurrent_En ---
+
+func TestCurrent_En(t *testing.T) {
+	i18n.ResetForTesting()
+	i18n.InitWithLocale("en")
+
+	dir := t.TempDir()
+	initGitRepo(t, dir)
+	t.Chdir(dir)
+
+	cmd := NewCurrentCmd()
+
+	// Verify Short is translated
+	if cmd.Short != "show current repo/global user" {
+		t.Errorf("expected Short='show current repo/global user', got %q", cmd.Short)
+	}
+
+	// Verify flag usage is translated
+	globalFlag := cmd.Flags().Lookup("global")
+	if globalFlag == nil {
+		t.Fatal("--global flag not found")
+	}
+	if globalFlag.Usage != "show global user" {
+		t.Errorf("expected flag usage='show global user', got %q", globalFlag.Usage)
+	}
+
+	stdout, _, err := executeCmd(cmd)
+	if err != nil {
+		t.Fatalf("NewCurrentCmd().Execute() unexpected error: %v", err)
+	}
+
+	if !strings.Contains(stdout, "Your repo git user is:") {
+		t.Errorf("expected 'Your repo git user is:' in stdout, got %q", stdout)
+	}
+	if !strings.Contains(stdout, "Repo User") {
+		t.Errorf("expected 'Repo User' in stdout, got %q", stdout)
+	}
+	if !strings.Contains(stdout, "repo@example.com") {
+		t.Errorf("expected 'repo@example.com' in stdout, got %q", stdout)
+	}
+}
+
+// --- TestCurrent_ZhCN ---
+
+func TestCurrent_ZhCN(t *testing.T) {
+	i18n.ResetForTesting()
+	i18n.InitWithLocale("zh-CN")
+
+	dir := t.TempDir()
+	initGitRepo(t, dir)
+	t.Chdir(dir)
+
+	cmd := NewCurrentCmd()
+
+	// Verify Short is translated to Chinese
+	if cmd.Short != "显示当前仓库/全局用户" {
+		t.Errorf("expected Short='显示当前仓库/全局用户', got %q", cmd.Short)
+	}
+
+	// Verify flag usage is translated to Chinese
+	globalFlag := cmd.Flags().Lookup("global")
+	if globalFlag == nil {
+		t.Fatal("--global flag not found")
+	}
+	if globalFlag.Usage != "显示全局用户" {
+		t.Errorf("expected flag usage='显示全局用户', got %q", globalFlag.Usage)
+	}
+
+	stdout, _, err := executeCmd(cmd)
+	if err != nil {
+		t.Fatalf("NewCurrentCmd().Execute() unexpected error: %v", err)
+	}
+
+	if !strings.Contains(stdout, "您的 repo git 用户为：") {
+		t.Errorf("expected '您的 repo git 用户为：' in stdout, got %q", stdout)
+	}
+	if !strings.Contains(stdout, "Repo User") {
+		t.Errorf("expected 'Repo User' in stdout, got %q", stdout)
+	}
+	if !strings.Contains(stdout, "repo@example.com") {
+		t.Errorf("expected 'repo@example.com' in stdout, got %q", stdout)
+	}
+}
+
+// --- TestCurrent_NotRepo_En ---
+
+func TestCurrent_NotRepo_En(t *testing.T) {
+	i18n.ResetForTesting()
+	i18n.InitWithLocale("en")
+
+	dir := t.TempDir()
+	t.Chdir(dir)
+
+	cmd := NewCurrentCmd()
+	_, _, err := executeCmd(cmd)
+
+	if err == nil {
+		t.Fatal("expected error outside repo, got nil")
+	}
+
+	errMsg := err.Error()
+	expected := "not a git repository (or any of the parent directories): .git"
+	if errMsg != expected {
+		t.Errorf("expected error %q, got %q", expected, errMsg)
+	}
+}
+
+// --- TestCurrent_NotRepo_ZhCN ---
+
+func TestCurrent_NotRepo_ZhCN(t *testing.T) {
+	i18n.ResetForTesting()
+	i18n.InitWithLocale("zh-CN")
+
+	dir := t.TempDir()
+	t.Chdir(dir)
+
+	cmd := NewCurrentCmd()
+	_, _, err := executeCmd(cmd)
+
+	if err == nil {
+		t.Fatal("expected error outside repo, got nil")
+	}
+
+	errMsg := err.Error()
+	expected := "不是 git 仓库（或其任何父目录）：.git"
+	if errMsg != expected {
+		t.Errorf("expected error %q, got %q", expected, errMsg)
 	}
 }

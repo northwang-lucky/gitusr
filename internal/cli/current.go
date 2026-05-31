@@ -6,6 +6,7 @@ import (
 	"gitusr/internal/domain"
 	"gitusr/internal/format"
 	"gitusr/internal/gitcmd"
+	"gitusr/internal/i18n"
 
 	"github.com/spf13/cobra"
 )
@@ -16,7 +17,7 @@ func NewCurrentCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "current",
 		Aliases: []string{"ct"},
-		Short:   "show current repo/global user",
+		Short:   i18n.T("cli.current.short", nil),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			global, err := cmd.Flags().GetBool("global")
 			if err != nil {
@@ -24,7 +25,7 @@ func NewCurrentCmd() *cobra.Command {
 			}
 
 			if !global && !gitcmd.IsGitRepo() {
-				return errors.New("not a git repository (or any of the parent directories): .git")
+				return errors.New(i18n.T("cli.error.not_repo", nil))
 			}
 
 			name, err := gitcmd.GetConfig("name", global)
@@ -45,7 +46,7 @@ func NewCurrentCmd() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().BoolP("global", "g", false, "show global user")
+	cmd.Flags().BoolP("global", "g", false, i18n.T("cli.current.flag_global", nil))
 
 	return cmd
 }
