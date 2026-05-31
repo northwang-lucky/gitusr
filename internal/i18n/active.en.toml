@@ -307,7 +307,7 @@ other = "Additional help topics:"
 
 [cli.framework.use_help]
 hash = "sha1:dummy"
-other = "Use \"{{.CommandPath}} [command] --help\" for more information about a command."
+other = "Use \"{{`{{.Use}}`}} [command] --help\" for more information about a command."
 
 [cli.framework.help_flag]
 hash = "sha1:dummy"
