@@ -18,7 +18,7 @@ Manually editing `git config user.name` and `git config user.email` is tedious a
 Additionally, `gitusr` provides:
 
 - **History author rewriting**: safely fix incorrect author information in past commits
-- **Shell Hook auto-switch**: automatically detect `.gitusrrc` configuration and apply the corresponding Git user identity during `git clone`, `git commit`, `cd`, and other operations
+- **Hook auto-switch**: automatically detect `.gitusrrc` configuration and apply the corresponding Git user identity during `git commit` and `cd`; after `git clone`, automatically enter the repository and call `gitusr use` to switch the user
 
 ## Installation
 

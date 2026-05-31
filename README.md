@@ -18,7 +18,7 @@
 此外，`gitusr` 还提供：
 
 - **历史记录作者替换**：当你发现历史提交中的作者信息有误时，可以安全地重写历史
-- **Shell Hook 自动切换**：安装 hook 后，git clone、git commit、cd 等操作会自动检测 `.gitusrrc` 配置并应用对应的 Git 用户身份
+- **Hook 自动用户切换**：安装 hook 后，`git commit` 和 `cd` 操作会自动检测 `.gitusrrc` 配置并应用对应的 Git 用户身份；`git clone` 结束后会自动进入仓库目录并调用 `gitusr use` 切换用户
 
 ## 安装指南
 
