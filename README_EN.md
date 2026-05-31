@@ -323,7 +323,7 @@ gitusr hook <subcommand> [flags]
 
 Install auto-switch hooks for the current shell (bash and zsh). Supports three types:
 
-- **`clone`** — Automatically detects `--gu-name` / `--gu-email` arguments during `git clone` and applies the user
+- **`clone`** — Automatically enters the cloned repository and calls `gitusr use` to switch the user after `git clone`. Supports specifying the user via `--gu-name` / `--gu-email` arguments for non-TTY environments
 - **`commit`** — Automatically reads `.gitusrrc` during `git commit` and applies the user
 - **`cd`** — Automatically applies the user when `cd`ing into a directory containing `.gitusrrc`
 

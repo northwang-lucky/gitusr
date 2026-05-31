@@ -56,6 +56,10 @@ func GenerateBashWrapper() string {
             return $clone_exit
         fi
 
+        # Save the original directory to return later
+        local original_dir
+        original_dir=$(pwd)
+
         # Determine target directory and cd into it
         local target_dir=""
         for arg in "${remaining_args[@]}"; do
@@ -75,16 +79,19 @@ func GenerateBashWrapper() string {
             fi
         fi
 
-        # Apply gitusr user identity (only if --gu-name or --gu-email provided)
-        if [ -n "$gu_name" ] || [ -n "$gu_email" ]; then
-            if [ -n "$gu_name" ] && [ -n "$gu_email" ]; then
-                gitusr use --name "$gu_name" --email "$gu_email"
-            elif [ -n "$gu_name" ]; then
-                gitusr use --name "$gu_name"
-            else
-                gitusr use --email "$gu_email"
-            fi
+        # Always apply gitusr user identity after clone
+        if [ -n "$gu_name" ] && [ -n "$gu_email" ]; then
+            gitusr use --name "$gu_name" --email "$gu_email"
+        elif [ -n "$gu_name" ]; then
+            gitusr use --name "$gu_name"
+        elif [ -n "$gu_email" ]; then
+            gitusr use --email "$gu_email"
+        else
+            gitusr use
         fi
+
+        # Return to the original directory
+        \cd "$original_dir" || return 1
 
         return $clone_exit
     fi

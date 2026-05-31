@@ -323,7 +323,7 @@ gitusr hook <subcommand> [flags]
 
 为当前 Shell（bash 和 zsh）安装自动切换钩子。支持三种类型：
 
-- **`clone`** — `git clone` 时自动检测 `--gu-name` / `--gu-email` 参数并应用用户
+- **`clone`** — `git clone` 结束后自动进入仓库目录并调用 `gitusr use` 切换用户。支持通过 `--gu-name` / `--gu-email` 参数在非 TTY 环境下指定用户
 - **`commit`** — `git commit` 时自动读取 `.gitusrrc` 并应用用户
 - **`cd`** — `cd` 到包含 `.gitusrrc` 的目录时自动应用用户
 
