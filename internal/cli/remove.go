@@ -5,6 +5,7 @@ import (
 
 	"gitusr/internal/domain"
 	"gitusr/internal/format"
+	"gitusr/internal/i18n"
 	sel "gitusr/internal/select"
 
 	"github.com/spf13/cobra"
@@ -15,10 +16,10 @@ func NewRemoveCmd(store domain.UserStore) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "remove",
 		Aliases: []string{"rm"},
-		Short:   "delete a user",
+		Short:   i18n.T("cli.remove.short", nil),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !store.IsInitialized() {
-				return fmt.Errorf("store not initialized")
+				return fmt.Errorf("%s", i18n.T("cli.error.store_not_init", nil))
 			}
 
 			// Build UserFilter from flags
@@ -50,14 +51,14 @@ func NewRemoveCmd(store domain.UserStore) *cobra.Command {
 				return err
 			}
 
-			fmt.Printf("Success! User (name: %s | email: %s) has been removed!\n", user.Name, user.Email)
+			fmt.Println(i18n.T("cli.remove.success", map[string]interface{}{"Name": user.Name, "Email": user.Email}))
 			return nil
 		},
 	}
 
-	cmd.Flags().StringP("name", "n", "", "delete user by name")
-	cmd.Flags().StringP("email", "e", "", "delete user by email")
-	cmd.Flags().IntP("index", "i", -1, "delete user by index")
+	cmd.Flags().StringP("name", "n", "", i18n.T("cli.remove.flag_name", nil))
+	cmd.Flags().StringP("email", "e", "", i18n.T("cli.remove.flag_email", nil))
+	cmd.Flags().IntP("index", "i", -1, i18n.T("cli.remove.flag_index", nil))
 
 	return cmd
 }

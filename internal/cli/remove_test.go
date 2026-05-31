@@ -5,10 +5,14 @@ import (
 	"testing"
 
 	"gitusr/internal/domain"
+	"gitusr/internal/i18n"
 	"gitusr/internal/store"
 )
 
 func TestRemove_ByIndex(t *testing.T) {
+	i18n.ResetForTesting()
+	i18n.InitWithLocale("en")
+
 	tmpDir := t.TempDir()
 	jsonStore := store.NewJSONStore(tmpDir + "/users.json")
 
@@ -46,6 +50,9 @@ func TestRemove_ByIndex(t *testing.T) {
 }
 
 func TestRemove_ByEmail(t *testing.T) {
+	i18n.ResetForTesting()
+	i18n.InitWithLocale("en")
+
 	tmpDir := t.TempDir()
 	jsonStore := store.NewJSONStore(tmpDir + "/users.json")
 
@@ -68,6 +75,9 @@ func TestRemove_ByEmail(t *testing.T) {
 }
 
 func TestRemove_NotInitialized(t *testing.T) {
+	i18n.ResetForTesting()
+	i18n.InitWithLocale("en")
+
 	tmpDir := t.TempDir()
 	jsonStore := store.NewJSONStore(tmpDir + "/users.json")
 
@@ -84,6 +94,9 @@ func TestRemove_NotInitialized(t *testing.T) {
 }
 
 func TestRemove_UserNotFound(t *testing.T) {
+	i18n.ResetForTesting()
+	i18n.InitWithLocale("en")
+
 	tmpDir := t.TempDir()
 	jsonStore := store.NewJSONStore(tmpDir + "/users.json")
 
@@ -144,5 +157,69 @@ func TestRemove_FlagRegistration(t *testing.T) {
 	}
 	if indexFlag.Shorthand != "i" {
 		t.Errorf("--index flag shorthand = %q, want %q", indexFlag.Shorthand, "i")
+	}
+}
+
+func TestRemove_Success_En(t *testing.T) {
+	i18n.ResetForTesting()
+	i18n.InitWithLocale("en")
+
+	store := &mockStore{
+		initialized: true,
+		users: []domain.User{
+			{Name: "Alice", Email: "alice@example.com"},
+		},
+	}
+
+	cmd := NewRemoveCmd(store)
+	stdout, _, err := executeCmd(cmd, "--index", "0")
+
+	if err != nil {
+		t.Fatalf("NewRemoveCmd().Execute(--index 0) unexpected error: %v", err)
+	}
+
+	if !strings.Contains(stdout, "Success! User (name: Alice | email: alice@example.com) has been removed!") {
+		t.Errorf("expected English success message, got %q", stdout)
+	}
+}
+
+func TestRemove_Success_ZhCN(t *testing.T) {
+	i18n.ResetForTesting()
+	i18n.InitWithLocale("zh-CN")
+
+	store := &mockStore{
+		initialized: true,
+		users: []domain.User{
+			{Name: "张三", Email: "zhangsan@example.com"},
+		},
+	}
+
+	cmd := NewRemoveCmd(store)
+	stdout, _, err := executeCmd(cmd, "--index", "0")
+
+	if err != nil {
+		t.Fatalf("NewRemoveCmd().Execute(--index 0) unexpected error: %v", err)
+	}
+
+	if !strings.Contains(stdout, "成功！用户（姓名：张三 | 邮箱：zhangsan@example.com）已删除！") {
+		t.Errorf("expected Chinese success message, got %q", stdout)
+	}
+}
+
+func TestRemove_NotInit_ZhCN(t *testing.T) {
+	i18n.ResetForTesting()
+	i18n.InitWithLocale("zh-CN")
+
+	store := &mockStore{initialized: false}
+
+	cmd := NewRemoveCmd(store)
+	_, _, err := executeCmd(cmd, "--index", "0")
+
+	if err == nil {
+		t.Fatal("NewRemoveCmd().Execute() on uninitialized store should return error")
+	}
+
+	if !strings.Contains(err.Error(), "存储未初始化") {
+		t.Errorf("expected Chinese 'store not initialized' error, got: %q", err.Error())
 	}
 }
