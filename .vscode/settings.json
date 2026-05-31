@@ -1,0 +1,7 @@
+{
+  "go.goroot": "${env:HOME}/.local/share/mise/installs/go/1.26.3",
+  "go.alternateTools": {
+    "go": "${env:HOME}/.local/share/mise/shims/go",
+    "gopls": "${env:HOME}/.local/share/mise/shims/gopls"
+  }
+}
