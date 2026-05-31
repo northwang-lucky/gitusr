@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/northwang-lucky/gitusr/internal/domain"
-	"github.com/northwang-lucky/gitusr/internal/format"
 	"github.com/northwang-lucky/gitusr/internal/i18n"
 	sel "github.com/northwang-lucky/gitusr/internal/select"
 
@@ -42,12 +41,10 @@ func NewRemoveCmd(store domain.UserStore) *cobra.Command {
 
 			user, idx, err := sel.ResolveUser(store, filter)
 			if err != nil {
-				format.PrintErr(err.Error())
 				return err
 			}
 
 			if err := store.Remove(idx); err != nil {
-				format.PrintErr(err.Error())
 				return err
 			}
 
