@@ -12,6 +12,7 @@ import (
 
 	"gitusr/internal/domain"
 	"gitusr/internal/format"
+	"gitusr/internal/i18n"
 	"gitusr/internal/store"
 )
 
@@ -46,6 +47,15 @@ func preloadedStore(t *testing.T, users []domain.User) *store.JSONStore {
 		t.Fatalf("preloadedStore: SaveAll failed: %v", err)
 	}
 	return s
+}
+
+// useLocale initializes i18n with the given locale for a test.
+// It must be called before any T()-translated strings are used.
+func useLocale(t *testing.T, locale string) {
+	t.Helper()
+	i18n.ResetForTesting()
+	i18n.InitWithLocale(locale)
+	t.Cleanup(func() { i18n.ResetForTesting() })
 }
 
 // ---------------------------------------------------------------------------
@@ -197,6 +207,8 @@ func TestInit_WithoutGlobalUser(t *testing.T) {
 // TestInit_WithExistingUsers_NoForce
 // ---------------------------------------------------------------------------
 func TestInit_WithExistingUsers_NoForce(t *testing.T) {
+	useLocale(t, "en")
+
 	// getConfig returns a valid user
 	origGet := getConfigFn
 	t.Cleanup(func() { getConfigFn = origGet })
@@ -310,6 +322,8 @@ func TestInit_WithForce(t *testing.T) {
 // TestInit_LegacyMigration_Confirmed
 // ---------------------------------------------------------------------------
 func TestInit_LegacyMigration_Confirmed(t *testing.T) {
+	useLocale(t, "en")
+
 	// Setup legacy config
 	legacyHome := t.TempDir()
 	t.Setenv("HOME", legacyHome) // not used when userHomeDirFn is overridden
@@ -390,6 +404,8 @@ func TestInit_LegacyMigration_Confirmed(t *testing.T) {
 // TestInit_LegacyMigration_Skip
 // ---------------------------------------------------------------------------
 func TestInit_LegacyMigration_Skip(t *testing.T) {
+	useLocale(t, "en")
+
 	legacyHome := t.TempDir()
 
 	origHome := userHomeDirFn
@@ -473,6 +489,8 @@ func TestInit_LegacyMigration_Skip(t *testing.T) {
 // TestInit_LegacyMigration_NoLegacyFile
 // ---------------------------------------------------------------------------
 func TestInit_LegacyMigration_NoLegacyFile(t *testing.T) {
+	useLocale(t, "en")
+
 	legacyHome := t.TempDir()
 
 	origHome := userHomeDirFn
@@ -594,5 +612,219 @@ func TestInit_GetConfigReturnsError_ThenPromptAndSet(t *testing.T) {
 	users, _ := s.List()
 	if len(users) != 1 || users[0].Name != "Full Prompt" {
 		t.Errorf("stored user = %v", users)
+	}
+}
+
+// ---------------------------------------------------------------------------
+// TestInit_Success_En — init with English locale
+// ---------------------------------------------------------------------------
+func TestInit_Success_En(t *testing.T) {
+	useLocale(t, "en")
+
+	origGet := getConfigFn
+	t.Cleanup(func() { getConfigFn = origGet })
+	getConfigFn = func(key string, global bool) (string, error) {
+		switch key {
+		case "name":
+			return "Alice", nil
+		case "email":
+			return "alice@example.com", nil
+		}
+		return "", fmt.Errorf("unknown key: %s", key)
+	}
+
+	origConfirm := confirmFn
+	t.Cleanup(func() { confirmFn = origConfirm })
+	confirmCalled := false
+	confirmFn = func(msg string, defaultVal bool) (bool, error) {
+		confirmCalled = true
+		return false, nil
+	}
+
+	s := testStore(t)
+	cmd := NewInitCmd(s)
+	cmd.SetArgs([]string{})
+	if err := cmd.Execute(); err != nil {
+		t.Fatalf("init failed: %v", err)
+	}
+
+	users, err := s.List()
+	if err != nil {
+		t.Fatalf("List() failed: %v", err)
+	}
+	if len(users) != 1 {
+		t.Fatalf("expected 1 user, got %d", len(users))
+	}
+	if users[0].Name != "Alice" {
+		t.Errorf("Name = %q, want %q", users[0].Name, "Alice")
+	}
+	if users[0].Email != "alice@example.com" {
+		t.Errorf("Email = %q, want %q", users[0].Email, "alice@example.com")
+	}
+	if confirmCalled {
+		t.Error("confirm should not have been called for empty store")
+	}
+}
+
+// ---------------------------------------------------------------------------
+// TestInit_Success_ZhCN — init with Chinese locale
+// ---------------------------------------------------------------------------
+func TestInit_Success_ZhCN(t *testing.T) {
+	useLocale(t, "zh-CN")
+
+	origGet := getConfigFn
+	t.Cleanup(func() { getConfigFn = origGet })
+	getConfigFn = func(key string, global bool) (string, error) {
+		switch key {
+		case "name":
+			return "小明", nil
+		case "email":
+			return "xiaoming@example.com", nil
+		}
+		return "", fmt.Errorf("unknown key: %s", key)
+	}
+
+	origConfirm := confirmFn
+	t.Cleanup(func() { confirmFn = origConfirm })
+	confirmCalled := false
+	confirmFn = func(msg string, defaultVal bool) (bool, error) {
+		confirmCalled = true
+		return false, nil
+	}
+
+	s := testStore(t)
+	cmd := NewInitCmd(s)
+	cmd.SetArgs([]string{})
+	if err := cmd.Execute(); err != nil {
+		t.Fatalf("init failed: %v", err)
+	}
+
+	users, err := s.List()
+	if err != nil {
+		t.Fatalf("List() failed: %v", err)
+	}
+	if len(users) != 1 {
+		t.Fatalf("expected 1 user, got %d", len(users))
+	}
+	if users[0].Name != "小明" {
+		t.Errorf("Name = %q, want %q", users[0].Name, "小明")
+	}
+	if confirmCalled {
+		t.Error("confirm should not have been called for empty store")
+	}
+}
+
+// ---------------------------------------------------------------------------
+// TestInit_Override_ZhCN — override confirm prompt in Chinese
+// ---------------------------------------------------------------------------
+func TestInit_Override_ZhCN(t *testing.T) {
+	useLocale(t, "zh-CN")
+
+	origGet := getConfigFn
+	t.Cleanup(func() { getConfigFn = origGet })
+	getConfigFn = func(key string, global bool) (string, error) {
+		switch key {
+		case "name":
+			return "New User", nil
+		case "email":
+			return "new@example.com", nil
+		}
+		return "", nil
+	}
+
+	origConfirm := confirmFn
+	t.Cleanup(func() { confirmFn = origConfirm })
+	confirmFn = func(msg string, defaultVal bool) (bool, error) {
+		want := "覆盖现有用户？"
+		if msg != want {
+			t.Errorf("confirm message = %q, want %q", msg, want)
+		}
+		return true, nil
+	}
+
+	existing := []domain.User{
+		{Name: "Existing", Email: "existing@example.com"},
+	}
+	s := preloadedStore(t, existing)
+
+	cmd := NewInitCmd(s)
+	cmd.SetArgs([]string{})
+	if err := cmd.Execute(); err != nil {
+		t.Fatalf("init failed: %v", err)
+	}
+
+	users, err := s.List()
+	if err != nil {
+		t.Fatalf("List() failed: %v", err)
+	}
+	if len(users) != 1 {
+		t.Fatalf("expected 1 user after override, got %d", len(users))
+	}
+	if users[0].Name != "New User" {
+		t.Errorf("Name = %q, want %q", users[0].Name, "New User")
+	}
+}
+
+// ---------------------------------------------------------------------------
+// TestInit_Migrate_ZhCN — migration success in Chinese
+// ---------------------------------------------------------------------------
+func TestInit_Migrate_ZhCN(t *testing.T) {
+	useLocale(t, "zh-CN")
+
+	legacyHome := t.TempDir()
+
+	origHome := userHomeDirFn
+	t.Cleanup(func() { userHomeDirFn = origHome })
+	userHomeDirFn = func() (string, error) { return legacyHome, nil }
+
+	legacyDir := filepath.Join(legacyHome, ".gitusr")
+	if err := os.MkdirAll(legacyDir, 0755); err != nil {
+		t.Fatalf("create legacy dir: %v", err)
+	}
+	legacyUsers := []domain.User{
+		{Name: "旧用户", Email: "old@test.com"},
+		{Name: "旧用户2", Email: "old2@test.com"},
+	}
+	legacyData, _ := json.MarshalIndent(legacyUsers, "", "  ")
+	legacyPath := filepath.Join(legacyDir, "user-list.json")
+	if err := os.WriteFile(legacyPath, append(legacyData, '\n'), 0644); err != nil {
+		t.Fatalf("write legacy config: %v", err)
+	}
+
+	origConfirm := confirmFn
+	t.Cleanup(func() { confirmFn = origConfirm })
+	confirmFn = func(msg string, defaultVal bool) (bool, error) {
+		want := "在 ~/.gitusr/user-list.json 找到旧配置。迁移到 XDG 目录？"
+		if msg != want {
+			t.Errorf("confirm message = %q, want %q", msg, want)
+		}
+		return true, nil
+	}
+
+	s := testStore(t)
+	cmd := NewInitCmd(s)
+
+	var stdout string
+	stdout = captureStdout(t, func() {
+		cmd.SetArgs([]string{})
+		if err := cmd.Execute(); err != nil {
+			t.Fatalf("init failed: %v", err)
+		}
+	})
+
+	users, err := s.List()
+	if err != nil {
+		t.Fatalf("List() failed: %v", err)
+	}
+	if len(users) != 2 {
+		t.Fatalf("expected 2 migrated users, got %d", len(users))
+	}
+	if users[0].Name != "旧用户" {
+		t.Errorf("Name = %q, want %q", users[0].Name, "旧用户")
+	}
+
+	wantMsg := "已从旧配置迁移 2 个用户。"
+	if !strings.Contains(stdout, wantMsg) {
+		t.Errorf("stdout missing %q, got: %s", wantMsg, stdout)
 	}
 }

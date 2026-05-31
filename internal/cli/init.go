@@ -11,6 +11,7 @@ import (
 	"gitusr/internal/domain"
 	"gitusr/internal/format"
 	"gitusr/internal/gitcmd"
+	"gitusr/internal/i18n"
 	"gitusr/internal/prompt"
 )
 
@@ -29,13 +30,13 @@ var (
 func NewInitCmd(store domain.UserStore) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "init",
-		Short: "initialize from git global config",
+		Short: i18n.T("cli.init.short", nil),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			force, _ := cmd.Flags().GetBool("force")
 			return runInit(store, force)
 		},
 	}
-	cmd.Flags().BoolP("force", "f", false, "force override existing users")
+	cmd.Flags().BoolP("force", "f", false, i18n.T("cli.init.flag_force", nil))
 	return cmd
 }
 
@@ -56,7 +57,7 @@ func runInit(store domain.UserStore, force bool) error {
 
 	// Step 2: Check if store is already initialized
 	if store.IsInitialized() && !force {
-		confirmed, err := confirmFn("Override existing users?", false)
+		confirmed, err := confirmFn(i18n.T("cli.init.override_confirm", nil), false)
 		if err != nil {
 			return err
 		}
@@ -102,16 +103,13 @@ func migrateLegacy(store domain.UserStore) (bool, error) {
 		return false, nil
 	}
 
-	confirmed, err := confirmFn(
-		fmt.Sprintf("Found legacy config at ~/.gitusr/user-list.json. Migrate to XDG?"),
-		true,
-	)
+	confirmed, err := confirmFn(i18n.T("cli.init.migrate_confirm", nil), true)
 	if err != nil {
 		return false, err
 	}
 
 	if !confirmed {
-		fmt.Println("Migration skipped.")
+		fmt.Println(i18n.T("cli.init.migrate_skip", nil))
 		return false, nil
 	}
 
@@ -119,7 +117,7 @@ func migrateLegacy(store domain.UserStore) (bool, error) {
 		return false, err
 	}
 
-	fmt.Printf("Migrated %d users from legacy config.\n", len(oldUsers))
+	fmt.Print(i18n.T("cli.init.migrate_count", map[string]interface{}{"Count": len(oldUsers)}) + "\n")
 	return true, nil
 }
 
