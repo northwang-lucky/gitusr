@@ -9,6 +9,7 @@ import (
 
 	"gitusr/internal/domain"
 	"gitusr/internal/gitcmd"
+	"gitusr/internal/i18n"
 	"gitusr/internal/prompt"
 	sel "gitusr/internal/select"
 )
@@ -27,19 +28,19 @@ var (
 func NewReplaceCmd(store domain.UserStore) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "replace <target-email>",
-		Short: "replace author in git history",
+		Short: i18n.T("cli.replace.short", nil),
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			targetEmail := args[0]
 
 			// 1. Safety: must be inside a git repository
 			if !gitcmd.IsGitRepo() {
-				return errors.New("not a git repository (or any of the parent directories): .git")
+				return errors.New(i18n.T("cli.error.not_repo", nil))
 			}
 
 			// 2. Safety: no uncommitted changes allowed
 			if gitcmd.HasUncommittedChanges() {
-				return errors.New("uncommitted changes detected, please commit or stash them first")
+				return errors.New(i18n.T("cli.replace.uncommitted", nil))
 			}
 
 			// 3. Read filter flags
@@ -79,7 +80,7 @@ func NewReplaceCmd(store domain.UserStore) *cobra.Command {
 			if err := gitcmd.CreateBackupBranch(backupName); err != nil {
 				return fmt.Errorf("create backup branch: %w", err)
 			}
-			fmt.Printf("Created backup branch: %s\n", backupName)
+			fmt.Print(i18n.T("cli.replace.backup_created", map[string]interface{}{"Branch": backupName}) + "\n")
 
 			// 7. Rewrite history using git-filter-repo
 			if err := filterRepoFunc(targetEmail, newUser.Name, newUser.Email); err != nil {
@@ -88,7 +89,7 @@ func NewReplaceCmd(store domain.UserStore) *cobra.Command {
 
 			// 8. Optionally update the repository-level git config
 			yes, err := confirmFunc(
-				fmt.Sprintf("Switch repo user to %s <%s>?", newUser.Name, newUser.Email),
+				i18n.T("cli.replace.switch_confirm", map[string]interface{}{"Name": newUser.Name, "Email": newUser.Email}),
 				false,
 			)
 			if err != nil {
@@ -108,9 +109,9 @@ func NewReplaceCmd(store domain.UserStore) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().String("with-name", "", "new user name")
-	cmd.Flags().String("with-email", "", "new user email")
-	cmd.Flags().Int("with-index", -1, "new user index")
+	cmd.Flags().String("with-name", "", i18n.T("cli.replace.flag_with_name", nil))
+	cmd.Flags().String("with-email", "", i18n.T("cli.replace.flag_with_email", nil))
+	cmd.Flags().Int("with-index", -1, i18n.T("cli.replace.flag_with_index", nil))
 
 	return cmd
 }

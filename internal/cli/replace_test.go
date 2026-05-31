@@ -9,11 +9,21 @@ import (
 	"testing"
 
 	"gitusr/internal/domain"
+	"gitusr/internal/i18n"
 	sel "gitusr/internal/select"
 )
 
+// initI18nForTest resets and initializes i18n with the given locale.
+// It must be called from every test that checks user-facing messages.
+func initI18nForTest(locale string) {
+	i18n.ResetForTesting()
+	i18n.InitWithLocale(locale)
+}
+
 // TestReplace_NotInRepo checks that running replace outside a git repo returns an error.
 func TestReplace_NotInRepo(t *testing.T) {
+	initI18nForTest("en")
+
 	dir := t.TempDir()
 	t.Chdir(dir)
 
@@ -29,14 +39,16 @@ func TestReplace_NotInRepo(t *testing.T) {
 	}
 
 	errMsg := err.Error()
-	if !strings.Contains(strings.ToLower(errMsg), "git") {
-		t.Errorf("error message should mention git, got: %q", errMsg)
+	if !strings.Contains(errMsg, "not a git repository") {
+		t.Errorf("error message should mention 'not a git repository', got: %q", errMsg)
 	}
 	_ = stderr
 }
 
 // TestReplace_UncommittedChanges checks that uncommitted changes block the command.
 func TestReplace_UncommittedChanges(t *testing.T) {
+	initI18nForTest("en")
+
 	dir := t.TempDir()
 	initGitRepo(t, dir)
 	t.Chdir(dir)
@@ -122,6 +134,8 @@ func TestReplace_FilterRepoNotInstalled(t *testing.T) {
 // TestReplace_BackupBranchCreated checks that a backup branch is created
 // before filter-repo runs.
 func TestReplace_BackupBranchCreated(t *testing.T) {
+	initI18nForTest("en")
+
 	dir := t.TempDir()
 	initGitRepo(t, dir)
 	t.Chdir(dir)
@@ -169,6 +183,8 @@ func TestReplace_BackupBranchCreated(t *testing.T) {
 // TestReplace_Success tests the full happy path: backup branch created,
 // filter-repo mock succeeds, and (when confirmed) repo user config is updated.
 func TestReplace_Success(t *testing.T) {
+	initI18nForTest("en")
+
 	dir := t.TempDir()
 	initGitRepo(t, dir)
 	t.Chdir(dir)
@@ -361,5 +377,191 @@ func TestReplace_ArgsValidation(t *testing.T) {
 	_, _, err = executeCmd(cmd2, "a@b.com", "extra")
 	if err == nil {
 		t.Error("expected error when extra args provided")
+	}
+}
+
+// --- i18n tests ---
+
+// TestReplace_Success_En verifies all user-facing English strings on the success path.
+func TestReplace_Success_En(t *testing.T) {
+	initI18nForTest("en")
+
+	dir := t.TempDir()
+	initGitRepo(t, dir)
+	t.Chdir(dir)
+
+	store := &mockStore{initialized: true, users: []domain.User{
+		{Name: "Alice", Email: "alice@example.com"},
+	}}
+
+	origFilterRepo := filterRepoFunc
+	origConfirm := confirmFunc
+	defer func() {
+		filterRepoFunc = origFilterRepo
+		confirmFunc = origConfirm
+	}()
+
+	filterRepoFunc = func(oldEmail, newName, newEmail string) error { return nil }
+
+	confirmCalled := false
+	confirmFunc = func(msg string, defaultVal bool) (bool, error) {
+		confirmCalled = true
+		if !strings.Contains(msg, "Switch repo user to Alice") {
+			t.Errorf("confirm message should contain English text, got: %q", msg)
+		}
+		return false, nil
+	}
+
+	cmd := NewReplaceCmd(store)
+	stdout, _, err := executeCmd(cmd, "old@example.com", "--with-name", "Alice")
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if !strings.Contains(stdout, "Created backup branch: backup/pre-replace-") {
+		t.Errorf("expected 'Created backup branch:', got: %q", stdout)
+	}
+
+	if !confirmCalled {
+		t.Error("confirmFunc was not called")
+	}
+}
+
+// TestReplace_Success_ZhCN verifies all user-facing Chinese strings on the success path.
+func TestReplace_Success_ZhCN(t *testing.T) {
+	initI18nForTest("zh-CN")
+
+	dir := t.TempDir()
+	initGitRepo(t, dir)
+	t.Chdir(dir)
+
+	store := &mockStore{initialized: true, users: []domain.User{
+		{Name: "Alice", Email: "alice@example.com"},
+	}}
+
+	origFilterRepo := filterRepoFunc
+	origConfirm := confirmFunc
+	defer func() {
+		filterRepoFunc = origFilterRepo
+		confirmFunc = origConfirm
+	}()
+
+	filterRepoFunc = func(oldEmail, newName, newEmail string) error { return nil }
+
+	confirmCalled := false
+	confirmFunc = func(msg string, defaultVal bool) (bool, error) {
+		confirmCalled = true
+		if !strings.Contains(msg, "将仓库用户切换为") {
+			t.Errorf("confirm message should contain Chinese text '将仓库用户切换为', got: %q", msg)
+		}
+		return false, nil
+	}
+
+	cmd := NewReplaceCmd(store)
+	stdout, _, err := executeCmd(cmd, "old@example.com", "--with-name", "Alice")
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if !strings.Contains(stdout, "已创建备份分支：backup/pre-replace-") {
+		t.Errorf("expected '已创建备份分支：', got: %q", stdout)
+	}
+
+	if !confirmCalled {
+		t.Error("confirmFunc was not called")
+	}
+}
+
+// TestReplace_Uncommitted_ZhCN verifies the uncommitted-changes error message in Chinese.
+func TestReplace_Uncommitted_ZhCN(t *testing.T) {
+	initI18nForTest("zh-CN")
+
+	dir := t.TempDir()
+	initGitRepo(t, dir)
+	t.Chdir(dir)
+
+	if err := os.WriteFile(filepath.Join(dir, "untracked.txt"), []byte("dirty"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	store := &mockStore{initialized: true, users: []domain.User{
+		{Name: "Alice", Email: "alice@example.com"},
+	}}
+
+	cmd := NewReplaceCmd(store)
+	_, _, err := executeCmd(cmd, "old@example.com", "--with-name", "Alice")
+
+	if err == nil {
+		t.Fatal("expected error for uncommitted changes, got nil")
+	}
+
+	if !strings.Contains(err.Error(), "未提交的更改") {
+		t.Errorf("error should mention '未提交的更改', got: %q", err.Error())
+	}
+}
+
+// TestReplace_Confirm_ZhCN verifies that both the confirm prompt and backup branch
+// message are in Chinese when the locale is zh-CN, and that accepting the confirm
+// actually updates the git config.
+func TestReplace_Confirm_ZhCN(t *testing.T) {
+	initI18nForTest("zh-CN")
+
+	dir := t.TempDir()
+	initGitRepo(t, dir)
+	t.Chdir(dir)
+
+	store := &mockStore{initialized: true, users: []domain.User{
+		{Name: "Alice", Email: "alice@example.com"},
+	}}
+
+	origFilterRepo := filterRepoFunc
+	origConfirm := confirmFunc
+	defer func() {
+		filterRepoFunc = origFilterRepo
+		confirmFunc = origConfirm
+	}()
+
+	filterRepoFunc = func(oldEmail, newName, newEmail string) error { return nil }
+
+	confirmCalled := false
+	confirmFunc = func(msg string, defaultVal bool) (bool, error) {
+		confirmCalled = true
+		if !strings.Contains(msg, "将仓库用户切换为") {
+			t.Errorf("confirm prompt should be in Chinese, got: %q", msg)
+		}
+		if !strings.Contains(msg, "Alice") {
+			t.Errorf("confirm prompt should contain user name Alice, got: %q", msg)
+		}
+		if !strings.Contains(msg, "alice@example.com") {
+			t.Errorf("confirm prompt should contain email alice@example.com, got: %q", msg)
+		}
+		return true, nil
+	}
+
+	cmd := NewReplaceCmd(store)
+	stdout, _, err := executeCmd(cmd, "old@example.com", "--with-name", "Alice")
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if !strings.Contains(stdout, "已创建备份分支：backup/pre-replace-") {
+		t.Errorf("expected Chinese backup branch message, got: %q", stdout)
+	}
+
+	if !confirmCalled {
+		t.Error("confirmFunc was not called")
+	}
+
+	// Config was updated because confirm returned true
+	gitCmd := exec.Command("git", "config", "--get", "user.name")
+	out, err := gitCmd.Output()
+	if err != nil {
+		t.Fatalf("git config --get user.name failed: %v", err)
+	}
+	if strings.TrimSpace(string(out)) != "Alice" {
+		t.Errorf("user.name = %q, want %q", strings.TrimSpace(string(out)), "Alice")
 	}
 }

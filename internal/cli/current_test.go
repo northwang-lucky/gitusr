@@ -65,6 +65,7 @@ func executeCmd(cmd *cobra.Command, args ...string) (stdout, stderr string, err 
 // --- TestCurrent_InRepo ---
 
 func TestCurrent_InRepo(t *testing.T) {
+	i18n.ResetForTesting()
 	i18n.InitWithLocale("en")
 
 	dir := t.TempDir()
@@ -92,6 +93,7 @@ func TestCurrent_InRepo(t *testing.T) {
 // --- TestCurrent_Global ---
 
 func TestCurrent_Global(t *testing.T) {
+	i18n.ResetForTesting()
 	i18n.InitWithLocale("en")
 
 	dir := t.TempDir()
@@ -113,6 +115,7 @@ func TestCurrent_Global(t *testing.T) {
 // --- TestCurrent_GlobalShortFlag ---
 
 func TestCurrent_GlobalShortFlag(t *testing.T) {
+	i18n.ResetForTesting()
 	i18n.InitWithLocale("en")
 
 	dir := t.TempDir()
@@ -134,6 +137,7 @@ func TestCurrent_GlobalShortFlag(t *testing.T) {
 // --- TestCurrent_NotInRepo ---
 
 func TestCurrent_NotInRepo(t *testing.T) {
+	i18n.ResetForTesting()
 	i18n.InitWithLocale("en")
 
 	dir := t.TempDir()
@@ -160,6 +164,7 @@ func TestCurrent_NotInRepo(t *testing.T) {
 // --- TestCurrent_GlobalOutsideRepo ---
 
 func TestCurrent_GlobalOutsideRepo(t *testing.T) {
+	i18n.ResetForTesting()
 	i18n.InitWithLocale("en")
 
 	dir := t.TempDir()
@@ -213,6 +218,7 @@ func TestCurrent_FlagRegistration(t *testing.T) {
 
 func TestCurrent_En(t *testing.T) {
 	i18n.ResetForTesting()
+	i18n.ResetForTesting()
 	i18n.InitWithLocale("en")
 
 	dir := t.TempDir()
@@ -254,6 +260,7 @@ func TestCurrent_En(t *testing.T) {
 // --- TestCurrent_ZhCN ---
 
 func TestCurrent_ZhCN(t *testing.T) {
+	i18n.ResetForTesting()
 	i18n.ResetForTesting()
 	i18n.InitWithLocale("zh-CN")
 
@@ -297,6 +304,7 @@ func TestCurrent_ZhCN(t *testing.T) {
 
 func TestCurrent_NotRepo_En(t *testing.T) {
 	i18n.ResetForTesting()
+	i18n.ResetForTesting()
 	i18n.InitWithLocale("en")
 
 	dir := t.TempDir()
@@ -319,6 +327,7 @@ func TestCurrent_NotRepo_En(t *testing.T) {
 // --- TestCurrent_NotRepo_ZhCN ---
 
 func TestCurrent_NotRepo_ZhCN(t *testing.T) {
+	i18n.ResetForTesting()
 	i18n.ResetForTesting()
 	i18n.InitWithLocale("zh-CN")
 
