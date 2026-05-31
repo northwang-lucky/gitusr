@@ -6,6 +6,7 @@ import (
 
 	"gitusr/internal/cli"
 	"gitusr/internal/format"
+	"gitusr/internal/i18n"
 	"gitusr/internal/store"
 	"gitusr/internal/xdgpath"
 )
@@ -16,6 +17,8 @@ func main() {
 		format.PrintErr(err.Error())
 		os.Exit(1)
 	}
+
+	i18n.Init()
 
 	s := store.NewJSONStore(path)
 
