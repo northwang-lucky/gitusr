@@ -198,8 +198,8 @@ func TestList_En(t *testing.T) {
 	}
 
 	// Verify English Short description
-	if cmd.Short != "show all saved users" {
-		t.Errorf("Short = %q, want %q", cmd.Short, "show all saved users")
+	if cmd.Short != "Show all saved users" {
+		t.Errorf("Short = %q, want %q", cmd.Short, "Show all saved users")
 	}
 
 	// Verify English formatted output

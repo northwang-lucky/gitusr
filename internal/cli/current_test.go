@@ -228,8 +228,8 @@ func TestCurrent_En(t *testing.T) {
 	cmd := NewCurrentCmd()
 
 	// Verify Short is translated
-	if cmd.Short != "show current repo/global user" {
-		t.Errorf("expected Short='show current repo/global user', got %q", cmd.Short)
+	if cmd.Short != "Show current repo/global user" {
+		t.Errorf("expected Short='Show current repo/global user', got %q", cmd.Short)
 	}
 
 	// Verify flag usage is translated
