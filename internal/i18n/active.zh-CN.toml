@@ -274,67 +274,67 @@ other = "新用户索引"
 # ================================================
 
 [cli.hook.use]
-hash = "sha1:placeholder"
+hash = "sha1:5fc242cc13d49ad1a214ec4fed97ac6b316edb08"
 other = "管理用于自动切换 git 用户的 shell 钩子"
 
 [cli.hook.short]
-hash = "sha1:placeholder"
+hash = "sha1:e1801e915838dd6e3040931a6d2396c49884c2f2"
 other = "管理 shell 钩子"
 
 [cli.hook.install.use]
-hash = "sha1:placeholder"
+hash = "sha1:ffd69c91c6189de069dc976f1f6f834aa49fbfa9"
 other = "安装 shell 钩子"
 
 [cli.hook.install.short]
-hash = "sha1:placeholder"
+hash = "sha1:35af6bf818e18d54305176eee08acc3a344b0410"
 other = "安装钩子"
 
 [cli.hook.install.flag_type]
-hash = "sha1:placeholder"
+hash = "sha1:5c28af393afe64b321c9c2011157edcacf35f79a"
 other = "钩子类型：clone 或 commit"
 
 [cli.hook.install.success]
-hash = "sha1:placeholder"
+hash = "sha1:74a7d7d492d8038de893e39e01de4fbb003ec867"
 other = "{{.Type}}钩子安装成功"
 
 [cli.hook.install.already_installed]
-hash = "sha1:placeholder"
+hash = "sha1:dc8412416d0833c9cc38cebe6b97f53c63dc6fbe"
 other = "{{.Type}}钩子已安装"
 
 [cli.hook.uninstall.use]
-hash = "sha1:placeholder"
+hash = "sha1:30f7edf8f8808f65496f28a526ea77c39aa4ecf9"
 other = "卸载 shell 钩子"
 
 [cli.hook.uninstall.short]
-hash = "sha1:placeholder"
+hash = "sha1:f054137b946afc81dc801a35d2428f6ed97f1928"
 other = "卸载钩子"
 
 [cli.hook.uninstall.success]
-hash = "sha1:placeholder"
+hash = "sha1:14140b298e0454f98e154b6adadb3f2611c1c08d"
 other = "{{.Type}}钩子卸载成功"
 
 [cli.hook.uninstall.not_installed]
-hash = "sha1:placeholder"
+hash = "sha1:4e2047d9d8a570c75fdc3330bc2403cbff7f504c"
 other = "{{.Type}}钩子未安装"
 
 [cli.hook.env.use]
-hash = "sha1:placeholder"
+hash = "sha1:8efcd2503c857913a89baf37b2c6c41ed79342be"
 other = "生成用于 cd 自动切换的 shell 代码"
 
 [cli.hook.env.short]
-hash = "sha1:placeholder"
+hash = "sha1:839f4a9018ecb3b87ba69bead1936e7be35f1695"
 other = "生成 cd 钩子代码"
 
 [cli.hook.env.flag_shell]
-hash = "sha1:placeholder"
+hash = "sha1:8778eb5d33cc7fed61382cef86263d763680fd3b"
 other = "Shell 类型：bash 或 zsh"
 
 [cli.hook.rc.not_found]
-hash = "sha1:placeholder"
+hash = "sha1:305b30f92787fcb6334f09d509dd086791f8d4d7"
 other = ".gitusrrc 中指定的用户在已保存用户中未找到"
 
 [cli.hook.rc.invalid_json]
-hash = "sha1:placeholder"
+hash = "sha1:6c4931776cdbe3ea9551588820233e9670f81097"
 other = ".gitusrrc 中的 JSON 格式无效"
 
 # ================================================
