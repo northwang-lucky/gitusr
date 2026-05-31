@@ -1,6 +1,8 @@
 package cli
 
 import (
+	"fmt"
+
 	"github.com/spf13/cobra"
 
 	"gitusr/internal/domain"
@@ -28,6 +30,47 @@ func NewRootCmd(store domain.UserStore, name string) *cobra.Command {
 		NewReplaceCmd(store),
 		NewUseCmd(store),
 	)
+
+	cmd.InitDefaultCompletionCmd()
+	cmd.InitDefaultHelpCmd()
+	cmd.InitDefaultHelpFlag()
+
+	for _, sub := range cmd.Commands() {
+		switch sub.Name() {
+		case "completion":
+			sub.Short = i18n.T("cli.completion.short", nil)
+		case "help":
+			sub.Short = i18n.T("cli.help.short", nil)
+		}
+	}
+
+	if f := cmd.Flags().Lookup("help"); f != nil {
+		f.Usage = i18n.T("cli.framework.help_flag", map[string]any{"Command": name})
+	}
+
+	usageTemplate := fmt.Sprintf(`Usage:
+  {{.UseLine}}{{if .HasAvailableSubCommands}}
+
+%s{{range .Commands}}{{if (or .IsAvailableCommand (eq .Name "help"))}}
+  {{rpad .Name .NamePadding }} {{.Short}}{{end}}{{end}}{{end}}{{if .HasAvailableLocalFlags}}
+
+%s
+{{.LocalFlags.FlagUsages | trimTrailingWhitespaces}}{{end}}{{if .HasAvailableInheritedFlags}}
+
+%s
+{{.InheritedFlags.FlagUsages | trimTrailingWhitespaces}}{{end}}{{if .HasHelpSubCommands}}
+
+%s{{range .Commands}}{{if .IsAdditionalHelpTopicCommand}}
+  {{rpad .Name .NamePadding }} {{.Short}}{{end}}{{end}}{{end}}{{if .HasAvailableSubCommands}}
+
+%s{{end}}`,
+		i18n.T("cli.framework.available_commands", nil),
+		i18n.T("cli.framework.flags", nil),
+		i18n.T("cli.framework.global_flags", nil),
+		i18n.T("cli.framework.additional_help", nil),
+		i18n.T("cli.framework.use_help", nil),
+	)
+	cmd.SetUsageTemplate(usageTemplate)
 
 	return cmd
 }
