@@ -3,51 +3,49 @@
 **Scope:** `internal/cli/`
 
 ## OVERVIEW
-All Cobra subcommands for gitusr live here. Each command has its own file plus a matching `_test.go`. The root command (`root.go`) registers every subcommand and configures i18n-aware help templates.
+Cobra command layer for gitusr. It owns flag parsing, i18n help text, user-facing command errors, and package-level test seams around prompts/git/hook operations.
 
 ## STRUCTURE
 ```
 internal/cli/
-├── root.go           # Root command registration and help template
-├── root_test.go      # Root command tests
-├── add.go            # Add a new user identity
-├── add_test.go
-├── current.go        # Show current git user config
-├── current_test.go
-├── init.go           # Initialize / import existing git config
-├── init_test.go
-├── list.go           # List saved identities
-├── list_test.go
-├── remove.go         # Remove a saved identity
-├── remove_test.go
-├── replace.go        # Replace identity in git history (filter-repo)
-├── replace_test.go
-├── use.go            # Switch active git user
-└── use_test.go
+├── root.go              # Root command registration + custom i18n usage template
+├── add.go              # Add saved identity; non-interactive flags or prompt
+├── current.go          # Show repo/global git config
+├── hook.go             # `hook install/uninstall`; delegates to internal/hook
+├── hook_apply_rc.go    # Hidden `hook apply-rc`; called by shell wrappers
+├── init.go             # Initialize user list and legacy XDG migration
+├── list.go             # List saved identities
+├── remove.go           # Remove identity by index/email/name
+├── replace.go          # git-filter-repo author replacement flow
+├── use.go              # Apply selected identity repo/global
+└── *_test.go           # Command-local tests and shared mocks/helpers
 ```
 
 ## WHERE TO LOOK
 | Task | Location | Notes |
 |------|----------|-------|
-| Add a new subcommand | `root.go` | Append to `cmd.AddCommand(...)` |
-| Change command flags | `<cmd>.go` | Use `cmd.Flags().BoolP/StringP/IntP` |
-| Test command output | `*_test.go` | Capture stdout/stderr, override `askNewUser` |
-| Test interactive flow | `*_test.go` | Override `askNewUser` or `sel.SelectFunc` |
+| Add subcommand | `root.go` | Append to `cmd.AddCommand(...)`; update i18n keys |
+| Add command flags | Command file | Prefer long + short when existing UX has one |
+| Change hook CLI UX | `hook.go`, `hook_apply_rc.go` | `installFunc`/`uninstallFunc` are test seams |
+| Change selection flags | `use.go`, `remove.go`, `replace.go` | `buildFilter(cmd)` exists in `use.go` only |
+| Change init/migration | `init.go`, `init_test.go` | Many locale and legacy-path cases live here |
+| Test command output | `*_test.go` | Use `executeCmd` from `current_test.go` |
+| Mock persistence | `list_test.go` | `mockStore` is the standard fake `domain.UserStore` |
 
 ## CONVENTIONS
-- Command constructors: `NewXxxCmd(store domain.UserStore) *cobra.Command`.
-- Flags use short + long forms (`-g` / `--global`, `-n` / `--name`, etc.).
-- `buildFilter(cmd)` helper extracts `UserFilter` from flags in `use.go`.
-- Success output goes through `format.PrintUserInfo` or `format.PrintSuccess`.
-- Errors are returned from `RunE`; never `fmt.Println` inside `RunE`.
-- **Test mocking**: package-level vars (`askNewUser`, `SelectFunc`, `getConfigFn`, etc.) are overridden in tests. Use `t.Cleanup()` to restore original values.
-- **Test helpers**: `executeCmd` (defined in `current_test.go`) runs a Cobra command and captures stdout/stderr. `mockStore` (defined in `list_test.go`) is the standard `domain.UserStore` fake.
-- **i18n test naming**: use `_En` / `_ZhCN` suffixes for locale-specific test cases.
+- Command constructors are `NewXxxCmd(store domain.UserStore) *cobra.Command`; commands without persistence omit the store.
+- Root command accepts `name string` so the same binary logic supports `gitusr` and `gu` aliases.
+- `RunE` returns errors; do not print and return the same error.
+- Use `errors.New(i18n.T(...))` for translated validation failures.
+- i18n-specific tests use `_En` / `_ZhCN` suffixes and reset locale with `i18n.ResetForTesting()`.
+- Function vars used for mocking must be restored with `t.Cleanup()`.
+- Hidden `hook apply-rc` must stay hidden; shell wrappers call it directly.
 
 ## ANTI-PATTERNS
-- Do **not** add `os.Exit` inside `RunE`.
-- Do **not** print errors directly to stdout — return them or use `format.PrintErr`.
-- Do **not** create standalone CLI logic outside this package.
+- Do **not** add standalone CLI logic outside this package.
+- Do **not** call `os.Exit` from command code.
+- Do **not** touch real git config, HOME, or XDG paths in tests; mock functions or use temp dirs.
+- Do **not** forget to update both `active.en.toml` and `active.zh-CN.toml` when adding message IDs.
 
 ## COMMANDS
 ```bash
@@ -55,5 +53,5 @@ internal/cli/
 go test ./internal/cli/... -v
 
 # Run a specific command test
-go test ./internal/cli/... -run TestAdd -v
+go test ./internal/cli/... -run TestHook -v
 ```
