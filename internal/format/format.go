@@ -6,11 +6,13 @@ import (
 	"strings"
 
 	"gitusr/internal/domain"
+	"gitusr/internal/i18n"
 )
 
-// PrintErr writes the given message prefixed with "gitusr error: " to stderr.
+// PrintErr writes the given message prefixed with a localised error label to stderr.
 func PrintErr(msg string) {
-	fmt.Fprintf(os.Stderr, "gitusr error: %s\n", msg)
+	prefix := i18n.T("format.error_prefix", map[string]interface{}{"Msg": msg})
+	fmt.Fprintf(os.Stderr, "%s\n", prefix)
 }
 
 // PrintOptions controls the behaviour of PrintUserInfo.
@@ -20,7 +22,7 @@ type PrintOptions struct {
 }
 
 // PrintUserInfo prints the current git user configuration to stdout.
-// If ShowSuccess is true, a "Success!" line is printed as a prefix.
+// If ShowSuccess is true, a localised success line is printed as a prefix.
 func PrintUserInfo(user domain.User, opts PrintOptions) {
 	var scope string
 	if opts.Global {
@@ -31,18 +33,18 @@ func PrintUserInfo(user domain.User, opts PrintOptions) {
 
 	var b strings.Builder
 	if opts.ShowSuccess {
-		b.WriteString("Success!\n")
+		b.WriteString(i18n.T("format.success_banner", nil) + "\n")
 	}
 
-	b.WriteString(fmt.Sprintf("Your %s git user is:\n\n", scope))
-	b.WriteString(fmt.Sprintf("user.name  = %s\n", user.Name))
-	b.WriteString(fmt.Sprintf("user.email = %s\n", user.Email))
+	b.WriteString(i18n.T("format.userinfo_header", map[string]interface{}{"Scope": scope}) + "\n\n")
+	b.WriteString(i18n.T("format.user_name_label", map[string]interface{}{"Name": user.Name}) + "\n")
+	b.WriteString(i18n.T("format.user_email_label", map[string]interface{}{"Email": user.Email}) + "\n")
 
 	fmt.Print(b.String())
 }
 
 // FormatUserList returns a numbered list of users with aligned columns.
-// Each line has the format: "N: Name: <name> | Email: <email>"
+// Each line uses a localised format like "N: Name: <name> | Email: <email>"
 // where <name> is padded to the length of the longest name in the list.
 func FormatUserList(users []domain.User) string {
 	if len(users) == 0 {
@@ -59,7 +61,12 @@ func FormatUserList(users []domain.User) string {
 
 	var b strings.Builder
 	for i, u := range users {
-		line := fmt.Sprintf("%d: Name: %-*s | Email: %s\n", i, maxNameLen, u.Name, u.Email)
+		paddedName := fmt.Sprintf("%-*s", maxNameLen, u.Name)
+		line := i18n.T("format.userlist_row", map[string]interface{}{
+			"Index":   i,
+			"NamePad": paddedName,
+			"Email":   u.Email,
+		}) + "\n"
 		b.WriteString(line)
 	}
 
