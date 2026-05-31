@@ -317,26 +317,6 @@ other = "{{.Type}}钩子卸载成功"
 hash = "sha1:4e2047d9d8a570c75fdc3330bc2403cbff7f504c"
 other = "{{.Type}}钩子未安装"
 
-[cli.hook.env.use]
-hash = "sha1:8efcd2503c857913a89baf37b2c6c41ed79342be"
-other = "生成用于 cd 自动切换的 shell 代码"
-
-[cli.hook.env.short]
-hash = "sha1:839f4a9018ecb3b87ba69bead1936e7be35f1695"
-other = "生成 cd 钩子代码"
-
-[cli.hook.env.flag_shell]
-hash = "sha1:8778eb5d33cc7fed61382cef86263d763680fd3b"
-other = "Shell 类型：bash 或 zsh"
-
-[cli.hook.env.not_installed]
-hash = "sha1:dummy"
-other = "请先执行 hook install"
-
-[cli.hook.env.deprecated]
-hash = "sha1:dummy"
-other = "警告：'hook env' 已弃用。请使用 'gitusr hook install --type=cd' 代替。"
-
 [cli.hook.rc.not_found]
 hash = "sha1:305b30f92787fcb6334f09d509dd086791f8d4d7"
 other = ".gitusrrc 中指定的用户在已保存用户中未找到"

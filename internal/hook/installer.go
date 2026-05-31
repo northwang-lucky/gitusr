@@ -10,7 +10,6 @@ var shellGenerators = map[ShellType]func() string{
 	ShellTypeZsh:  GenerateZshWrapper,
 }
 
-// cdShellGenerators maps shell types to their cd-hook environment generation functions.
 var cdShellGenerators = map[ShellType]func() string{
 	ShellTypeBash: GenerateBashEnv,
 	ShellTypeZsh:  GenerateZshEnv,

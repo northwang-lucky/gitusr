@@ -134,24 +134,20 @@ gitusr hook install --type=commit
 echo "  Step 10 PASSED (commit hook installed)"
 
 echo ""
-echo "--- Step 11/14: hook env --shell bash ---"
-ENV_OUTPUT=$(gitusr hook env --shell bash 2>&1)
-if echo "$ENV_OUTPUT" | grep -q "__gitusr_use_if_found"; then
-    echo "  Step 11 PASSED (env generates valid bash code)"
+echo "--- Step 11/14: hook install --type=cd ---"
+gitusr hook install --type=cd
+WRAPPER_FILE="$XDG_DATA_HOME/gitusr/hooks/git-wrapper.sh"
+if [[ -f "$WRAPPER_FILE" ]] && grep -q "__gitusr_use_if_found" "$WRAPPER_FILE"; then
+    echo "  Step 11 PASSED (cd hook installed, wrapper contains cd code)"
 else
-    echo "  FAIL: env output doesn't contain expected function"
+    echo "  FAIL: cd hook wrapper not found or missing expected function"
     exit 1
 fi
 
 echo ""
-echo "--- Step 12/14: hook env --shell zsh ---"
-ENV_OUTPUT=$(gitusr hook env --shell zsh 2>&1)
-if echo "$ENV_OUTPUT" | grep -q "add-zsh-hook"; then
-    echo "  Step 12 PASSED (env generates valid zsh code)"
-else
-    echo "  FAIL: env output doesn't contain zsh hook code"
-    exit 1
-fi
+echo "--- Step 12/14: hook uninstall --type=cd ---"
+gitusr hook uninstall --type=cd
+echo "  Step 12 PASSED (cd hook uninstalled)"
 
 echo ""
 echo "--- Step 13/14: hook uninstall --type=clone ---"
