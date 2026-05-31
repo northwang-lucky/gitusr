@@ -1,0 +1,111 @@
+#!/bin/bash
+# =============================================================================
+# e2e-test.sh — 8-step gitusr E2E flow (executed inside bubblewrap sandbox)
+#
+# This script is invoked by sandbox-test.sh inside the bubblewrap container.
+# It builds gitusr from source, installs git-filter-repo, and runs the full
+# E2E workflow with an isolated XDG_DATA_HOME.
+#
+# Do NOT run this script directly — use scripts/sandbox-test.sh instead.
+# =============================================================================
+set -euo pipefail
+
+# ─── Sandbox environment setup ─────────────────────────────────────────────
+echo "[sandbox] Setting up environment..."
+
+export XDG_DATA_HOME=/tmp/xdg
+mkdir -p "$XDG_DATA_HOME"
+
+# Install git-filter-repo (used by the filter-repo command).
+# python3 -m pip is preferred over bare pip3 to avoid path issues.
+echo "[sandbox] Installing git-filter-repo..."
+if python3 -m pip install --quiet git-filter-repo 2>/dev/null; then
+    echo "[sandbox] git-filter-repo installed"
+else
+    echo "[sandbox] WARNING: git-filter-repo install failed, continuing without it"
+fi
+
+# ─── Build gitusr binary ───────────────────────────────────────────────────
+echo "[sandbox] Building gitusr binary..."
+go build -o /tmp/gitusr ./cmd/gitusr
+echo "[sandbox] Build complete"
+
+# ─── Helper ────────────────────────────────────────────────────────────────
+# gitusr wrapper that always sets XDG_DATA_HOME for isolated store access.
+gitusr() {
+    XDG_DATA_HOME=/tmp/xdg /tmp/gitusr "$@"
+}
+
+# ─── 8-step E2E workflow ──────────────────────────────────────────────────
+
+# Step 1: init — create the first user
+echo ""
+echo "--- Step 1/8: init ---"
+gitusr init --name "Dev" --email "dev@test.com" --yes --force
+echo "  Step 1 PASSED"
+
+# Step 2: add Work user
+echo ""
+echo "--- Step 2/8: add Work ---"
+gitusr add --name "Work" --email "work@test.com"
+echo "  Step 2 PASSED"
+
+# Step 3: add Personal user
+echo ""
+echo "--- Step 3/8: add Personal ---"
+gitusr add --name "Personal" --email "personal@test.com"
+echo "  Step 3 PASSED"
+
+# Step 4: list — verify all three users are present
+echo ""
+echo "--- Step 4/8: list ---"
+gitusr list | tee /tmp/list-output.txt
+grep -q "Dev" /tmp/list-output.txt      || { echo "  FAIL: Dev not in list"; exit 1; }
+grep -q "Work" /tmp/list-output.txt     || { echo "  FAIL: Work not in list"; exit 1; }
+grep -q "Personal" /tmp/list-output.txt || { echo "  FAIL: Personal not in list"; exit 1; }
+echo "  Step 4 PASSED (Dev, Work, Personal all present)"
+
+# Step 5: use — switch to Work identity inside a fresh git repo
+echo ""
+echo "--- Step 5/8: use --email in git repo ---"
+TMP_REPO=/tmp/repo
+rm -rf "$TMP_REPO"
+mkdir -p "$TMP_REPO"
+cd "$TMP_REPO"
+git init
+gitusr use --email "work@test.com"
+echo "  Step 5 PASSED"
+
+# Step 6: current — verify the active repo identity is Work
+echo ""
+echo "--- Step 6/8: current ---"
+cd "$TMP_REPO"
+gitusr current | tee /tmp/current-output.txt
+grep -q "work@test.com" /tmp/current-output.txt || {
+    echo "  FAIL: work@test.com not in current output"
+    exit 1
+}
+echo "  Step 6 PASSED"
+
+# Step 7: remove — delete Personal user by email
+echo ""
+echo "--- Step 7/8: remove Personal ---"
+cd /src
+gitusr remove --email "personal@test.com"
+# Verify Personal was actually removed
+gitusr list | tee /tmp/list-after-remove.txt
+grep -q "Personal" /tmp/list-after-remove.txt && {
+    echo "  FAIL: Personal still in list after remove"
+    exit 1
+}
+echo "  Step 7 PASSED"
+
+# Step 8: replace — rename work@test.com to Freelance
+echo ""
+echo "--- Step 8/8: replace ---"
+gitusr replace work@test.com --with-name "Freelance" --yes
+echo "  Step 8 PASSED"
+
+echo ""
+echo "========== ALL 8 E2E STEPS PASSED =========="
+exit 0
