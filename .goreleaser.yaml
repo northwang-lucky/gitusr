@@ -1,0 +1,62 @@
+version: 2
+
+project_name: gitusr
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: gitusr
+    main: ./cmd/gitusr
+    binary: gitusr
+    ldflags:
+      - -s -w -X github.com/northwang-lucky/gitusr/internal/version.Version={{.Version}}
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - darwin
+      - linux
+    goarch:
+      - amd64
+      - arm64
+    mod_timestamp: "{{ .CommitTimestamp }}"
+
+archives:
+  - formats: [tar.gz]
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- .Version }}_
+      {{- .Os }}_
+      {{- .Arch }}
+    files:
+      - LICENSE
+
+checksum:
+  name_template: checksums.txt
+
+changelog:
+  use: github
+  groups:
+    - title: Features
+      regexp: '^feat.*'
+      order: 0
+    - title: "Bug Fixes"
+      regexp: '^fix.*'
+      order: 1
+    - title: Other
+      order: 999
+
+release:
+  prerelease: auto
+
+homebrew_casks:
+  - name: gitusr
+    repository:
+      owner: northwang-lucky
+      name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
+    directory: Formula
+    homepage: "https://github.com/northwang-lucky/gitusr"
+    description: "CLI tool for managing and switching between git user identities"
+    license: "MIT"
