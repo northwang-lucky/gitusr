@@ -71,8 +71,8 @@ func TestList_NotInitialized(t *testing.T) {
 		t.Fatal("expected error when store is not initialized")
 	}
 
-	if !strings.Contains(stderr, "gitusr error:") {
-		t.Errorf("stderr should contain 'gitusr error:', got %q", stderr)
+	if !strings.Contains(stderr, "Error:") {
+		t.Errorf("stderr should contain 'Error:', got %q", stderr)
 	}
 
 	if stdout != "" {
