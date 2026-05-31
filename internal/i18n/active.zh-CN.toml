@@ -284,3 +284,39 @@ other = "索引 {{.Index}} 超出界限（0-{{.Max}}）"
 [gitcmd.filter_repo_not_installed]
 hash = "sha1:41b9ac2acf28c0344182fa28e3f4c1b2c774fc32"
 other = "未安装 git-filter-repo。请使用以下命令安装：pip install git-filter-repo"
+
+# ================================================
+# Cobra 框架字符串
+# ================================================
+
+[cli.framework.available_commands]
+hash = "sha1:dummy"
+other = "可用命令："
+
+[cli.framework.flags]
+hash = "sha1:dummy"
+other = "标志："
+
+[cli.framework.global_flags]
+hash = "sha1:dummy"
+other = "全局标志："
+
+[cli.framework.additional_help]
+hash = "sha1:dummy"
+other = "其他帮助主题："
+
+[cli.framework.use_help]
+hash = "sha1:dummy"
+other = "使用 \"{{.CommandPath}} [command] --help\" 获取有关命令的更多信息。"
+
+[cli.framework.help_flag]
+hash = "sha1:dummy"
+other = "{{.Command}} 的帮助"
+
+[cli.completion.short]
+hash = "sha1:dummy"
+other = "生成指定 shell 的自动补全脚本"
+
+[cli.help.short]
+hash = "sha1:dummy"
+other = "查看任何命令的帮助"

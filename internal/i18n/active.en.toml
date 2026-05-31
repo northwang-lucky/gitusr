@@ -79,7 +79,7 @@ other = "A CLI that allows you to switch git users."
 
 [cli.add.short]
 hash = "sha1:4ad9781aa0e50651a7981b00af34691c9c492b0f"
-other = "add and save a user"
+other = "Add and save a user"
 
 [cli.add.dup_name]
 hash = "sha1:7cdc8d37ac07a77150d6a68223293ffa0957cb07"
@@ -99,7 +99,7 @@ other = "Success! User (name: {{.Name}} | email: {{.Email}}) has been saved!"
 
 [cli.current.short]
 hash = "sha1:a6f2a5c4c10c1b3ee9fdcb8c730f4da369557b7d"
-other = "show current repo/global user"
+other = "Show current repo/global user"
 
 [cli.current.flag_global]
 hash = "sha1:c3d2739f418b9cd3c7415787288e5c84ca6dc9a6"
@@ -111,7 +111,7 @@ other = "show global user"
 
 [cli.use.short]
 hash = "sha1:8e9ec1ea995c60d278e4c4a835942f993033e4ff"
-other = "switch user in a git repo or globally"
+other = "Switch user in a git repo or globally"
 
 [cli.use.no_users]
 hash = "sha1:41ae5e7c57333337f8eae51258230d76d2df8580"
@@ -139,7 +139,7 @@ other = "switch by index"
 
 [cli.list.short]
 hash = "sha1:35c12305c31ff91743a4f893ca9102d6fa22b51a"
-other = "show all saved users"
+other = "Show all saved users"
 
 [cli.list.no_users]
 hash = "sha1:41ae5e7c57333337f8eae51258230d76d2df8580"
@@ -151,7 +151,7 @@ other = "no users saved yet, run \"gitusr add\" first"
 
 [cli.remove.short]
 hash = "sha1:0e7bf95158988e8bd19990143f7db99e08b6ac4d"
-other = "delete a user"
+other = "Delete a user"
 
 [cli.remove.success]
 hash = "sha1:a4d41f04ab1db6a0db1c2c71a33a2310671a8e2d"
@@ -175,7 +175,7 @@ other = "delete user by index"
 
 [cli.init.short]
 hash = "sha1:e49335f7eac441122a4dadc7b0b315c0db2a738b"
-other = "initialize from git global config"
+other = "Initialize from git global config"
 
 [cli.init.flag_force]
 hash = "sha1:e996c2d84add88301442411318fae5d5015c4651"
@@ -203,7 +203,7 @@ other = "Migrated {{.Count}} users from legacy config."
 
 [cli.replace.short]
 hash = "sha1:f539734c5bad88f97251ca2a1eca8d982b23e9d1"
-other = "replace author in git history"
+other = "Replace author in git history"
 
 [cli.replace.uncommitted]
 hash = "sha1:5321517f0f69caeded1ce85f66c73a6bc876de10"
@@ -284,3 +284,39 @@ other = "index {{.Index}} out of bounds (0-{{.Max}})"
 [gitcmd.filter_repo_not_installed]
 hash = "sha1:41b9ac2acf28c0344182fa28e3f4c1b2c774fc32"
 other = "git-filter-repo is not installed. Install it with: pip install git-filter-repo"
+
+# ================================================
+# Cobra framework strings
+# ================================================
+
+[cli.framework.available_commands]
+hash = "sha1:dummy"
+other = "Available Commands:"
+
+[cli.framework.flags]
+hash = "sha1:dummy"
+other = "Flags:"
+
+[cli.framework.global_flags]
+hash = "sha1:dummy"
+other = "Global Flags:"
+
+[cli.framework.additional_help]
+hash = "sha1:dummy"
+other = "Additional help topics:"
+
+[cli.framework.use_help]
+hash = "sha1:dummy"
+other = "Use \"{{.CommandPath}} [command] --help\" for more information about a command."
+
+[cli.framework.help_flag]
+hash = "sha1:dummy"
+other = "help for {{.Command}}"
+
+[cli.completion.short]
+hash = "sha1:dummy"
+other = "Generate the autocompletion script for the specified shell"
+
+[cli.help.short]
+hash = "sha1:dummy"
+other = "Help about any command"
