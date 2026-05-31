@@ -12,13 +12,29 @@ run = "go test ./... -v"
 [tasks.install]
 description = "安装到 ~/.local/bin/ 并创建 gu 软链接"
 depends = ["build"]
-run = "mkdir -p ~/.local/bin/ && cp bin/gitusr ~/.local/bin/gitusr && ln -sf ~/.local/bin/gitusr ~/.local/bin/gu"
+run = """
+if [ -f "$HOME/.gitconfig" ]; then
+    backup_path="$HOME/.gitconfig.bak.$(date +%s)"
+    cp "$HOME/.gitconfig" "$backup_path"
+    echo "已备份 ~/.gitconfig 到 $backup_path"
+fi
+mkdir -p ~/.local/bin/
+cp bin/gitusr ~/.local/bin/gitusr
+ln -sf ~/.local/bin/gitusr ~/.local/bin/gu
+"""
 
 [tasks.uninstall]
 description = "完整卸载 gitusr（删除二进制、软链接和数据文件）"
 run = """
 rm -f ~/.local/bin/gitusr ~/.local/bin/gu
 rm -rf "${XDG_DATA_HOME:-$HOME/.local/share}/gitusr"
+
+backup_files=$(ls -1 "$HOME/.gitconfig.bak."* 2>/dev/null || true)
+if [ -n "$backup_files" ]; then
+    echo "检测到 ~/.gitconfig 备份文件："
+    echo "$backup_files"
+    echo "如需恢复，可手动执行：mv <备份文件> ~/.gitconfig"
+fi
 """
 
 [tasks.clean]
