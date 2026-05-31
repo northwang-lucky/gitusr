@@ -50,13 +50,16 @@ changelog:
 release:
   prerelease: auto
 
-homebrew_casks:
+brews:
   - name: gitusr
     repository:
       owner: northwang-lucky
       name: homebrew-tap
       token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
-    directory: Casks
+    directory: Formula
     homepage: "https://github.com/northwang-lucky/gitusr"
     description: "CLI tool for managing and switching between git user identities"
     license: "MIT"
+    install: |
+      bin.install "gitusr"
+      bin.install_symlink "gitusr" => "gu"
