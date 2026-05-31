@@ -15,7 +15,10 @@
 
 手动修改 `git config user.name` 和 `git config user.email` 既繁琐又容易出错。`gitusr` 帮你把常用的 Git 用户身份保存起来，通过一条命令就能在仓库级别或全局快速切换，无需记忆复杂的 `git config` 语法。
 
-此外，`gitusr` 还提供**历史记录作者替换**功能，当你发现历史提交中的作者信息有误时，可以安全地重写历史。
+此外，`gitusr` 还提供：
+
+- **历史记录作者替换**：当你发现历史提交中的作者信息有误时，可以安全地重写历史
+- **Shell Hook 自动切换**：安装 hook 后，git clone、git commit、cd 等操作会自动检测 `.gitusrrc` 配置并应用对应的 Git 用户身份
 
 ## 安装指南
 
@@ -296,6 +299,89 @@ gitusr replace old@wrong.com --with-index 1
 # 替换完成后自动切换仓库用户（跳过确认）
 gitusr replace old@wrong.com --with-name "North Wang" --with-email "north@example.com" --yes
 ```
+
+---
+
+### `gitusr hook` — 管理 Shell 自动切换钩子
+
+安装 Shell 钩子后，`gitusr` 可以在 `git clone`、`git commit`、`cd` 等操作中自动检测并切换 Git 用户身份。
+
+**用法：**
+
+```bash
+gitusr hook <subcommand> [flags]
+```
+
+**子命令：**
+
+| 子命令 | 说明 |
+|--------|------|
+| `install` | 安装 shell 钩子 |
+| `uninstall` | 卸载 shell 钩子 |
+
+#### `gitusr hook install`
+
+为当前 Shell（bash 和 zsh）安装自动切换钩子。支持三种类型：
+
+- **`clone`** — `git clone` 时自动检测 `--gu-name` / `--gu-email` 参数并应用用户
+- **`commit`** — `git commit` 时自动读取 `.gitusrrc` 并应用用户
+- **`cd`** — `cd` 到包含 `.gitusrrc` 的目录时自动应用用户
+
+**标志：**
+
+| 标志 | 简写 | 说明 |
+|------|------|------|
+| `--type` | | 钩子类型：`clone`、`commit` 或 `cd` |
+| `--all` | `-a` | 安装所有三种钩子 |
+
+**示例：**
+
+```bash
+# 安装 cd 钩子（切换目录时自动应用 .gitusrrc）
+gitusr hook install --type cd
+
+# 安装 clone 钩子（git clone 时自动切换用户）
+gitusr hook install --type clone
+
+# 安装所有钩子
+gitusr hook install --all
+```
+
+#### `gitusr hook uninstall`
+
+卸载已安装的 shell 钩子。
+
+**标志：**
+
+| 标志 | 简写 | 说明 |
+|------|------|------|
+| `--type` | | 钩子类型：`clone`、`commit` 或 `cd` |
+| `--all` | `-a` | 卸载所有钩子 |
+
+**示例：**
+
+```bash
+# 卸载 cd 钩子
+gitusr hook uninstall --type cd
+
+# 卸载所有钩子
+gitusr hook uninstall --all
+```
+
+#### `.gitusrrc` 文件
+
+在 Git 仓库根目录创建 `.gitusrrc` 文件，当 `cd` 进入该目录或 `git commit` 时，hook 会自动匹配并应用对应的 Git 用户。
+
+**格式：**
+
+```json
+{
+  "name": "Zhang San",
+  "email": "zhangsan@company.com"
+}
+```
+
+匹配优先级：**email > name**。只要提供其中一项即可。
 
 ---
 
