@@ -38,11 +38,12 @@ func appendSourceLine(configPath, wrapperPath string) error {
 }
 
 // WriteWrapperFile writes a shell wrapper script to the hooks directory.
-// The path is: {XDG_DATA_HOME}/gitusr/hooks/git-wrapper.{sh|zsh}.
+// For HookTypeCD, the path is: {XDG_DATA_HOME}/gitusr/hooks/cd-env.{sh|zsh}.
+// For other hook types, the path is: {XDG_DATA_HOME}/gitusr/hooks/git-wrapper.{sh|zsh}.
 // The directory is created if it doesn't exist (0755 permissions).
 // The file is written with 0644 permissions.
 // Returns the absolute path to the written file.
-func WriteWrapperFile(shell ShellType, content string) (string, error) {
+func WriteWrapperFile(hookType HookType, shell ShellType, content string) (string, error) {
 	ext, err := wrapperExt(shell)
 	if err != nil {
 		return "", err
@@ -57,7 +58,7 @@ func WriteWrapperFile(shell ShellType, content string) (string, error) {
 		return "", fmt.Errorf("create hooks dir: %w", err)
 	}
 
-	path := filepath.Join(dir, fmt.Sprintf("git-wrapper.%s", ext))
+	path := filepath.Join(dir, wrapperFileName(hookType, ext))
 	if err := os.WriteFile(path, []byte(content), 0644); err != nil {
 		return "", fmt.Errorf("write wrapper file: %w", err)
 	}

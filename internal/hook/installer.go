@@ -47,7 +47,7 @@ func Install(hookType HookType, shells []ShellType) ([]HookInstallResult, error)
 		code := generate()
 
 		// Write wrapper file to disk
-		filePath, err := WriteWrapperFile(shell, code)
+		filePath, err := WriteWrapperFile(hookType, shell, code)
 		if err != nil {
 			return results, fmt.Errorf("write wrapper for %s: %w", shell, err)
 		}
