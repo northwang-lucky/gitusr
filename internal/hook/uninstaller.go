@@ -8,8 +8,11 @@ import (
 
 // Uninstall removes a specific hook type from the specified shell configurations.
 // It checks if the hook type is installed, removes the hook block from each shell
-// config file, updates the persistent state, and cleans up wrapper files when no
-// hook types remain installed.
+// config file, updates the persistent state, and cleans up wrapper files.
+//
+// Per-hook cleanup:
+//   - CD hook: removes cd source blocks and cd-env.* wrapper files immediately
+//   - When no hook types remain: removes main source blocks and all remaining wrapper files
 func Uninstall(hookType HookType, shells []ShellType) error {
 	installed, err := IsInstalled(hookType)
 	if err != nil {
@@ -37,7 +40,19 @@ func Uninstall(hookType HookType, shells []ShellType) error {
 		return err
 	}
 
-	// Only remove source blocks and wrapper files when no hook types remain
+	// Remove CD-specific source blocks and wrapper files immediately when uninstalling CD
+	if hookType == HookTypeCD {
+		for _, shell := range shells {
+			if err := RemoveCDSourceBlock(shell); err != nil {
+				return err
+			}
+		}
+		if err := deleteCDWrapperFiles(); err != nil {
+			return err
+		}
+	}
+
+	// Clean up remaining artifacts when no hook types are left
 	if len(updated) == 0 {
 		for _, shell := range shells {
 			if err := RemoveSourceBlock(shell); err != nil {
@@ -45,6 +60,24 @@ func Uninstall(hookType HookType, shells []ShellType) error {
 			}
 		}
 		if err := deleteWrapperFiles(); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// deleteCDWrapperFiles removes cd-env scripts from the hooks directory.
+// Non-existent files are silently skipped.
+func deleteCDWrapperFiles() error {
+	dir, err := hooksDir()
+	if err != nil {
+		return err
+	}
+
+	for _, ext := range []string{"sh", "zsh"} {
+		fp := filepath.Join(dir, wrapperFileName(HookTypeCD, ext))
+		if err := os.Remove(fp); err != nil && !os.IsNotExist(err) {
 			return err
 		}
 	}

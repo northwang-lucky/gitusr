@@ -4,15 +4,17 @@ import (
 	"fmt"
 )
 
-// shellGenerators maps shell types to their wrapper generation functions.
+// shellGenerators maps shell types to their unified wrapper generation functions.
+// Each unified wrapper contains both git() (clone+commit) and cd/chpwd hook
+// behavior in a single script with disabled hook checks.
 var shellGenerators = map[ShellType]func() string{
-	ShellTypeBash: GenerateBashWrapper,
-	ShellTypeZsh:  GenerateZshWrapper,
+	ShellTypeBash: GenerateUnifiedBashWrapper,
+	ShellTypeZsh:  GenerateUnifiedZshWrapper,
 }
 
 var cdShellGenerators = map[ShellType]func() string{
-	ShellTypeBash: GenerateBashEnv,
-	ShellTypeZsh:  GenerateZshEnv,
+	ShellTypeBash: GenerateUnifiedBashWrapper,
+	ShellTypeZsh:  GenerateUnifiedZshWrapper,
 }
 
 // Install installs hook wrappers for the specified hook type and shells.

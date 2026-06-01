@@ -262,13 +262,13 @@ func TestInstall_CD_FirstTime(t *testing.T) {
 		t.Error("expected IsInstalled(HookTypeCD) to be true after install")
 	}
 
-	// Verify wrapper contains cd-specific code
+	// Verify wrapper contains cd-specific code (unified wrapper uses __gitusrcd for bash)
 	wrapper, err := os.ReadFile(r.FilePath)
 	if err != nil {
 		t.Fatalf("read wrapper file: %v", err)
 	}
-	if !strings.Contains(string(wrapper), "__gitusr_use_if_found") {
-		t.Error("cd wrapper should contain __gitusr_use_if_found")
+	if !strings.Contains(string(wrapper), "__gitusrcd") {
+		t.Error("cd wrapper should contain __gitusrcd (unified bash wrapper)")
 	}
 }
 
@@ -340,17 +340,19 @@ func TestInstall_AllDoesNotOverwrite(t *testing.T) {
 		t.Error("git-wrapper.sh should contain git() function definition")
 	}
 
-	// Assert cd-env.sh exists, contains __gitusr_use_if_found, and does NOT contain git()
+	// Assert cd-env.sh exists and contains __gitusrcd (unified wrapper includes cd handler)
 	cdEnvPath := filepath.Join(tmpDir, "gitusr", "hooks", "cd-env.sh")
 	cdEnvData, err := os.ReadFile(cdEnvPath)
 	if err != nil {
 		t.Fatalf("read cd-env.sh: %v", err)
 	}
-	if !strings.Contains(string(cdEnvData), "__gitusr_use_if_found") {
-		t.Error("cd-env.sh should contain __gitusr_use_if_found")
+	if !strings.Contains(string(cdEnvData), "__gitusrcd") {
+		t.Error("cd-env.sh should contain __gitusrcd (unified bash wrapper)")
 	}
-	if strings.Contains(string(cdEnvData), "git()") {
-		t.Error("cd-env.sh should NOT contain git() function definition")
+	// With unified wrappers, cd-env.sh also contains git() since both wrapper
+	// types generate the same unified script with all hook behaviors.
+	if !strings.Contains(string(cdEnvData), "git()") {
+		t.Error("cd-env.sh should contain git() (unified wrapper includes all hooks)")
 	}
 
 	// Assert .bashrc contains both hook and cd markers

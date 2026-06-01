@@ -175,9 +175,9 @@ func TestUninstall_CD_Cleanup(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// Prepare .bashrc with both source lines inside the marked block
+	// Prepare .bashrc with clone source line in hook block and CD source line in CD block
 	bashrcPath := filepath.Join(tmpHome, ".bashrc")
-	block := fmt.Sprintf("\n# gitusr hook begin\nsource %s\nsource %s\n# gitusr hook end\n", gitWrapperPath, cdEnvPath)
+	block := fmt.Sprintf("\n# gitusr hook begin\nsource %s\n# gitusr hook end\n\n# gitusr cd begin\nsource %s\n# gitusr cd end\n", gitWrapperPath, cdEnvPath)
 	if err := os.WriteFile(bashrcPath, []byte(block), 0644); err != nil {
 		t.Fatal(err)
 	}

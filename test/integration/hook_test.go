@@ -100,24 +100,24 @@ func TestHookInstallUninstall_CD(t *testing.T) {
 		t.Errorf("expected 'successfully installed' in output, got: %s", output)
 	}
 
-	// Verify .bashrc contains the hook begin marker
+	// Verify .bashrc contains the cd begin marker (CD uses separate cd markers)
 	bashrcPath := filepath.Join(homeDir, ".bashrc")
 	bashrc, err := os.ReadFile(bashrcPath)
 	if err != nil {
 		t.Fatalf("read .bashrc: %v", err)
 	}
-	if !strings.Contains(string(bashrc), "# gitusr hook begin") {
-		t.Errorf(".bashrc should contain '# gitusr hook begin', got:\n%s", string(bashrc))
+	if !strings.Contains(string(bashrc), "# gitusr cd begin") {
+		t.Errorf(".bashrc should contain '# gitusr cd begin', got:\n%s", string(bashrc))
 	}
 
-	// Verify wrapper file exists and contains cd-specific code
-	wrapperPath := filepath.Join(xdgDataHome, "gitusr", "hooks", "git-wrapper.sh")
+	// Verify wrapper file exists and contains cd-specific code (unified wrapper uses __gitusrcd for bash)
+	wrapperPath := filepath.Join(xdgDataHome, "gitusr", "hooks", "cd-env.sh")
 	wrapper, err := os.ReadFile(wrapperPath)
 	if err != nil {
 		t.Fatalf("read wrapper file: %v", err)
 	}
-	if !strings.Contains(string(wrapper), "__gitusr_use_if_found") {
-		t.Errorf("wrapper should contain '__gitusr_use_if_found', got:\n%s", string(wrapper))
+	if !strings.Contains(string(wrapper), "__gitusrcd") {
+		t.Errorf("wrapper should contain '__gitusrcd', got:\n%s", string(wrapper))
 	}
 
 	// Uninstall cd hook
@@ -129,13 +129,13 @@ func TestHookInstallUninstall_CD(t *testing.T) {
 		t.Errorf("expected 'successfully uninstalled' in output, got: %s", output)
 	}
 
-	// Verify .bashrc no longer contains the hook block
+	// Verify .bashrc no longer contains the cd block
 	bashrc, err = os.ReadFile(bashrcPath)
 	if err != nil {
 		t.Fatalf("read .bashrc after uninstall: %v", err)
 	}
-	if strings.Contains(string(bashrc), "# gitusr hook begin") {
-		t.Errorf(".bashrc should NOT contain '# gitusr hook begin' after uninstall, got:\n%s", string(bashrc))
+	if strings.Contains(string(bashrc), "# gitusr cd begin") {
+		t.Errorf(".bashrc should NOT contain '# gitusr cd begin' after uninstall, got:\n%s", string(bashrc))
 	}
 }
 
