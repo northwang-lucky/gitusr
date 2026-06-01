@@ -35,15 +35,32 @@ if [[ ! -f "$PROJECT_ROOT/go.mod" ]]; then
     exit 1
 fi
 
-E2E_SCRIPT="$PROJECT_ROOT/scripts/e2e-test.sh"
+# ─── Select E2E script based on shell ────────────────────────────────────────
+SHELL_TYPE="${GITUSR_E2E_SHELL:-bash}"
+case "$SHELL_TYPE" in
+    bash)
+        E2E_SCRIPT="$PROJECT_ROOT/scripts/e2e-test.sh"
+        E2E_SHELL="bash"
+        ;;
+    zsh)
+        E2E_SCRIPT="$PROJECT_ROOT/scripts/e2e-zsh-test.sh"
+        E2E_SHELL="zsh"
+        ;;
+    *)
+        echo "ERROR: GITUSR_E2E_SHELL must be 'bash' or 'zsh' (got: '$SHELL_TYPE')" >&2
+        exit 1
+        ;;
+esac
+
 if [[ ! -f "$E2E_SCRIPT" ]]; then
-    echo "ERROR: e2e-test.sh not found at $E2E_SCRIPT" >&2
+    echo "ERROR: $(basename "$E2E_SCRIPT") not found at $E2E_SCRIPT" >&2
     exit 1
 fi
 
 echo "=== gitusr E2E Sandbox Test ==="
 echo "GOROOT:      $GOROOT"
 echo "PROJECT:     $PROJECT_ROOT"
+echo "SHELL:       $E2E_SHELL"
 
 # ─── Run E2E inside bubblewrap sandbox ─────────────────────────────────────
 # The sandbox inherits the host filesystem and selectively overrides mounts.
@@ -69,7 +86,7 @@ bwrap \
     --setenv HOME /root \
     --setenv GOROOT /usr/local/go \
     --setenv PATH "/usr/local/go/bin:/usr/bin:/bin" \
-    bash /src/scripts/e2e-test.sh
+    "$E2E_SHELL" "/src/scripts/$(basename "$E2E_SCRIPT")"
 
 EXIT_CODE=$?
 
