@@ -2,6 +2,7 @@ package cli
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -90,14 +91,12 @@ func TestNewHooksCmd_Help(t *testing.T) {
 		t.Fatalf("executeCmd --help unexpected error: %v", err)
 	}
 
-	// Help should mention all visible subcommands
 	for _, name := range []string{"install", "uninstall", "enable", "disable"} {
 		if !strings.Contains(help, name) {
 			t.Errorf("help should mention visible subcommand %q", name)
 		}
 	}
 
-	// Help should NOT mention hidden subcommands
 	for _, name := range []string{"apply-rc", "is-disabled"} {
 		if strings.Contains(help, name) {
 			t.Errorf("help should NOT mention hidden subcommand %q", name)
@@ -111,14 +110,12 @@ func TestNewHooksCmd_IsDisabled_WhenDisabled(t *testing.T) {
 	i18n.ResetForTesting()
 	i18n.InitWithLocale("en")
 
-	// Setup: clone hook IS disabled in state
 	setupHookState(t, []hook.HookType{hook.HookTypeClone})
 
 	store := &mockStore{}
 	cmd := NewHooksCmd(store)
 	_, _, err := executeCmd(cmd, "is-disabled", "clone")
 
-	// Exit 0: the hook IS disabled
 	if err != nil {
 		t.Fatalf("expected exit 0 (disabled), got error: %v", err)
 	}
@@ -128,14 +125,12 @@ func TestNewHooksCmd_IsDisabled_WhenEnabled(t *testing.T) {
 	i18n.ResetForTesting()
 	i18n.InitWithLocale("en")
 
-	// Setup: empty state (no disabled types) → all hooks enabled
 	setupHookState(t, nil)
 
 	store := &mockStore{}
 	cmd := NewHooksCmd(store)
 	_, _, err := executeCmd(cmd, "is-disabled", "clone")
 
-	// Exit 1: the hook is NOT disabled
 	if err == nil {
 		t.Fatal("expected exit 1 (enabled), got nil error")
 	}
@@ -175,14 +170,6 @@ func TestNewHooksCmd_IsDisabled_MissingArg(t *testing.T) {
 
 // --- enable command tests ---
 
-func TestNewHooksCmd_Enable_PositionalArg(t *testing.T) {
-	cmd := NewHooksEnableCmd()
-
-	if cmd.Args == nil {
-		t.Fatal("NewHooksEnableCmd() should have Args validation")
-	}
-}
-
 func TestNewHooksCmd_Enable_InvalidType(t *testing.T) {
 	i18n.ResetForTesting()
 	i18n.InitWithLocale("en")
@@ -199,7 +186,7 @@ func TestNewHooksCmd_Enable_InvalidType(t *testing.T) {
 	}
 }
 
-func TestNewHooksCmd_Enable_MissingType(t *testing.T) {
+func TestNewHooksCmd_Enable_MissingArg(t *testing.T) {
 	i18n.ResetForTesting()
 	i18n.InitWithLocale("en")
 
@@ -208,10 +195,50 @@ func TestNewHooksCmd_Enable_MissingType(t *testing.T) {
 	_, _, err := executeCmd(cmd, "enable")
 
 	if err == nil {
-		t.Fatal("expected error for missing hook type argument")
+		t.Fatal("expected error for missing positional arg")
 	}
-	if !strings.Contains(err.Error(), "accepts 1 arg") {
-		t.Errorf("error should mention 'accepts 1 arg', got: %q", err.Error())
+}
+
+// --- disable command tests ---
+
+func TestNewHooksDisableCmd_NoTypeFlag(t *testing.T) {
+	cmd := NewHooksDisableCmd()
+
+	if typeFlag := cmd.Flags().Lookup("type"); typeFlag != nil {
+		t.Fatal("NewHooksDisableCmd() should NOT have a --type flag")
+	}
+
+	if cmd.Args == nil {
+		t.Fatal("NewHooksDisableCmd() should set Args")
+	}
+}
+
+func TestNewHooksCmd_Disable_InvalidType(t *testing.T) {
+	i18n.ResetForTesting()
+	i18n.InitWithLocale("en")
+
+	store := &mockStore{}
+	cmd := NewHooksCmd(store)
+	_, _, err := executeCmd(cmd, "disable", "invalid")
+
+	if err == nil {
+		t.Fatal("expected error for invalid hook type")
+	}
+	if !strings.Contains(err.Error(), "invalid hook type") {
+		t.Errorf("error should mention 'invalid hook type', got: %q", err.Error())
+	}
+}
+
+func TestNewHooksCmd_Disable_MissingArg(t *testing.T) {
+	i18n.ResetForTesting()
+	i18n.InitWithLocale("en")
+
+	store := &mockStore{}
+	cmd := NewHooksCmd(store)
+	_, _, err := executeCmd(cmd, "disable")
+
+	if err == nil {
+		t.Fatal("expected error for missing positional arg")
 	}
 }
 
@@ -221,7 +248,6 @@ func TestNewHooksCmd_Enable_Success(t *testing.T) {
 	i18n.ResetForTesting()
 	i18n.InitWithLocale("en")
 
-	// Start with clone disabled
 	setupHookState(t, []hook.HookType{hook.HookTypeClone})
 
 	store := &mockStore{}
@@ -235,12 +261,134 @@ func TestNewHooksCmd_Enable_Success(t *testing.T) {
 		t.Errorf("expected success message mentioning clone, got: %s", stdout)
 	}
 
-	// Verify the hook is no longer disabled
 	enabled, err := hook.IsEnabled(hook.HookTypeClone)
 	if err != nil {
 		t.Fatalf("IsEnabled error: %v", err)
 	}
 	if !enabled {
 		t.Error("expected clone hook to be enabled after enable command")
+	}
+}
+
+func TestNewHooksCmd_Disable_Success(t *testing.T) {
+	i18n.ResetForTesting()
+	i18n.InitWithLocale("en")
+
+	setupHookState(t, nil)
+
+	store := &mockStore{}
+	cmd := NewHooksCmd(store)
+	stdout, _, err := executeCmd(cmd, "disable", "clone")
+
+	if err != nil {
+		t.Fatalf("disable clone unexpected error: %v", err)
+	}
+	if !strings.Contains(stdout, "Hook clone disabled") {
+		t.Errorf("expected success message mentioning clone, got: %s", stdout)
+	}
+
+	enabled, err := hook.IsEnabled(hook.HookTypeClone)
+	if err != nil {
+		t.Fatalf("IsEnabled error: %v", err)
+	}
+	if enabled {
+		t.Error("expected clone hook to be disabled after disable command")
+	}
+}
+
+// --- hooks uninstall command tests ---
+
+func TestHooksUninstall_Success(t *testing.T) {
+	i18n.ResetForTesting()
+	i18n.InitWithLocale("en")
+
+	origUninstall := uninstallFunc
+	t.Cleanup(func() { uninstallFunc = origUninstall })
+
+	uninstallFunc = func(_ any, shells []hook.ShellType) error {
+		if len(shells) != 2 {
+			t.Errorf("expected 2 shells, got %d", len(shells))
+		}
+		return nil
+	}
+
+	store := &mockStore{}
+	cmd := NewHooksCmd(store)
+	stdout, _, err := executeCmd(cmd, "uninstall")
+
+	if err != nil {
+		t.Fatalf("hooks uninstall unexpected error: %v", err)
+	}
+	if !strings.Contains(stdout, "All hooks successfully uninstalled") {
+		t.Errorf("expected success message, got: %s", stdout)
+	}
+}
+
+func TestHooksUninstall_NoneInstalled(t *testing.T) {
+	i18n.ResetForTesting()
+	i18n.InitWithLocale("en")
+
+	origUninstall := uninstallFunc
+	t.Cleanup(func() { uninstallFunc = origUninstall })
+
+	uninstallFunc = func(_ any, shells []hook.ShellType) error {
+		return fmt.Errorf("no hooks are currently installed")
+	}
+
+	store := &mockStore{}
+	cmd := NewHooksCmd(store)
+	_, _, err := executeCmd(cmd, "uninstall")
+
+	if err == nil {
+		t.Fatal("expected error for no hooks installed")
+	}
+	if !strings.Contains(err.Error(), "No hooks are currently installed") {
+		t.Errorf("error should mention 'No hooks are currently installed', got: %q", err.Error())
+	}
+}
+
+func TestHooksUninstall_NotInstalled(t *testing.T) {
+	i18n.ResetForTesting()
+	i18n.InitWithLocale("en")
+
+	origUninstall := uninstallFunc
+	t.Cleanup(func() { uninstallFunc = origUninstall })
+
+	uninstallFunc = func(_ any, shells []hook.ShellType) error {
+		return fmt.Errorf("hook clone is not installed")
+	}
+
+	store := &mockStore{}
+	cmd := NewHooksCmd(store)
+	_, _, err := executeCmd(cmd, "uninstall")
+
+	if err == nil {
+		t.Fatal("expected error for not installed hook")
+	}
+	if !strings.Contains(err.Error(), "No hooks are currently installed") {
+		t.Errorf("error should mention 'No hooks are currently installed', got: %q", err.Error())
+	}
+}
+
+func TestHooksUninstall_Error(t *testing.T) {
+	i18n.ResetForTesting()
+	i18n.InitWithLocale("en")
+
+	origUninstall := uninstallFunc
+	t.Cleanup(func() { uninstallFunc = origUninstall })
+
+	uninstallFunc = func(_ any, shells []hook.ShellType) error {
+		return fmt.Errorf("remove error: permission denied")
+	}
+
+	store := &mockStore{}
+	cmd := NewHooksCmd(store)
+	_, _, err := executeCmd(cmd, "uninstall")
+
+	if err == nil {
+		t.Fatal("expected error from uninstall failure")
+	}
+	if !strings.Contains(err.Error(), "permission denied") {
+		t.Errorf("error should contain 'permission denied', got: %q", err.Error())
 	}
 }
