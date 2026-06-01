@@ -457,6 +457,10 @@ other = "All hooks successfully installed"
 hash = "sha1:dummy"
 other = "All hooks are already installed"
 
+[cli.hooks.install.source_hint]
+hash = "sha1:dummy"
+other = "Please run 'source {{.RcFile}}' to apply the {{.Shell}} hooks"
+
 [cli.hooks.uninstall.short]
 hash = "sha1:dummy"
 other = "Remove all hook wrappers"

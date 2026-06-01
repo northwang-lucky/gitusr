@@ -15,8 +15,9 @@ metadata:
 
 - 发布仓库：`northwang-lucky/gitusr`。
 - 默认分支：`main`。
-- Release Please 工作流：`.github/workflows/release-please.yml`，在 `main` push 后运行并创建/更新 Release PR。
-- Release 工作流：`.github/workflows/release.yml`，在 `Release Please` 完成或 `v*` tag push 后运行 GoReleaser。
+- Release Please 工作流：`.github/workflows/release-please.yml`，在 `main` push 后运行。包含两个阶段：
+  1. `release-please` 作业：分析提交并创建/更新 Release PR；当 Release PR 合并后再次运行时会创建 release + tag
+  2. `goreleaser` 作业：仅在 `release-please` 实际创建了 release（`release_created == 'true'`）时运行，构建二进制并更新 Homebrew tap
 - GoReleaser 配置：`.goreleaser.yaml`，构建 `darwin/linux` 的 `amd64/arm64` 二进制，并更新 `northwang-lucky/homebrew-tap`。
 - Homebrew tap 需要仓库 secret：`HOMEBREW_TAP_GITHUB_TOKEN`。
 - 本项目质量门禁：`mise run test`。
@@ -173,19 +174,16 @@ git log --oneline -5
 
 ## 5. 跟进 GitHub Actions 发布流程
 
-先跟进 Release Please：
+### 5.1 跟进 Release Please 工作流
+
+当业务 PR 合并到 main 后，Release Please 工作流会自动运行（创建/更新 Release PR）：
 
 ```bash
 gh run list --workflow "Release Please" --branch main --limit 5
 gh run watch <run-id> --exit-status
 ```
 
-Release Please 成功后有两种结果：
-
-1. 创建或更新 Release PR：提示用户需要合并 Release Please PR 才会创建 tag/release。
-2. 已创建 release/tag：继续跟进 Release 工作流。
-
-查找 Release Please PR：
+Release Please 成功后，检查是否创建了 Release PR：
 
 ```bash
 gh pr list --search "Release Please" --state open --base main
@@ -197,12 +195,18 @@ gh pr list --search "Release Please" --state open --base main
 2. 用户确认后，按第 3 步的检查与合并规则合并该 PR。
 3. 合并后再次 `git switch main && git pull --ff-only origin main`。
 
-跟进 Release 工作流：
+### 5.2 跟进 GoReleaser 构建
+
+Release Please PR 合并后，Release Please 会再次运行并**自动创建 release + tag**。此时同一工作流中的 `goreleaser` 作业会被触发（条件：`release_created == 'true'`），构建二进制并上传 release assets。
+
+监控工作流：
 
 ```bash
-gh run list --workflow "Release" --limit 10
+gh run list --workflow "Release Please" --branch main --limit 5
 gh run watch <run-id> --exit-status
 ```
+
+> **注意**：不需要单独跟进 "Release" 工作流。GoReleaser 已内嵌在 Release Please 工作流中作为依赖作业。
 
 如果失败，收集失败原因：
 
@@ -216,7 +220,6 @@ gh run view <run-id> --log-failed
 - `HOMEBREW_TAP_GITHUB_TOKEN` 是否缺失或权限不足。
 - Go 版本是否与 `go.mod` / `mise.toml` 不一致。
 - GoReleaser 配置或 Homebrew tap 路径是否错误。
-- Release Please 是否只创建了 PR、尚未创建 tag。
 - GitHub token 权限是否不足以写 release contents。
 
 失败时不要盲目重跑。先向用户报告：
