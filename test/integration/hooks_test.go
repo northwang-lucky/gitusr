@@ -532,6 +532,14 @@ func TestHooksWrapperBashContent(t *testing.T) {
 	if !strings.Contains(wrapperContent, "--gu-email") {
 		t.Error("wrapper should contain --gu-email argument extraction")
 	}
+
+	// Verify single-user pass-through logic (user_count check and -le 1 threshold)
+	if !strings.Contains(wrapperContent, "user_count") {
+		t.Error("wrapper should contain single-user check variable (user_count)")
+	}
+	if !strings.Contains(wrapperContent, "-le 1") {
+		t.Error("wrapper should contain pass-through threshold (-le 1)")
+	}
 }
 
 // ---------------------------------------------------------------------------
