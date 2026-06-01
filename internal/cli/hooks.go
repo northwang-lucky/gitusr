@@ -1,7 +1,6 @@
 package cli
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -21,83 +20,11 @@ func NewHooksCmd(store domain.UserStore) *cobra.Command {
 	cmd.AddCommand(
 		NewHookInstallCmd(store),
 		NewHookUninstallCmd(store),
-		NewHookEnableCmd(),
-		NewHookDisableCmd(),
-		NewHooksApplyRCCmd(store),
+		NewHooksEnableCmd(),
+		NewHooksDisableCmd(),
+		NewHookApplyRCCmd(store),
 		newHookIsDisabledCmd(),
 	)
-
-	return cmd
-}
-
-// NewHookEnableCmd creates the "hooks enable" command.
-// It re-enables a previously disabled hook type without reinstalling it.
-func NewHookEnableCmd() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "enable",
-		Short: "Enable a hook type",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			typeStr, err := cmd.Flags().GetString("type")
-			if err != nil {
-				return err
-			}
-
-			if typeStr == "" {
-				return errors.New("--type flag is required for enable")
-			}
-
-			hookType := hook.HookType(typeStr)
-			if !isValidHookType(hookType) {
-				return fmt.Errorf("invalid hook type: %q, must be %q, %q, or %q",
-					typeStr, hook.HookTypeClone, hook.HookTypeCommit, hook.HookTypeCD)
-			}
-
-			if err := hook.EnableHook(hookType); err != nil {
-				return err
-			}
-
-			fmt.Printf("Hook type %q enabled\n", hookType)
-			return nil
-		},
-	}
-
-	cmd.Flags().String("type", "", "Hook type to enable (clone, commit, cd)")
-
-	return cmd
-}
-
-// NewHookDisableCmd creates the "hooks disable" command.
-// It disables a hook type without uninstalling it, so it can be re-enabled later.
-func NewHookDisableCmd() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "disable",
-		Short: "Disable a hook type",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			typeStr, err := cmd.Flags().GetString("type")
-			if err != nil {
-				return err
-			}
-
-			if typeStr == "" {
-				return errors.New("--type flag is required for disable")
-			}
-
-			hookType := hook.HookType(typeStr)
-			if !isValidHookType(hookType) {
-				return fmt.Errorf("invalid hook type: %q, must be %q, %q, or %q",
-					typeStr, hook.HookTypeClone, hook.HookTypeCommit, hook.HookTypeCD)
-			}
-
-			if err := hook.DisableHook(hookType); err != nil {
-				return err
-			}
-
-			fmt.Printf("Hook type %q disabled\n", hookType)
-			return nil
-		},
-	}
-
-	cmd.Flags().String("type", "", "Hook type to disable (clone, commit, cd)")
 
 	return cmd
 }
@@ -123,12 +50,10 @@ func newHookIsDisabledCmd() *cobra.Command {
 				return err
 			}
 
-			// exit 0: hook IS disabled
 			if !enabled {
 				return nil
 			}
 
-			// exit 1: hook is NOT disabled
 			return fmt.Errorf("hook type %q is not disabled", typeStr)
 		},
 	}

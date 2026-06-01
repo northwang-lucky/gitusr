@@ -175,15 +175,11 @@ func TestNewHooksCmd_IsDisabled_MissingArg(t *testing.T) {
 
 // --- enable command tests ---
 
-func TestNewHooksCmd_Enable_FlagRegistration(t *testing.T) {
-	cmd := NewHookEnableCmd()
+func TestNewHooksCmd_Enable_PositionalArg(t *testing.T) {
+	cmd := NewHooksEnableCmd()
 
-	typeFlag := cmd.Flags().Lookup("type")
-	if typeFlag == nil {
-		t.Fatal("NewHookEnableCmd() should have --type flag")
-	}
-	if typeFlag.Usage == "" {
-		t.Error("--type flag should have a usage description")
+	if cmd.Args == nil {
+		t.Fatal("NewHooksEnableCmd() should have Args validation")
 	}
 }
 
@@ -193,7 +189,7 @@ func TestNewHooksCmd_Enable_InvalidType(t *testing.T) {
 
 	store := &mockStore{}
 	cmd := NewHooksCmd(store)
-	_, _, err := executeCmd(cmd, "enable", "--type", "invalid")
+	_, _, err := executeCmd(cmd, "enable", "invalid")
 
 	if err == nil {
 		t.Fatal("expected error for invalid hook type")
@@ -212,56 +208,10 @@ func TestNewHooksCmd_Enable_MissingType(t *testing.T) {
 	_, _, err := executeCmd(cmd, "enable")
 
 	if err == nil {
-		t.Fatal("expected error for missing --type flag")
+		t.Fatal("expected error for missing hook type argument")
 	}
-	if !strings.Contains(err.Error(), "--type flag") {
-		t.Errorf("error should mention --type flag, got: %q", err.Error())
-	}
-}
-
-// --- disable command tests ---
-
-func TestNewHooksCmd_Disable_FlagRegistration(t *testing.T) {
-	cmd := NewHookDisableCmd()
-
-	typeFlag := cmd.Flags().Lookup("type")
-	if typeFlag == nil {
-		t.Fatal("NewHookDisableCmd() should have --type flag")
-	}
-	if typeFlag.Usage == "" {
-		t.Error("--type flag should have a usage description")
-	}
-}
-
-func TestNewHooksCmd_Disable_InvalidType(t *testing.T) {
-	i18n.ResetForTesting()
-	i18n.InitWithLocale("en")
-
-	store := &mockStore{}
-	cmd := NewHooksCmd(store)
-	_, _, err := executeCmd(cmd, "disable", "--type", "invalid")
-
-	if err == nil {
-		t.Fatal("expected error for invalid hook type")
-	}
-	if !strings.Contains(err.Error(), "invalid hook type") {
-		t.Errorf("error should mention 'invalid hook type', got: %q", err.Error())
-	}
-}
-
-func TestNewHooksCmd_Disable_MissingType(t *testing.T) {
-	i18n.ResetForTesting()
-	i18n.InitWithLocale("en")
-
-	store := &mockStore{}
-	cmd := NewHooksCmd(store)
-	_, _, err := executeCmd(cmd, "disable")
-
-	if err == nil {
-		t.Fatal("expected error for missing --type flag")
-	}
-	if !strings.Contains(err.Error(), "--type flag") {
-		t.Errorf("error should mention --type flag, got: %q", err.Error())
+	if !strings.Contains(err.Error(), "accepts 1 arg") {
+		t.Errorf("error should mention 'accepts 1 arg', got: %q", err.Error())
 	}
 }
 
@@ -276,12 +226,12 @@ func TestNewHooksCmd_Enable_Success(t *testing.T) {
 
 	store := &mockStore{}
 	cmd := NewHooksCmd(store)
-	stdout, _, err := executeCmd(cmd, "enable", "--type", "clone")
+	stdout, _, err := executeCmd(cmd, "enable", "clone")
 
 	if err != nil {
-		t.Fatalf("enable --type clone unexpected error: %v", err)
+		t.Fatalf("enable clone unexpected error: %v", err)
 	}
-	if !strings.Contains(stdout, "Hook type \"clone\" enabled") {
+	if !strings.Contains(stdout, "Hook clone enabled") {
 		t.Errorf("expected success message mentioning clone, got: %s", stdout)
 	}
 
@@ -292,33 +242,5 @@ func TestNewHooksCmd_Enable_Success(t *testing.T) {
 	}
 	if !enabled {
 		t.Error("expected clone hook to be enabled after enable command")
-	}
-}
-
-func TestNewHooksCmd_Disable_Success(t *testing.T) {
-	i18n.ResetForTesting()
-	i18n.InitWithLocale("en")
-
-	// Start with clean state (no disabled types)
-	setupHookState(t, nil)
-
-	store := &mockStore{}
-	cmd := NewHooksCmd(store)
-	stdout, _, err := executeCmd(cmd, "disable", "--type", "clone")
-
-	if err != nil {
-		t.Fatalf("disable --type clone unexpected error: %v", err)
-	}
-	if !strings.Contains(stdout, "Hook type \"clone\" disabled") {
-		t.Errorf("expected success message mentioning clone, got: %s", stdout)
-	}
-
-	// Verify the hook is now disabled
-	enabled, err := hook.IsEnabled(hook.HookTypeClone)
-	if err != nil {
-		t.Fatalf("IsEnabled error: %v", err)
-	}
-	if enabled {
-		t.Error("expected clone hook to be disabled after disable command")
 	}
 }
