@@ -302,70 +302,97 @@ gitusr replace old@wrong.com --with-name "North Wang" --with-email "north@exampl
 
 ---
 
-### `gitusr hook` — 管理 Shell 自动切换钩子
+### `gitusr hooks` — 管理 Shell 自动切换钩子
 
 安装 Shell 钩子后，`gitusr` 可以在 `git clone`、`git commit`、`cd` 等操作中自动检测并切换 Git 用户身份。
 
 **用法：**
 
 ```bash
-gitusr hook <subcommand> [flags]
+gitusr hooks <subcommand> [flags]
 ```
 
 **子命令：**
 
 | 子命令 | 说明 |
 |--------|------|
-| `install` | 安装 shell 钩子 |
-| `uninstall` | 卸载 shell 钩子 |
+| `install` | 安装所有 shell 钩子（bash + zsh） |
+| `uninstall` | 卸载所有 shell 钩子 |
+| `enable` | 启用指定类型的钩子 |
+| `disable` | 禁用指定类型的钩子 |
 
-#### `gitusr hook install`
+#### `gitusr hooks install`
 
-为当前 Shell（bash 和 zsh）安装自动切换钩子。支持三种类型：
+为当前 Shell（bash 和 zsh）安装所有自动切换钩子。操作是幂等的 —— 如果所有钩子都已安装，会提示已安装并退出。
+
+安装后支持三种钩子类型：
 
 - **`clone`** — `git clone` 结束后自动进入仓库目录并调用 `gitusr use` 切换用户。支持通过 `--gu-name` / `--gu-email` 参数在非 TTY 环境下指定用户
 - **`commit`** — `git commit` 时自动读取 `.gitusrrc` 并应用用户
 - **`cd`** — `cd` 到包含 `.gitusrrc` 的目录时自动应用用户
 
-**标志：**
-
-| 标志 | 简写 | 说明 |
-|------|------|------|
-| `--type` | | 钩子类型：`clone`、`commit` 或 `cd` |
-| `--all` | `-a` | 安装所有三种钩子 |
-
 **示例：**
 
 ```bash
-# 安装 cd 钩子（切换目录时自动应用 .gitusrrc）
-gitusr hook install --type cd
-
-# 安装 clone 钩子（git clone 时自动切换用户）
-gitusr hook install --type clone
-
-# 安装所有钩子
-gitusr hook install --all
+# 安装所有钩子（bash + zsh）
+gitusr hooks install
 ```
 
-#### `gitusr hook uninstall`
+#### `gitusr hooks uninstall`
 
-卸载已安装的 shell 钩子。
-
-**标志：**
-
-| 标志 | 简写 | 说明 |
-|------|------|------|
-| `--type` | | 钩子类型：`clone`、`commit` 或 `cd` |
-| `--all` | `-a` | 卸载所有钩子 |
+卸载所有已安装的 shell 钩子。
 
 **示例：**
 
 ```bash
-# 卸载 cd 钩子
-gitusr hook uninstall --type cd
-
 # 卸载所有钩子
-gitusr hook uninstall --all
+gitusr hooks uninstall
+```
+
+#### `gitusr hooks enable`
+
+启用指定类型的钩子（恢复之前被禁用的钩子）。
+
+**用法：**
+
+```bash
+gitusr hooks enable <clone|commit|cd>
+```
+
+**示例：**
+
+```bash
+# 启用 clone 钩子
+gitusr hooks enable clone
+
+# 启用 commit 钩子
+gitusr hooks enable commit
+
+# 启用 cd 钩子
+gitusr hooks enable cd
+```
+
+#### `gitusr hooks disable`
+
+禁用指定类型的钩子，使其不再触发，但保留安装状态。
+
+**用法：**
+
+```bash
+gitusr hooks disable <clone|commit|cd>
+```
+
+**示例：**
+
+```bash
+# 禁用 clone 钩子
+gitusr hooks disable clone
+
+# 禁用 commit 钩子
+gitusr hooks disable commit
+
+# 禁用 cd 钩子
+gitusr hooks disable cd
 ```
 
 #### `.gitusrrc` 文件
