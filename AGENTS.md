@@ -25,6 +25,7 @@
 │   └── xdgpath/         # XDG data path resolution and legacy path helpers
 ├── scripts/             # Manual sandbox/E2E shell scripts
 ├── test/integration/    # Real binary + real git repo workflow tests
+├── .agents/skills/      # Project-local OpenCode/agent skills shared with this repo
 ├── dist/                # Release artifacts; do not treat as source
 ├── mise.toml            # Build/test/install tasks
 ├── .goreleaser.yaml     # Release packaging and Homebrew Formula config
@@ -45,6 +46,7 @@
 | Add unit tests | Package-local `*_test.go` | Most tests override package-level function vars with `t.Cleanup()` |
 | Add full workflow tests | `test/integration/` | Builds binary once, uses temp HOME/XDG and real git repos |
 | Release packaging | `.goreleaser.yaml`, `release-please-config.json` | GoReleaser injects `internal/version.Version`; Homebrew tap token comes from env |
+| Publish binary release | `.agents/skills/publish-binary/SKILL.md` | Project-local SOP for branch checks, PR merge, Release Please, GoReleaser, and GitHub Actions follow-up |
 
 ## CODE MAP
 | Symbol | Type | Location | Role |
