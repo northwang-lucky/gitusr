@@ -12,7 +12,7 @@ func TestWriteWrapperFile(t *testing.T) {
 	t.Setenv("XDG_DATA_HOME", tmpDir)
 
 	content := "test wrapper content"
-	path, err := WriteWrapperFile(ShellTypeBash, content)
+	path, err := WriteWrapperFile(HookTypeClone, ShellTypeBash, content)
 	if err != nil {
 		t.Fatalf("WriteWrapperFile failed: %v", err)
 	}
@@ -41,7 +41,7 @@ func TestWriteWrapperFile_CreateDir(t *testing.T) {
 		t.Fatal("hooks dir should not exist yet")
 	}
 
-	path, err := WriteWrapperFile(ShellTypeZsh, "content")
+	path, err := WriteWrapperFile(HookTypeClone, ShellTypeZsh, "content")
 	if err != nil {
 		t.Fatalf("WriteWrapperFile failed: %v", err)
 	}
@@ -228,8 +228,8 @@ func TestAppendSourceLine_WithCDMarker(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// Second call: different path (simulating CD hook)
-	err = AppendSourceLine(ShellTypeBash, "/path/cd-env.sh")
+	// Second call: different path (CD hook uses AppendCDSourceLine)
+	err = AppendCDSourceLine(ShellTypeBash, "/path/cd-env.sh")
 	if err != nil {
 		t.Fatal(err)
 	}

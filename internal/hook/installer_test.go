@@ -7,6 +7,35 @@ import (
 	"testing"
 )
 
+// verifyBashrcHasCDBlock checks that the .bashrc file contains exactly one gitusr CD block.
+func verifyBashrcHasCDBlock(t *testing.T, homeDir string, wrapperPath string) {
+	t.Helper()
+
+	bashrc := filepath.Join(homeDir, ".bashrc")
+	data, err := os.ReadFile(bashrc)
+	if err != nil {
+		t.Fatalf("failed to read .bashrc: %v", err)
+	}
+
+	content := string(data)
+
+	// Verify CD markers appear exactly once
+	beginCount := strings.Count(content, "# gitusr cd begin")
+	if beginCount != 1 {
+		t.Errorf("expected 1 %q, got %d", "# gitusr cd begin", beginCount)
+	}
+
+	endCount := strings.Count(content, "# gitusr cd end")
+	if endCount != 1 {
+		t.Errorf("expected 1 %q, got %d", "# gitusr cd end", endCount)
+	}
+
+	// Verify source line contains the wrapper path
+	if !strings.Contains(content, "source "+wrapperPath) {
+		t.Errorf("expected source %s in .bashrc, got:\n%s", wrapperPath, content)
+	}
+}
+
 // verifyBashrcHasBlock checks that the .bashrc file contains exactly one gitusr hook block.
 func verifyBashrcHasBlock(t *testing.T, homeDir string, wrapperPath string) {
 	t.Helper()
@@ -218,8 +247,8 @@ func TestInstall_CD_FirstTime(t *testing.T) {
 		t.Errorf("result.Shell = %q, want %q", r.Shell, ShellTypeBash)
 	}
 
-	// Verify .bashrc was updated
-	verifyBashrcHasBlock(t, tmpDir, r.FilePath)
+	// Verify .bashrc was updated with CD markers
+	verifyBashrcHasCDBlock(t, tmpDir, r.FilePath)
 
 	// Verify wrapper file exists
 	verifyWrapperFileExists(t, r.FilePath)

@@ -53,7 +53,12 @@ func Install(hookType HookType, shells []ShellType) ([]HookInstallResult, error)
 		}
 
 		// Append source line to shell config
-		if err := AppendSourceLine(shell, filePath); err != nil {
+		if hookType == HookTypeCD {
+			err = AppendCDSourceLine(shell, filePath)
+		} else {
+			err = AppendSourceLine(shell, filePath)
+		}
+		if err != nil {
 			return results, fmt.Errorf("update shell config for %s: %w", shell, err)
 		}
 
