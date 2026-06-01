@@ -151,7 +151,7 @@ func TestHookUninstall_Success(t *testing.T) {
 	origUninstall := uninstallFunc
 	t.Cleanup(func() { uninstallFunc = origUninstall })
 
-	uninstallFunc = func(hookType hook.HookType, shells []hook.ShellType) error {
+	uninstallFunc = func(_ any, shells []hook.ShellType) error {
 		return nil
 	}
 
@@ -175,8 +175,8 @@ func TestHookUninstall_NotInstalled(t *testing.T) {
 	origUninstall := uninstallFunc
 	t.Cleanup(func() { uninstallFunc = origUninstall })
 
-	uninstallFunc = func(hookType hook.HookType, shells []hook.ShellType) error {
-		return fmt.Errorf("hook %s is not installed", hookType)
+	uninstallFunc = func(_ any, shells []hook.ShellType) error {
+		return fmt.Errorf("hook commit is not installed")
 	}
 
 	store := &mockStore{initialized: true}
@@ -199,7 +199,7 @@ func TestHookUninstall_Success_CD(t *testing.T) {
 	origUninstall := uninstallFunc
 	t.Cleanup(func() { uninstallFunc = origUninstall })
 
-	uninstallFunc = func(hookType hook.HookType, shells []hook.ShellType) error {
+	uninstallFunc = func(_ any, shells []hook.ShellType) error {
 		return nil
 	}
 
@@ -240,7 +240,7 @@ func TestHookUninstall_Error(t *testing.T) {
 	origUninstall := uninstallFunc
 	t.Cleanup(func() { uninstallFunc = origUninstall })
 
-	uninstallFunc = func(hookType hook.HookType, shells []hook.ShellType) error {
+	uninstallFunc = func(_ any, shells []hook.ShellType) error {
 		return fmt.Errorf("remove error: permission denied")
 	}
 
@@ -369,7 +369,7 @@ func TestHookUninstall_Success_ZhCN(t *testing.T) {
 	origUninstall := uninstallFunc
 	t.Cleanup(func() { uninstallFunc = origUninstall })
 
-	uninstallFunc = func(hookType hook.HookType, shells []hook.ShellType) error {
+	uninstallFunc = func(_ any, shells []hook.ShellType) error {
 		return nil
 	}
 
@@ -516,7 +516,7 @@ func TestHookUninstall_All(t *testing.T) {
 	t.Cleanup(func() { uninstallFunc = origUninstall })
 
 	callCount := 0
-	uninstallFunc = func(hookType hook.HookType, shells []hook.ShellType) error {
+	uninstallFunc = func(_ any, shells []hook.ShellType) error {
 		callCount++
 		return nil
 	}
@@ -550,9 +550,9 @@ func TestHookUninstall_All_NotInstalled(t *testing.T) {
 	t.Cleanup(func() { uninstallFunc = origUninstall })
 
 	callCount := 0
-	uninstallFunc = func(hookType hook.HookType, shells []hook.ShellType) error {
+	uninstallFunc = func(_ any, shells []hook.ShellType) error {
 		callCount++
-		return fmt.Errorf("hook %s is not installed", hookType)
+		return fmt.Errorf("hook clone is not installed")
 	}
 
 	store := &mockStore{initialized: true}
@@ -626,7 +626,7 @@ func TestHookUninstall_All_ZhCN(t *testing.T) {
 	origUninstall := uninstallFunc
 	t.Cleanup(func() { uninstallFunc = origUninstall })
 
-	uninstallFunc = func(hookType hook.HookType, shells []hook.ShellType) error {
+	uninstallFunc = func(_ any, shells []hook.ShellType) error {
 		return nil
 	}
 

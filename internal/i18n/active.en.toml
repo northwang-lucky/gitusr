@@ -438,6 +438,18 @@ hash = "sha1:70239e6bc5f24b82fa78c859c25fff3cfdef9c20"
 other = "index {{.Index}} out of bounds (0-{{.Max}})"
 
 # ================================================
+# CLI hooks uninstall messages
+# ================================================
+
+[cli.hooks.uninstall.short]
+hash = "sha1:dummy"
+other = "Uninstall all shell hooks"
+
+[cli.hooks.uninstall.none_installed]
+hash = "sha1:dummy"
+other = "No hooks are currently installed"
+
+# ================================================
 # Gitcmd package messages (internal/gitcmd/)
 # ================================================
 

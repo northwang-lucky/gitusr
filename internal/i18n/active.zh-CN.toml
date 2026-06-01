@@ -434,6 +434,18 @@ hash = "sha1:70239e6bc5f24b82fa78c859c25fff3cfdef9c20"
 other = "索引 {{.Index}} 超出界限（0-{{.Max}}）"
 
 # ================================================
+# CLI hooks uninstall 消息
+# ================================================
+
+[cli.hooks.uninstall.short]
+hash = "sha1:dummy"
+other = "卸载所有 shell 钩子"
+
+[cli.hooks.uninstall.none_installed]
+hash = "sha1:dummy"
+other = "当前没有安装任何钩子"
+
+# ================================================
 # Gitcmd 包消息（internal/gitcmd/）
 # ================================================
 

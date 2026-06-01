@@ -15,7 +15,9 @@ import (
 // installFunc and uninstallFunc are package-level variables to allow
 // test code to inject mock implementations.
 var installFunc = hook.Install
-var uninstallFunc = hook.Uninstall
+var uninstallFunc func(any, []hook.ShellType) error = func(_ any, shells []hook.ShellType) error {
+	return hook.UninstallAll(shells)
+}
 
 // defaultShells returns the list of shell types that hook commands operate on by default.
 func defaultShells() []hook.ShellType {
