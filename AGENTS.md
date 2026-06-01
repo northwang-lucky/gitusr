@@ -1,11 +1,11 @@
 # PROJECT KNOWLEDGE BASE
 
-**Generated:** 2026-05-31
-**Commit:** fcb39ae
+**Generated:** 2026-06-01
+**Commit:** 75070aa
 **Branch:** main
 
 ## OVERVIEW
-`gitusr` is a Go 1.26 CLI for managing and switching Git user identities. It stores identities under XDG data, applies them through `git config`, rewrites mistaken author history with `git-filter-repo`, and can install shell hooks for clone/commit/cd workflows.
+`gitusr` is a Go 1.26.3 Cobra CLI for managing and switching Git user identities. It stores identities under XDG data, applies them through `git config`, rewrites mistaken author history with `git-filter-repo`, and installs bash/zsh shell hooks for clone/commit/cd workflows.
 
 ## STRUCTURE
 ```
@@ -17,7 +17,7 @@
 │   ├── format/          # User-facing stdout/stderr formatting helpers
 │   ├── gitcmd/          # `git config`, backup branch, git-filter-repo wrappers
 │   ├── hook/            # Shell wrapper install/uninstall + .gitusrrc application
-│   ├── i18n/            # Embedded active.*.toml translations and locale state
+│   ├── i18n/            # Embedded active.*.toml translations and locale state; see child AGENTS
 │   ├── prompt/          # survey/v2 prompts for user creation/selection
 │   ├── select/          # User resolution: index > email > name > interactive
 │   ├── store/           # JSON persistence for saved users
@@ -27,34 +27,36 @@
 ├── test/integration/    # Real binary + real git repo workflow tests
 ├── dist/                # Release artifacts; do not treat as source
 ├── mise.toml            # Build/test/install tasks
-└── .goreleaser.yaml     # Release packaging and Homebrew cask config
+├── .goreleaser.yaml     # Release packaging and Homebrew Formula config
+└── release-please-config.json # Release Please changelog/version config
 ```
 
 ## WHERE TO LOOK
 | Task | Location | Notes |
 |------|----------|-------|
 | Add or register a CLI command | `internal/cli/` | Register in `root.go`; command constructors are `NewXxxCmd(...)` |
-| Change hook install/cd/commit behavior | `internal/hook/`, `internal/cli/hook*.go` | Shell snippets are generated Go raw strings; CLI has hidden `hook apply-rc` |
+| Change hook install/cd/commit behavior | `internal/hook/`, `internal/cli/hook*.go` | Shell snippets are generated Go raw strings; CLI has hidden `hooks apply-rc` |
 | Change user data model | `internal/domain/user.go` | Update `UserStore`, `store.JSONStore`, tests, docs |
 | Change persistence path/legacy migration | `internal/xdgpath/`, `internal/store/`, `internal/cli/init.go` | User list and hook state share the XDG gitusr directory |
 | Change git interaction | `internal/gitcmd/runner.go` | Wraps real `git`; replace flow depends on `git-filter-repo` |
 | Change prompts / UX | `internal/prompt/prompt.go`, `internal/i18n/*.toml` | survey prompts + translated messages must stay aligned |
 | Change formatting | `internal/format/format.go` | Keep stdout success messages separate from stderr errors |
+| Change translations | `internal/i18n/`, `internal/i18n/AGENTS.md` | Keep `active.en.toml` and `active.zh-CN.toml` message IDs aligned |
 | Add unit tests | Package-local `*_test.go` | Most tests override package-level function vars with `t.Cleanup()` |
 | Add full workflow tests | `test/integration/` | Builds binary once, uses temp HOME/XDG and real git repos |
-| Release packaging | `.goreleaser.yaml`, `dist/homebrew/Formula/` | GoReleaser injects `internal/version.Version` |
+| Release packaging | `.goreleaser.yaml`, `release-please-config.json` | GoReleaser injects `internal/version.Version`; Homebrew tap token comes from env |
 
 ## CODE MAP
 | Symbol | Type | Location | Role |
 |--------|------|----------|------|
 | `main` | func | `cmd/gitusr/main.go` | Initializes path/i18n/store, derives binary alias, executes root command |
 | `NewRootCmd` | func | `internal/cli/root.go` | Registers add/current/hook/init/list/remove/replace/use and custom i18n usage template |
-| `domain.UserStore` | interface | `internal/domain/user.go` | Persistence seam used by CLI, select, hook apply-rc |
+| `domain.UserStore` | interface | `internal/domain/user.go` | Persistence seam used by CLI, select, hooks apply-rc |
 | `store.JSONStore` | struct | `internal/store/store.go` | JSON file implementation; creates empty list on first `List()` |
 | `sel.ResolveUser` | func | `internal/select/resolver.go` | Resolution priority: index, email, name, then interactive selection |
 | `gitcmd.SetConfig` | func | `internal/gitcmd/runner.go` | Calls `git config [--global] user.name/user.email` |
 | `gitcmd.FilterRepo` | func | `internal/gitcmd/runner.go` | Runs `git-filter-repo` with inline Python author callback |
-| `hook.Install` | func | `internal/hook/installer.go` | Writes shell wrappers, appends marked rc blocks, saves hook state |
+| `hook.InstallAll` | func | `internal/hook/installer.go` | Writes unified bash/zsh wrappers for clone/commit/cd and saves hook state |
 | `hook.Uninstall` | func | `internal/hook/uninstaller.go` | Removes hook type from state; cleans wrappers only when no hook types remain |
 | `hook.ParseRC` | func | `internal/hook/rc.go` | Reads `.gitusrrc`; nil means absent, error means invalid JSON/empty config |
 | `hook.MatchAndApplyRC` | func | `internal/hook/rc.go` | Matches saved user by email then name, applies repo-local git config |
@@ -71,6 +73,7 @@
 - Locale detection priority: `GITUSR_LANG` > `LANGUAGE` > `LANG` > `en`; `zh*` normalizes to `zh-CN`, everything else to `en`.
 - Test seams are package-level vars (`askNewUser`, `SelectFunc`, `getConfigFn`, `installFunc`, `uninstallFunc`, etc.) restored with `t.Cleanup()`.
 - Tests that write HOME/XDG/shell rc state use `t.TempDir()` and `t.Setenv()`; do not touch real user files.
+- Release config is split: Release Please controls changelog sections, GoReleaser controls binary archives and Homebrew Formula output.
 
 ## ANTI-PATTERNS (THIS PROJECT)
 - Do **not** call `os.Exit` inside command `RunE`.
@@ -85,8 +88,8 @@
 - Root command calls `InitDefaultCompletionCmd/HelpCmd/HelpFlag` and then rewrites built-in help/completion descriptions through i18n.
 - The executable name is `filepath.Base(os.Args[0])`, so `gitusr` and `gu` share the same root command with different `Use`.
 - Hook state lives next to `user-list.json` as `hook-state.json`; shell wrappers live in `{XDG_DATA_HOME}/gitusr/hooks/`.
-- Hook install returns `nil, nil` when already installed; CLI interprets nil results as idempotent success.
-- `.gitusrrc` matching uses email priority over name; `hook apply-rc --silent-if-unchanged` avoids repeated output from shell hooks.
+- `hooks install` calls `InstallAll`; nil results mean all hook types are already installed and CLI prints idempotent success.
+- `.gitusrrc` matching uses email priority over name; `hooks apply-rc --silent-if-unchanged` avoids repeated output from shell hooks.
 - `LoadState()` treats missing, empty, and invalid hook-state JSON as an empty state.
 
 ## COMMANDS
@@ -106,8 +109,9 @@ mise run uninstall
 # Clean build artifacts
 mise run clean
 
-# Release packaging config check target is GoReleaser-owned
+# Release packaging config is GoReleaser + Release Please owned
 .goreleaser.yaml
+release-please-config.json
 ```
 
 ## NOTES
@@ -116,3 +120,4 @@ mise run clean
 - `replace` requires `git-filter-repo` available in `PATH` and creates a backup branch before rewriting history.
 - Integration tests require `git`; hook tests also exercise shell rc file writes inside temp HOME.
 - No GitHub Actions or golangci config is present; `mise run test` is the project quality gate.
+- Existing focused child docs: `internal/cli/AGENTS.md`, `internal/hook/AGENTS.md`, `internal/i18n/AGENTS.md`, `test/integration/AGENTS.md`.
