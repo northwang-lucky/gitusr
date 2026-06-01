@@ -10,10 +10,10 @@ Shell-hook engine for automatic git user switching. It writes bash/zsh wrapper f
 |------|----------|-------|
 | Add/remove hook type | `types.go`, `installer.go`, `uninstaller.go` | Update `AllHookTypes`, CLI validation, tests |
 | Change wrapper behavior | `shell_bash.go`, `shell_zsh.go` | Raw shell strings for git clone/commit wrappers |
-| Change cd auto-apply behavior | `env_bash.go`, `env_zsh.go` | Bash aliases `cd`; zsh uses `add-zsh-hook chpwd` |
+| Change cd auto-apply behavior | `shell_bash.go`, `shell_zsh.go` | Bash aliases `cd`; zsh uses `add-zsh-hook chpwd` |
 | Change shell rc mutation | `config_writer.go` | Markers are `# gitusr hook begin/end` |
 | Change persistent hook state | `state.go` | State file is `hook-state.json` next to user list |
-| Change `.gitusrrc` parsing/matching | `rc.go`, `env.go` | Email match wins over name match |
+| Change `.gitusrrc` parsing/matching | `rc.go` | Email match wins over name match |
 | Add tests for filesystem writes | `*_test.go` | Use `t.TempDir()` + `t.Setenv("HOME"/"XDG_DATA_HOME")` |
 
 ## CODE MAP

@@ -28,9 +28,9 @@ func TestHookInstallUninstall_Clone(t *testing.T) {
 	writeJSONFile(t, storePath, users)
 
 	// Install clone hook
-	output, err := runGitusr(t, env, "hook", "install", "--type", "clone")
+	output, err := runGitusr(t, env, "hooks", "install", "--type", "clone")
 	if err != nil {
-		t.Fatalf("hook install --type clone failed: %v\noutput: %s", err, output)
+		t.Fatalf("hooks install --type clone failed: %v\noutput: %s", err, output)
 	}
 	if !strings.Contains(output, "successfully installed") {
 		t.Errorf("expected 'successfully installed' in output, got: %s", output)
@@ -52,13 +52,13 @@ func TestHookInstallUninstall_Clone(t *testing.T) {
 		t.Fatalf("wrapper file does not exist at %s", wrapperPath)
 	}
 
-	// Uninstall clone hook
-	output, err = runGitusr(t, env, "hook", "uninstall", "--type", "clone")
+	// Uninstall all hooks
+	output, err = runGitusr(t, env, "hooks", "uninstall")
 	if err != nil {
-		t.Fatalf("hook uninstall --type clone failed: %v\noutput: %s", err, output)
+		t.Fatalf("hooks uninstall failed: %v\noutput: %s", err, output)
 	}
-	if !strings.Contains(output, "successfully uninstalled") {
-		t.Errorf("expected 'successfully uninstalled' in output, got: %s", output)
+	if !strings.Contains(output, "All hooks successfully uninstalled") {
+		t.Errorf("expected 'All hooks successfully uninstalled' in output, got: %s", output)
 	}
 
 	// Verify .bashrc no longer contains the hook block
@@ -92,9 +92,9 @@ func TestHookInstallUninstall_CD(t *testing.T) {
 	writeJSONFile(t, storePath, users)
 
 	// Install cd hook
-	output, err := runGitusr(t, env, "hook", "install", "--type", "cd")
+	output, err := runGitusr(t, env, "hooks", "install", "--type", "cd")
 	if err != nil {
-		t.Fatalf("hook install --type cd failed: %v\noutput: %s", err, output)
+		t.Fatalf("hooks install --type cd failed: %v\noutput: %s", err, output)
 	}
 	if !strings.Contains(output, "successfully installed") {
 		t.Errorf("expected 'successfully installed' in output, got: %s", output)
@@ -120,13 +120,13 @@ func TestHookInstallUninstall_CD(t *testing.T) {
 		t.Errorf("wrapper should contain '__gitusrcd', got:\n%s", string(wrapper))
 	}
 
-	// Uninstall cd hook
-	output, err = runGitusr(t, env, "hook", "uninstall", "--type", "cd")
+	// Uninstall all hooks
+	output, err = runGitusr(t, env, "hooks", "uninstall")
 	if err != nil {
-		t.Fatalf("hook uninstall --type cd failed: %v\noutput: %s", err, output)
+		t.Fatalf("hooks uninstall failed: %v\noutput: %s", err, output)
 	}
-	if !strings.Contains(output, "successfully uninstalled") {
-		t.Errorf("expected 'successfully uninstalled' in output, got: %s", output)
+	if !strings.Contains(output, "All hooks successfully uninstalled") {
+		t.Errorf("expected 'All hooks successfully uninstalled' in output, got: %s", output)
 	}
 
 	// Verify .bashrc no longer contains the cd block
@@ -155,7 +155,7 @@ func TestHookInstallUninstall_All(t *testing.T) {
 	}
 	writeJSONFile(t, storePath, users)
 
-	output, err := runGitusr(t, env, "hook", "install", "--all")
+	output, err := runGitusr(t, env, "hooks", "install", "--all")
 	if err != nil {
 		t.Fatalf("hook install --all failed: %v\noutput: %s", err, output)
 	}
@@ -198,19 +198,12 @@ func TestHookInstallUninstall_All(t *testing.T) {
 		t.Fatalf("wrapper file does not exist at %s after install --all", wrapperPath)
 	}
 
-	output, err = runGitusr(t, env, "hook", "uninstall", "--all")
+	output, err = runGitusr(t, env, "hooks", "uninstall")
 	if err != nil {
-		t.Fatalf("hook uninstall --all failed: %v\noutput: %s", err, output)
+		t.Fatalf("hooks uninstall failed: %v\noutput: %s", err, output)
 	}
-	for _, want := range []string{
-		"Hook clone successfully uninstalled",
-		"Hook commit successfully uninstalled",
-		"Hook cd successfully uninstalled",
-		"All hooks successfully uninstalled",
-	} {
-		if !strings.Contains(output, want) {
-			t.Errorf("hook uninstall --all output should contain %q, got: %s", want, output)
-		}
+	if !strings.Contains(output, "All hooks successfully uninstalled") {
+		t.Errorf("hooks uninstall output should contain 'All hooks successfully uninstalled', got: %s", output)
 	}
 
 	for _, rcPath := range []string{bashrcPath, zshrcPath} {
@@ -257,7 +250,7 @@ func TestHookSingleUserNoTrigger(t *testing.T) {
 	writeJSONFile(t, storePath, users)
 
 	// Install clone hook
-	_, err := runGitusr(t, env, "hook", "install", "--type", "clone")
+	_, err := runGitusr(t, env, "hooks", "install", "--type", "clone")
 	if err != nil {
 		t.Fatalf("hook install failed: %v", err)
 	}

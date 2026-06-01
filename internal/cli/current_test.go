@@ -5,6 +5,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -60,6 +61,33 @@ func executeCmd(cmd *cobra.Command, args ...string) (stdout, stderr string, err 
 	io.Copy(&bufErr, rErr)
 
 	return bufOut.String(), bufErr.String(), err
+}
+
+// writeRCFile writes a .gitusrrc file to the given directory with the provided
+// JSON content. It fails the test if the write operation fails.
+func writeRCFile(t *testing.T, dir string, content string) {
+	t.Helper()
+	rcPath := filepath.Join(dir, ".gitusrrc")
+	if err := os.WriteFile(rcPath, []byte(content), 0644); err != nil {
+		t.Fatalf("failed to write .gitusrrc: %v", err)
+	}
+}
+
+// getGitConfig runs git config in the specified directory to read the given key.
+func getGitConfig(t *testing.T, dir string, key string, global bool) string {
+	t.Helper()
+	args := []string{"config"}
+	if global {
+		args = append(args, "--global")
+	}
+	args = append(args, "--get", key)
+	cmd := exec.Command("git", args...)
+	cmd.Dir = dir
+	out, err := cmd.Output()
+	if err != nil {
+		t.Fatalf("git config --get %s: %v", key, err)
+	}
+	return strings.TrimSpace(string(out))
 }
 
 // --- TestCurrent_InRepo ---

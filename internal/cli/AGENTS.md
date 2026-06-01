@@ -11,8 +11,6 @@ internal/cli/
 ├── root.go              # Root command registration + custom i18n usage template
 ├── add.go              # Add saved identity; non-interactive flags or prompt
 ├── current.go          # Show repo/global git config
-├── hook.go             # `hook install/uninstall`; delegates to internal/hook
-├── hook_apply_rc.go    # Hidden `hook apply-rc`; called by shell wrappers
 ├── init.go             # Initialize user list and legacy XDG migration
 ├── list.go             # List saved identities
 ├── remove.go           # Remove identity by index/email/name
@@ -26,7 +24,7 @@ internal/cli/
 |------|----------|-------|
 | Add subcommand | `root.go` | Append to `cmd.AddCommand(...)`; update i18n keys |
 | Add command flags | Command file | Prefer long + short when existing UX has one |
-| Change hook CLI UX | `hook.go`, `hook_apply_rc.go` | `installFunc`/`uninstallFunc` are test seams |
+| Change hook CLI UX | `hooks.go`, `hooks_apply_rc.go` | `installFunc`/`uninstallFunc` are test seams |
 | Change selection flags | `use.go`, `remove.go`, `replace.go` | `buildFilter(cmd)` exists in `use.go` only |
 | Change init/migration | `init.go`, `init_test.go` | Many locale and legacy-path cases live here |
 | Test command output | `*_test.go` | Use `executeCmd` from `current_test.go` |
