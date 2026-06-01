@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.1](https://github.com/northwang-lucky/gitusr/compare/v1.0.0...v1.0.1) (2026-06-01)
+
+
+### Bug Fixes
+
+* **release:** 修复 brew install 后无法使用 gu 别名 ([6e8e233](https://github.com/northwang-lucky/gitusr/commit/6e8e2334d692de73187c726221b84771283500b8))
+* **release:** 修复 brew install 后无法使用 gu 别名的问题 ([39facc8](https://github.com/northwang-lucky/gitusr/commit/39facc8010feb7eaf948666e1a0887ac462e1206))
+
 ## [1.0.0](https://github.com/northwang-lucky/gitusr/compare/v0.2.1...v1.0.0) (2026-05-31)
 
 
