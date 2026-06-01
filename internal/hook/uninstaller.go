@@ -65,6 +65,11 @@ func deleteWrapperFiles() error {
 		if err := os.Remove(fp); err != nil && !os.IsNotExist(err) {
 			return err
 		}
+
+		fp = filepath.Join(dir, wrapperFileName(HookTypeCD, ext))
+		if err := os.Remove(fp); err != nil && !os.IsNotExist(err) {
+			return err
+		}
 	}
 
 	return nil
