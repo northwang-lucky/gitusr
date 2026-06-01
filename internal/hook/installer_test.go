@@ -283,3 +283,90 @@ func TestAppendSourceLine_MarkersAlreadyExist(t *testing.T) {
 		t.Errorf("old source path should have been removed:\n%s", content)
 	}
 }
+
+func TestInstall_AllDoesNotOverwrite(t *testing.T) {
+	tmpDir := t.TempDir()
+	t.Setenv("HOME", tmpDir)
+	t.Setenv("XDG_DATA_HOME", tmpDir)
+
+	// Install hooks sequentially: clone → commit → cd
+	hookTypes := []HookType{HookTypeClone, HookTypeCommit, HookTypeCD}
+	for _, ht := range hookTypes {
+		results, err := Install(ht, []ShellType{ShellTypeBash})
+		if err != nil {
+			t.Fatalf("Install(%s) returned error: %v", ht, err)
+		}
+		if len(results) != 1 {
+			t.Fatalf("Install(%s): expected 1 result, got %d", ht, len(results))
+		}
+	}
+
+	// Assert git-wrapper.sh contains git() function definition
+	wrapperPath := filepath.Join(tmpDir, "gitusr", "hooks", "git-wrapper.sh")
+	wrapperData, err := os.ReadFile(wrapperPath)
+	if err != nil {
+		t.Fatalf("read git-wrapper.sh: %v", err)
+	}
+	if !strings.Contains(string(wrapperData), "git()") {
+		t.Error("git-wrapper.sh should contain git() function definition")
+	}
+
+	// Assert cd-env.sh exists, contains __gitusr_use_if_found, and does NOT contain git()
+	cdEnvPath := filepath.Join(tmpDir, "gitusr", "hooks", "cd-env.sh")
+	cdEnvData, err := os.ReadFile(cdEnvPath)
+	if err != nil {
+		t.Fatalf("read cd-env.sh: %v", err)
+	}
+	if !strings.Contains(string(cdEnvData), "__gitusr_use_if_found") {
+		t.Error("cd-env.sh should contain __gitusr_use_if_found")
+	}
+	if strings.Contains(string(cdEnvData), "git()") {
+		t.Error("cd-env.sh should NOT contain git() function definition")
+	}
+
+	// Assert .bashrc contains both hook and cd markers
+	bashrc := filepath.Join(tmpDir, ".bashrc")
+	bashrcData, err := os.ReadFile(bashrc)
+	if err != nil {
+		t.Fatalf("read .bashrc: %v", err)
+	}
+	bashrcContent := string(bashrcData)
+	if !strings.Contains(bashrcContent, "# gitusr hook begin") {
+		t.Error(".bashrc should contain # gitusr hook begin marker")
+	}
+	if !strings.Contains(bashrcContent, "# gitusr cd begin") {
+		t.Error(".bashrc should contain # gitusr cd begin marker")
+	}
+
+	// Assert state has all three types installed
+	state, err := LoadState()
+	if err != nil {
+		t.Fatalf("LoadState(): %v", err)
+	}
+	if len(state.InstalledTypes) != 3 {
+		t.Errorf("expected 3 installed types, got %d: %v", len(state.InstalledTypes), state.InstalledTypes)
+	}
+
+	hasClone := false
+	hasCommit := false
+	hasCD := false
+	for _, typ := range state.InstalledTypes {
+		switch typ {
+		case HookTypeClone:
+			hasClone = true
+		case HookTypeCommit:
+			hasCommit = true
+		case HookTypeCD:
+			hasCD = true
+		}
+	}
+	if !hasClone {
+		t.Error("state missing HookTypeClone")
+	}
+	if !hasCommit {
+		t.Error("state missing HookTypeCommit")
+	}
+	if !hasCD {
+		t.Error("state missing HookTypeCD")
+	}
+}

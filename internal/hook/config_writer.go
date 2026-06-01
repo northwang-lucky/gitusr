@@ -10,8 +10,10 @@ import (
 )
 
 const (
-	markerBegin = "# gitusr hook begin"
-	markerEnd   = "# gitusr hook end"
+	markerBegin    = "# gitusr hook begin"
+	markerEnd      = "# gitusr hook end"
+	markerCDBegin  = "# gitusr cd begin"
+	markerCDEnd    = "# gitusr cd end"
 )
 
 // appendSourceLine is a compatibility wrapper retained for existing tests.
@@ -135,6 +137,13 @@ func wrapperExt(shell ShellType) (string, error) {
 	default:
 		return "", fmt.Errorf("unsupported shell type: %s", shell)
 	}
+}
+
+func wrapperFileName(hookType HookType, ext string) string {
+	if hookType == HookTypeCD {
+		return fmt.Sprintf("cd-env.%s", ext)
+	}
+	return fmt.Sprintf("git-wrapper.%s", ext)
 }
 
 // hooksDir returns the hooks directory path under the XDG data directory.

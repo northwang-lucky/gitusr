@@ -1,6 +1,7 @@
 package hook
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -144,5 +145,84 @@ func TestUninstall_LastType(t *testing.T) {
 	}
 	if _, err := os.Stat(zshWrapper); !os.IsNotExist(err) {
 		t.Error("expected git-wrapper.zsh to be deleted")
+	}
+}
+
+// TestUninstall_CD_Cleanup verifies that uninstalling HookTypeCD removes
+// cd-env.sh and cleans up the CD source line from .bashrc, while preserving
+// git-wrapper.sh for the still-installed clone hook.
+func TestUninstall_CD_Cleanup(t *testing.T) {
+	tmpHome := t.TempDir()
+	t.Setenv("HOME", tmpHome)
+	tmpData := t.TempDir()
+	t.Setenv("XDG_DATA_HOME", tmpData)
+
+	// Prepare: create hooks dir
+	hooksDir := filepath.Join(tmpData, "gitusr", "hooks")
+	if err := os.MkdirAll(hooksDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+
+	// Create git-wrapper.sh (for clone hook)
+	gitWrapperPath := filepath.Join(hooksDir, "git-wrapper.sh")
+	if err := os.WriteFile(gitWrapperPath, []byte("#!/bin/bash\necho 'clone wrapper'"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	// Create cd-env.sh (for cd hook)
+	cdEnvPath := filepath.Join(hooksDir, "cd-env.sh")
+	if err := os.WriteFile(cdEnvPath, []byte("#!/bin/bash\necho 'cd env'"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	// Prepare .bashrc with both source lines inside the marked block
+	bashrcPath := filepath.Join(tmpHome, ".bashrc")
+	block := fmt.Sprintf("\n# gitusr hook begin\nsource %s\nsource %s\n# gitusr hook end\n", gitWrapperPath, cdEnvPath)
+	if err := os.WriteFile(bashrcPath, []byte(block), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	// Prepare state with both HookTypeClone and HookTypeCD installed
+	state := &HookState{InstalledTypes: []HookType{HookTypeClone, HookTypeCD}}
+	if err := SaveState(state); err != nil {
+		t.Fatal(err)
+	}
+
+	// Execute: uninstall only CD
+	if err := Uninstall(HookTypeCD, []ShellType{ShellTypeBash}); err != nil {
+		t.Fatalf("Uninstall() returned error: %v", err)
+	}
+
+	// Verify: git-wrapper.sh still exists (clone is still installed)
+	if _, err := os.Stat(gitWrapperPath); os.IsNotExist(err) {
+		t.Error("expected git-wrapper.sh to still exist after cd uninstall")
+	}
+
+	// Verify: cd-env.sh is deleted after cd uninstall
+	if _, err := os.Stat(cdEnvPath); !os.IsNotExist(err) {
+		t.Error("expected cd-env.sh to be deleted after cd uninstall")
+	}
+
+	// Verify: cd source line removed from .bashrc
+	data, err := os.ReadFile(bashrcPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	bashrcContent := string(data)
+	if strings.Contains(bashrcContent, cdEnvPath) {
+		t.Error("expected cd source line to be removed from .bashrc")
+	}
+	// Clone source line should remain intact
+	if !strings.Contains(bashrcContent, gitWrapperPath) {
+		t.Error("expected clone source line to remain in .bashrc")
+	}
+
+	// Verify: state only has [clone] after cd uninstall
+	loaded, err := LoadState()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(loaded.InstalledTypes) != 1 || loaded.InstalledTypes[0] != HookTypeClone {
+		t.Errorf("expected state to have only [clone], got %v", loaded.InstalledTypes)
 	}
 }
