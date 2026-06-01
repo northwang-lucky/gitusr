@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.2.0](https://github.com/northwang-lucky/gitusr/compare/v1.1.0...v1.2.0) (2026-06-01)
+
+
+### Features
+
+* **cli:** hooks install 后提示用户 source shell rc 文件 ([85b2a35](https://github.com/northwang-lucky/gitusr/commit/85b2a3531694b32b2cffd0c72f10c8e3ba25a2e8))
+* **cli:** hooks install 添加 source 提示并修复 CI 竞态 ([64682e4](https://github.com/northwang-lucky/gitusr/commit/64682e4ac7705ea2167b964b43157688a16afe4f))
+
+
+### Bug Fixes
+
+* **ci:** 合并 GoReleaser 到 Release Please 工作流以消除竞态条件 ([e35f37b](https://github.com/northwang-lucky/gitusr/commit/e35f37be2cff4acd29e029888ef0177210e48743))
+
 ## [1.1.0](https://github.com/northwang-lucky/gitusr/compare/v1.0.2...v1.1.0) (2026-06-01)
 
 
