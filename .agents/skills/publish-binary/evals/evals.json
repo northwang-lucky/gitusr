@@ -1,0 +1,40 @@
+{
+  "skill_name": "publish-binary",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "帮我把当前 gitusr 分支发布成二进制版本，当前在 main 上，本地 main 比 origin/main 多了几个提交。",
+      "expected_output": "应先检查 main 与 origin/main 的差异，发现 main 有领先提交后创建 release/* 分支，再分析变更建议版本 bump，并要求用户确认后创建 PR。",
+      "files": [],
+      "expectations": [
+        "不会直接从 main 推送或合并发布",
+        "会创建 release/* 分支承载领先提交",
+        "会基于 origin/main..HEAD 分析变更并建议 major/minor/patch",
+        "会在创建或合并 PR 前等待用户确认"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "发布一下这个 feature 分支吧，我不确定它有没有跟上 main。",
+      "expected_output": "应 fetch 远端，检查当前分支是否包含 origin/main；若落后或存在冲突风险，应提示用户先 rebase/merge main 并结束。",
+      "files": [],
+      "expectations": [
+        "会检查当前分支是否领先且包含 origin/main",
+        "分支落后或未包含 main 时不会继续创建 PR",
+        "会要求用户先解决 rebase/merge 或冲突问题"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "PR 已经合并了，继续盯一下 GitHub Actions 发布是否成功。",
+      "expected_output": "应切回 main 并 ff-only 更新，先查看 Release Please，再处理可能出现的 Release Please PR，最后跟进 Release workflow，失败时读取失败日志并给出原因和修复方案。",
+      "files": [],
+      "expectations": [
+        "会先更新本地 main 到 origin/main",
+        "会区分 Release Please 只创建 PR 与真正创建 release/tag 的情况",
+        "会使用 gh run watch 或等价方式持续跟进 Release workflow",
+        "失败时会读取 failed logs 并输出原因、证据和修复建议"
+      ]
+    }
+  ]
+}

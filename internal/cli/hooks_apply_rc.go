@@ -10,13 +10,13 @@ import (
 	"github.com/northwang-lucky/gitusr/internal/i18n"
 )
 
-// NewHookApplyRCCmd creates the hidden "hook apply-rc" command.
+// NewHooksApplyRCCmd creates the hidden "hooks apply-rc" command.
 // It reads .gitusrrc from the current directory, matches a user from the store
 // by email (priority) then name, and applies the git config locally.
 //
 // This command is called by the shell hook wrappers when processing
 // git operations (clone, commit). It is hidden from help output.
-func NewHookApplyRCCmd(store domain.UserStore) *cobra.Command {
+func NewHooksApplyRCCmd(store domain.UserStore) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:    "apply-rc",
 		Hidden: true,

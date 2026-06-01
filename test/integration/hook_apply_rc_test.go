@@ -38,10 +38,10 @@ func TestHookApplyRCByEmail(t *testing.T) {
 		t.Fatalf("write .gitusrrc: %v", err)
 	}
 
-	// Run hook apply-rc
-	output, err := runGitusrInDir(t, env, repoDir, "hook", "apply-rc")
+	// Run hooks apply-rc
+	output, err := runGitusrInDir(t, env, repoDir, "hooks", "apply-rc")
 	if err != nil {
-		t.Fatalf("hook apply-rc failed: %v\noutput: %s", err, output)
+		t.Fatalf("hooks apply-rc failed: %v\noutput: %s", err, output)
 	}
 
 	// Verify git config was updated
@@ -82,9 +82,9 @@ func TestHookApplyRCByName(t *testing.T) {
 		t.Fatalf("write .gitusrrc: %v", err)
 	}
 
-	output, err := runGitusrInDir(t, env, repoDir, "hook", "apply-rc")
+	output, err := runGitusrInDir(t, env, repoDir, "hooks", "apply-rc")
 	if err != nil {
-		t.Fatalf("hook apply-rc failed: %v\noutput: %s", err, output)
+		t.Fatalf("hooks apply-rc failed: %v\noutput: %s", err, output)
 	}
 
 	// Should match by name fallback
@@ -124,9 +124,9 @@ func TestHookApplyRCNotFound(t *testing.T) {
 		t.Fatalf("write .gitusrrc: %v", err)
 	}
 
-	output, err := runGitusrInDir(t, env, repoDir, "hook", "apply-rc")
+	output, err := runGitusrInDir(t, env, repoDir, "hooks", "apply-rc")
 	if err == nil {
-		t.Fatalf("hook apply-rc with no match should fail, got: %s", output)
+		t.Fatalf("hooks apply-rc with no match should fail, got: %s", output)
 	}
 	if !strings.Contains(strings.ToLower(output), "not found") {
 		t.Errorf("output should mention not found, got: %s", output)
@@ -156,9 +156,9 @@ func TestHookApplyRCNoFile(t *testing.T) {
 
 	// Do NOT create .gitusrrc
 
-	output, err := runGitusrInDir(t, env, repoDir, "hook", "apply-rc")
+	output, err := runGitusrInDir(t, env, repoDir, "hooks", "apply-rc")
 	if err != nil {
-		t.Fatalf("hook apply-rc without .gitusrrc should succeed silently, got error: %v\noutput: %s", err, output)
+		t.Fatalf("hooks apply-rc without .gitusrrc should succeed silently, got error: %v\noutput: %s", err, output)
 	}
 }
 
@@ -195,9 +195,9 @@ func TestHookApplyRCSilentIfUnchanged(t *testing.T) {
 	}
 
 	// Run with --silent-if-unchanged — should exit without error and without changing config
-	output, err := runGitusrInDir(t, env, repoDir, "hook", "apply-rc", "--silent-if-unchanged")
+	output, err := runGitusrInDir(t, env, repoDir, "hooks", "apply-rc", "--silent-if-unchanged")
 	if err != nil {
-		t.Fatalf("hook apply-rc --silent-if-unchanged failed: %v\noutput: %s", err, output)
+		t.Fatalf("hooks apply-rc --silent-if-unchanged failed: %v\noutput: %s", err, output)
 	}
 
 	// Config should still be Alice

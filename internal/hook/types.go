@@ -20,9 +20,10 @@ const (
 	ShellTypeZsh  ShellType = "zsh"
 )
 
-// HookState tracks which hooks are installed
+// HookState tracks which hooks are installed and which are disabled
 type HookState struct {
 	InstalledTypes []HookType `json:"installed_types"`
+	DisabledTypes  []HookType `json:"disabled_types"`
 }
 
 // GitusrRC represents the .gitusrrc file structure

@@ -302,70 +302,97 @@ gitusr replace old@wrong.com --with-name "North Wang" --with-email "north@exampl
 
 ---
 
-### `gitusr hook` — Manage Shell Auto-Switch Hooks
+### `gitusr hooks` — Manage Shell Auto-Switch Hooks
 
 After installing Shell hooks, `gitusr` can automatically detect and switch Git user identities during `git clone`, `git commit`, `cd`, and other operations.
 
 **Usage:**
 
 ```bash
-gitusr hook <subcommand> [flags]
+gitusr hooks <subcommand> [flags]
 ```
 
 **Subcommands:**
 
 | Subcommand | Description |
 |------------|-------------|
-| `install` | Install shell hooks |
-| `uninstall` | Uninstall shell hooks |
+| `install` | Install all shell hooks (bash + zsh) |
+| `uninstall` | Uninstall all shell hooks |
+| `enable` | Enable a specific hook type |
+| `disable` | Disable a specific hook type |
 
-#### `gitusr hook install`
+#### `gitusr hooks install`
 
-Install auto-switch hooks for the current shell (bash and zsh). Supports three types:
+Install auto-switch hooks for the current shell (bash and zsh). The operation is idempotent — if all hooks are already installed, it prints a message and exits.
+
+After installation, three hook types are supported:
 
 - **`clone`** — Automatically enters the cloned repository and calls `gitusr use` to switch the user after `git clone`. Supports specifying the user via `--gu-name` / `--gu-email` arguments for non-TTY environments
 - **`commit`** — Automatically reads `.gitusrrc` during `git commit` and applies the user
 - **`cd`** — Automatically applies the user when `cd`ing into a directory containing `.gitusrrc`
 
-**Flags:**
-
-| Flag | Short | Description |
-|------|-------|-------------|
-| `--type` | | Hook type: `clone`, `commit`, or `cd` |
-| `--all` | `-a` | Install all three hook types |
-
-**Examples:**
+**Example:**
 
 ```bash
-# Install cd hook (auto-apply .gitusrrc when switching directories)
-gitusr hook install --type cd
-
-# Install clone hook (auto-switch user during git clone)
-gitusr hook install --type clone
-
-# Install all hooks
-gitusr hook install --all
+# Install all hooks (bash + zsh)
+gitusr hooks install
 ```
 
-#### `gitusr hook uninstall`
+#### `gitusr hooks uninstall`
 
-Uninstall installed shell hooks.
+Uninstall all installed shell hooks.
 
-**Flags:**
+**Example:**
 
-| Flag | Short | Description |
-|------|-------|-------------|
-| `--type` | | Hook type: `clone`, `commit`, or `cd` |
-| `--all` | `-a` | Uninstall all hooks |
+```bash
+# Uninstall all hooks
+gitusr hooks uninstall
+```
+
+#### `gitusr hooks enable`
+
+Enable a previously disabled hook type.
+
+**Usage:**
+
+```bash
+gitusr hooks enable <clone|commit|cd>
+```
 
 **Examples:**
 
 ```bash
-# Uninstall cd hook
-gitusr hook uninstall --type cd
+# Enable clone hook
+gitusr hooks enable clone
 
-# Uninstall all hooks
-gitusr hook uninstall --all
+# Enable commit hook
+gitusr hooks enable commit
+
+# Enable cd hook
+gitusr hooks enable cd
+```
+
+#### `gitusr hooks disable`
+
+Disable a hook type so it won't run until re-enabled, while keeping the installation state.
+
+**Usage:**
+
+```bash
+gitusr hooks disable <clone|commit|cd>
+```
+
+**Examples:**
+
+```bash
+# Disable clone hook
+gitusr hooks disable clone
+
+# Disable commit hook
+gitusr hooks disable commit
+
+# Disable cd hook
+gitusr hooks disable cd
 ```
 
 #### `.gitusrrc` File

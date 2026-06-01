@@ -12,7 +12,7 @@ func TestWriteWrapperFile(t *testing.T) {
 	t.Setenv("XDG_DATA_HOME", tmpDir)
 
 	content := "test wrapper content"
-	path, err := WriteWrapperFile(ShellTypeBash, content)
+	path, err := WriteWrapperFile(HookTypeClone, ShellTypeBash, content)
 	if err != nil {
 		t.Fatalf("WriteWrapperFile failed: %v", err)
 	}
@@ -41,7 +41,7 @@ func TestWriteWrapperFile_CreateDir(t *testing.T) {
 		t.Fatal("hooks dir should not exist yet")
 	}
 
-	path, err := WriteWrapperFile(ShellTypeZsh, "content")
+	path, err := WriteWrapperFile(HookTypeClone, ShellTypeZsh, "content")
 	if err != nil {
 		t.Fatalf("WriteWrapperFile failed: %v", err)
 	}
@@ -215,5 +215,52 @@ func TestRemoveSourceBlock_NoConfigFile(t *testing.T) {
 	// Should return nil when config file doesn't exist
 	if err := RemoveSourceBlock(ShellTypeZsh); err != nil {
 		t.Fatalf("RemoveSourceBlock should return nil when no config file: %v", err)
+	}
+}
+
+func TestAppendSourceLine_WithCDMarker(t *testing.T) {
+	tmpDir := t.TempDir()
+	t.Setenv("HOME", tmpDir)
+
+	// First call: standard marker
+	err := AppendSourceLine(ShellTypeBash, "/path/git-wrapper.sh")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Second call: different path (CD hook uses AppendCDSourceLine)
+	err = AppendCDSourceLine(ShellTypeBash, "/path/cd-env.sh")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Read .bashrc
+	data, err := os.ReadFile(filepath.Join(tmpDir, ".bashrc"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	content := string(data)
+
+	// The current implementation REPLACES the marker block, so:
+	// - There should be only ONE marker block
+	// - The source line should point to cd-env.sh (the last one)
+	// - The git-wrapper.sh source line should be GONE
+	//
+	// For TDD RED, we want to assert what SHOULD happen after fix:
+	// Both source lines should exist in SEPARATE marker blocks
+	// So this test will FAIL because currently only one marker block exists
+
+	if !strings.Contains(content, "source /path/git-wrapper.sh") {
+		t.Error("Expected .bashrc to contain source line for git-wrapper.sh")
+	}
+	if !strings.Contains(content, "source /path/cd-env.sh") {
+		t.Error("Expected .bashrc to contain source line for cd-env.sh")
+	}
+
+	// Count marker blocks - after fix there should be 1 of each
+	hookCount := strings.Count(content, "# gitusr hook begin")
+	cdCount := strings.Count(content, "# gitusr cd begin")
+	if hookCount != 1 || cdCount != 1 {
+		t.Errorf("Expected 1 hook marker and 1 cd marker, got %d hook and %d cd", hookCount, cdCount)
 	}
 }

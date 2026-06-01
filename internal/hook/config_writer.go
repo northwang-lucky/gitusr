@@ -10,8 +10,10 @@ import (
 )
 
 const (
-	markerBegin = "# gitusr hook begin"
-	markerEnd   = "# gitusr hook end"
+	markerBegin    = "# gitusr hook begin"
+	markerEnd      = "# gitusr hook end"
+	markerCDBegin  = "# gitusr cd begin"
+	markerCDEnd    = "# gitusr cd end"
 )
 
 // appendSourceLine is a compatibility wrapper retained for existing tests.
@@ -36,11 +38,12 @@ func appendSourceLine(configPath, wrapperPath string) error {
 }
 
 // WriteWrapperFile writes a shell wrapper script to the hooks directory.
-// The path is: {XDG_DATA_HOME}/gitusr/hooks/git-wrapper.{sh|zsh}.
+// For HookTypeCD, the path is: {XDG_DATA_HOME}/gitusr/hooks/cd-env.{sh|zsh}.
+// For other hook types, the path is: {XDG_DATA_HOME}/gitusr/hooks/git-wrapper.{sh|zsh}.
 // The directory is created if it doesn't exist (0755 permissions).
 // The file is written with 0644 permissions.
 // Returns the absolute path to the written file.
-func WriteWrapperFile(shell ShellType, content string) (string, error) {
+func WriteWrapperFile(hookType HookType, shell ShellType, content string) (string, error) {
 	ext, err := wrapperExt(shell)
 	if err != nil {
 		return "", err
@@ -55,7 +58,7 @@ func WriteWrapperFile(shell ShellType, content string) (string, error) {
 		return "", fmt.Errorf("create hooks dir: %w", err)
 	}
 
-	path := filepath.Join(dir, fmt.Sprintf("git-wrapper.%s", ext))
+	path := filepath.Join(dir, wrapperFileName(hookType, ext))
 	if err := os.WriteFile(path, []byte(content), 0644); err != nil {
 		return "", fmt.Errorf("write wrapper file: %w", err)
 	}
@@ -125,6 +128,68 @@ func RemoveSourceBlock(shell ShellType) error {
 	return os.WriteFile(configPath, []byte(newContent), 0644)
 }
 
+// AppendCDSourceLine appends a marked CD source block to the shell config file.
+// Shell config: ~/.bashrc for bash, ~/.zshrc for zsh.
+// The block is:
+//
+//	# gitusr cd begin
+//	source /path/to/wrapper
+//	# gitusr cd end
+//
+// If the markers already exist, the old block is removed first (idempotent).
+func AppendCDSourceLine(shell ShellType, wrapperPath string) error {
+	configPath, err := shellConfigPath(shell)
+	if err != nil {
+		return err
+	}
+
+	data, err := os.ReadFile(configPath)
+	if err != nil {
+		if !os.IsNotExist(err) {
+			return fmt.Errorf("read shell config: %w", err)
+		}
+		data = []byte{}
+	}
+
+	content := string(data)
+	content = removeMarkedCDBlock(content)
+	content = strings.TrimRight(content, "\n")
+
+	block := fmt.Sprintf("\n# gitusr cd begin\nsource %s\n# gitusr cd end\n", wrapperPath)
+	content += block
+
+	if err := os.WriteFile(configPath, []byte(content), 0644); err != nil {
+		return fmt.Errorf("write shell config: %w", err)
+	}
+
+	return nil
+}
+
+// RemoveCDSourceBlock removes the marked CD source block from the shell config file.
+// If the block is not found, it returns nil (no error).
+func RemoveCDSourceBlock(shell ShellType) error {
+	configPath, err := shellConfigPath(shell)
+	if err != nil {
+		return err
+	}
+
+	data, err := os.ReadFile(configPath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil
+		}
+		return fmt.Errorf("read shell config: %w", err)
+	}
+
+	content := string(data)
+	newContent := removeMarkedCDBlock(content)
+	if newContent == content {
+		return nil
+	}
+
+	return os.WriteFile(configPath, []byte(newContent), 0644)
+}
+
 // wrapperExt returns the file extension for the given shell type.
 func wrapperExt(shell ShellType) (string, error) {
 	switch shell {
@@ -135,6 +200,13 @@ func wrapperExt(shell ShellType) (string, error) {
 	default:
 		return "", fmt.Errorf("unsupported shell type: %s", shell)
 	}
+}
+
+func wrapperFileName(hookType HookType, ext string) string {
+	if hookType == HookTypeCD {
+		return fmt.Sprintf("cd-env.%s", ext)
+	}
+	return fmt.Sprintf("git-wrapper.%s", ext)
 }
 
 // hooksDir returns the hooks directory path under the XDG data directory.
@@ -171,6 +243,48 @@ func shellConfigPath(shell ShellType) (string, error) {
 func removeMarkedBlock(content string) string {
 	startMarker := "# gitusr hook begin"
 	endMarker := "# gitusr hook end"
+
+	lines := strings.Split(content, "\n")
+	startLine := -1
+	endLine := -1
+
+	for i, line := range lines {
+		if strings.Contains(line, startMarker) {
+			startLine = i
+		}
+		if strings.Contains(line, endMarker) {
+			endLine = i
+			break
+		}
+	}
+
+	if startLine == -1 || endLine == -1 {
+		return content
+	}
+
+	// Rebuild content without the block
+	var result strings.Builder
+	for i, line := range lines {
+		if i < startLine {
+			if i > 0 {
+				result.WriteString("\n")
+			}
+			result.WriteString(line)
+		} else if i > endLine {
+			result.WriteString("\n")
+			result.WriteString(line)
+		}
+	}
+
+	return result.String()
+}
+
+// removeMarkedCDBlock removes the content between and including the CD marker lines.
+// Markers: "# gitusr cd begin" and "# gitusr cd end".
+// If either marker is not found, the original content is returned unchanged.
+func removeMarkedCDBlock(content string) string {
+	startMarker := "# gitusr cd begin"
+	endMarker := "# gitusr cd end"
 
 	lines := strings.Split(content, "\n")
 	startLine := -1

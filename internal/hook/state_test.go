@@ -88,6 +88,139 @@ func TestIsInstalled_True(t *testing.T) {
 	}
 }
 
+func TestEnableHook_RemovesFromDisabled(t *testing.T) {
+	tmpDir := t.TempDir()
+	t.Setenv("XDG_DATA_HOME", tmpDir)
+
+	state := &HookState{
+		InstalledTypes: []HookType{HookTypeClone, HookTypeCD},
+		DisabledTypes:  []HookType{HookTypeClone, HookTypeCD},
+	}
+	if err := SaveState(state); err != nil {
+		t.Fatalf("SaveState() returned error: %v", err)
+	}
+
+	if err := EnableHook(HookTypeClone); err != nil {
+		t.Fatalf("EnableHook() returned error: %v", err)
+	}
+
+	loaded, err := LoadState()
+	if err != nil {
+		t.Fatalf("LoadState() returned error: %v", err)
+	}
+
+	if len(loaded.DisabledTypes) != 1 || loaded.DisabledTypes[0] != HookTypeCD {
+		t.Errorf("expected DisabledTypes to contain only %q, got %v", HookTypeCD, loaded.DisabledTypes)
+	}
+}
+
+func TestDisableHook_AddsToDisabled(t *testing.T) {
+	tmpDir := t.TempDir()
+	t.Setenv("XDG_DATA_HOME", tmpDir)
+
+	state := &HookState{
+		InstalledTypes: []HookType{HookTypeClone},
+	}
+	if err := SaveState(state); err != nil {
+		t.Fatalf("SaveState() returned error: %v", err)
+	}
+
+	if err := DisableHook(HookTypeClone); err != nil {
+		t.Fatalf("DisableHook() returned error: %v", err)
+	}
+
+	loaded, err := LoadState()
+	if err != nil {
+		t.Fatalf("LoadState() returned error: %v", err)
+	}
+
+	if len(loaded.DisabledTypes) != 1 || loaded.DisabledTypes[0] != HookTypeClone {
+		t.Errorf("expected DisabledTypes to contain %q, got %v", HookTypeClone, loaded.DisabledTypes)
+	}
+}
+
+func TestDisableHook_Deduplicates(t *testing.T) {
+	tmpDir := t.TempDir()
+	t.Setenv("XDG_DATA_HOME", tmpDir)
+
+	state := &HookState{
+		InstalledTypes: []HookType{HookTypeClone},
+		DisabledTypes:  []HookType{HookTypeClone},
+	}
+	if err := SaveState(state); err != nil {
+		t.Fatalf("SaveState() returned error: %v", err)
+	}
+
+	// Disable again — should not duplicate
+	if err := DisableHook(HookTypeClone); err != nil {
+		t.Fatalf("DisableHook() returned error: %v", err)
+	}
+
+	loaded, err := LoadState()
+	if err != nil {
+		t.Fatalf("LoadState() returned error: %v", err)
+	}
+
+	if len(loaded.DisabledTypes) != 1 {
+		t.Errorf("expected DisabledTypes to have length 1 (no duplicates), got %d: %v", len(loaded.DisabledTypes), loaded.DisabledTypes)
+	}
+}
+
+func TestIsEnabled_TrueWhenNotDisabled(t *testing.T) {
+	tmpDir := t.TempDir()
+	t.Setenv("XDG_DATA_HOME", tmpDir)
+
+	state := &HookState{
+		InstalledTypes: []HookType{HookTypeClone},
+		DisabledTypes:  []HookType{HookTypeCD},
+	}
+	if err := SaveState(state); err != nil {
+		t.Fatalf("SaveState() returned error: %v", err)
+	}
+
+	enabled, err := IsEnabled(HookTypeClone)
+	if err != nil {
+		t.Fatalf("IsEnabled() returned error: %v", err)
+	}
+	if !enabled {
+		t.Errorf("expected IsEnabled(%q) to be true", HookTypeClone)
+	}
+}
+
+func TestIsEnabled_FalseWhenDisabled(t *testing.T) {
+	tmpDir := t.TempDir()
+	t.Setenv("XDG_DATA_HOME", tmpDir)
+
+	state := &HookState{
+		DisabledTypes: []HookType{HookTypeClone},
+	}
+	if err := SaveState(state); err != nil {
+		t.Fatalf("SaveState() returned error: %v", err)
+	}
+
+	enabled, err := IsEnabled(HookTypeClone)
+	if err != nil {
+		t.Fatalf("IsEnabled() returned error: %v", err)
+	}
+	if enabled {
+		t.Errorf("expected IsEnabled(%q) to be false", HookTypeClone)
+	}
+}
+
+func TestIsEnabled_EmptyState(t *testing.T) {
+	tmpDir := t.TempDir()
+	t.Setenv("XDG_DATA_HOME", tmpDir)
+
+	// No state file — empty state, defaults to enabled
+	enabled, err := IsEnabled(HookTypeClone)
+	if err != nil {
+		t.Fatalf("IsEnabled() returned error: %v", err)
+	}
+	if !enabled {
+		t.Errorf("expected IsEnabled(%q) to be true for empty state", HookTypeClone)
+	}
+}
+
 func TestIsInstalled_False(t *testing.T) {
 	tmpDir := t.TempDir()
 	t.Setenv("XDG_DATA_HOME", tmpDir)

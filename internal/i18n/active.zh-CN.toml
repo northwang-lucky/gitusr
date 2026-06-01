@@ -434,6 +434,58 @@ hash = "sha1:70239e6bc5f24b82fa78c859c25fff3cfdef9c20"
 other = "索引 {{.Index}} 超出界限（0-{{.Max}}）"
 
 # ================================================
+# CLI hooks 命令（internal/cli/hooks*.go）
+# ================================================
+
+[cli.hooks.short]
+hash = "sha1:dummy"
+other = "管理 git hook 包装器"
+
+[cli.hooks.install.short]
+hash = "sha1:dummy"
+other = "安装所有 hook 包装器"
+
+[cli.hooks.install.success]
+hash = "sha1:dummy"
+other = "所有 hook 安装成功"
+
+[cli.hooks.install.already_installed]
+hash = "sha1:dummy"
+other = "所有 hook 已安装"
+
+[cli.hooks.uninstall.short]
+hash = "sha1:dummy"
+other = "移除所有 hook 包装器"
+
+[cli.hooks.uninstall.success]
+hash = "sha1:dummy"
+other = "所有 hook 卸载成功"
+
+[cli.hooks.uninstall.none_installed]
+hash = "sha1:dummy"
+other = "当前没有安装任何 hook"
+
+[cli.hooks.enable.short]
+hash = "sha1:dummy"
+other = "启用一个 hook"
+
+[cli.hooks.enable.success]
+hash = "sha1:dummy"
+other = "Hook %s 已启用"
+
+[cli.hooks.disable.short]
+hash = "sha1:dummy"
+other = "禁用一个 hook"
+
+[cli.hooks.disable.success]
+hash = "sha1:dummy"
+other = "Hook %s 已禁用"
+
+[cli.hooks.invalid_type]
+hash = "sha1:dummy"
+other = "无效的 hook 类型: %q，必须为 %q、%q 或 %q"
+
+# ================================================
 # Gitcmd 包消息（internal/gitcmd/）
 # ================================================
 
