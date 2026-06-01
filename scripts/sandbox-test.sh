@@ -78,6 +78,7 @@ bwrap \
     --ro-bind /lib64 /lib64 \
     --ro-bind /etc/ssl/certs /etc/ssl/certs \
     --ro-bind /usr/include /usr/include \
+    --ro-bind /usr/share/zsh /usr/share/zsh \
     --bind "$PROJECT_ROOT" /src \
     --proc /proc \
     --dev /dev \
