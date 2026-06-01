@@ -1,5 +1,33 @@
 # Changelog
 
+## [1.1.0](https://github.com/northwang-lucky/gitusr/compare/v1.0.2...v1.1.0) (2026-06-01)
+
+
+### Features
+
+* **cli:** 新增 hooks apply-rc 子命令，从 hook apply-rc 移植 ([481bbf9](https://github.com/northwang-lucky/gitusr/commit/481bbf9b0f0b2a650c384064d048cb679c993ff2))
+* **cli:** 添加 hooks 父命令和 is-disabled/enable/disable 子命令 ([af1495d](https://github.com/northwang-lucky/gitusr/commit/af1495d561faaa4f3461ac5daa56a001e665b769))
+* **hooks:** add hooks disable command with positional arg ([585437d](https://github.com/northwang-lucky/gitusr/commit/585437de8d536fc62a8bb67cc0c2332df1de9402))
+* **hooks:** 扩展 HookState 类型定义和状态管理 ([93f7072](https://github.com/northwang-lucky/gitusr/commit/93f707275ddd1c98030ca60ae87448d8cc5f8a25))
+* **hooks:** 新增 EnableHook/DisableHook/IsEnabled 状态管理函数 ([bbf15f9](https://github.com/northwang-lucky/gitusr/commit/bbf15f980b54f0d68203377fa012e53b4d275886))
+* **hooks:** 新增 GenerateUnifiedBashWrapper 统一 bash wrapper ([7600a1d](https://github.com/northwang-lucky/gitusr/commit/7600a1d5adf0dd5e7f6a460732a091c79c0f407e))
+* **hooks:** 新增 hooks enable 命令，使用位置参数替代 --type 标志 ([e5abad9](https://github.com/northwang-lucky/gitusr/commit/e5abad9e5dd8f53e11112f9e96f4780ae62b76f0))
+* **hooks:** 新增 hooks uninstall 命令并更新 uninstallFunc ([e65354c](https://github.com/northwang-lucky/gitusr/commit/e65354c90e2f99ca10d984ef1f39f2fdce12ad69))
+* **hooks:** 重构 hook 命令体系并新增 hooks 子命令 ([93e9bd6](https://github.com/northwang-lucky/gitusr/commit/93e9bd6a6418ead24ccff6179ea9cd0d80f2fd2d))
+* **hook:** 新增 CD 标记辅助函数 AppendCDSourceLine、RemoveCDSourceBlock 和 removeMarkedCDBlock ([2e46b9e](https://github.com/northwang-lucky/gitusr/commit/2e46b9e44c808e99a531195d27502fbf333135f2))
+* **hook:** 新增 GenerateUnifiedZshWrapper 统一 zsh 封装器 ([7a95203](https://github.com/northwang-lucky/gitusr/commit/7a9520388339b6b363294e19d1477d4d40a68ae5))
+* **hook:** 新增 UninstallAll 函数用于一键卸载所有 hook 类型 ([ae05c38](https://github.com/northwang-lucky/gitusr/commit/ae05c388d3a7536f071d2dc521a38b7b274d11ff))
+* **hook:** 添加 InstallAll 以通过统一包装器安装所有 hook 类型 ([0924d14](https://github.com/northwang-lucky/gitusr/commit/0924d144d99e19f1754efea9b4b5e5bd327d4d59))
+* **scripts:** 支持 GITUSR_E2E_SHELL 环境变量选择 zsh E2E 测试 ([7f01388](https://github.com/northwang-lucky/gitusr/commit/7f01388209a94440f596b89df57e971c15cb063f))
+* **skills:** 新增二进制发布流程 skill ([0a1c854](https://github.com/northwang-lucky/gitusr/commit/0a1c8542dd911ad44ec3dfc1f090108d88541b94))
+
+
+### Bug Fixes
+
+* **cli,hook:** 修复 Final Verification Wave 中的关键问题 (F1, F4) ([712fcca](https://github.com/northwang-lucky/gitusr/commit/712fccabb511f1b9f55618ea2555f6a9265c9074))
+* **hook:** CD 钩子使用 AppendCDSourceLine，避免与 clone/commit 钩子冲突 ([57dea8e](https://github.com/northwang-lucky/gitusr/commit/57dea8e9d6d4a34c1b1a90fce2294376b6572403))
+* **hook:** deleteWrapperFiles 现在也删除 cd-env.{sh,zsh} ([d072a33](https://github.com/northwang-lucky/gitusr/commit/d072a33b5efcb44f2a2c9e89014e7aa1d10032b0))
+
 ## [1.0.0](https://github.com/northwang-lucky/gitusr/compare/v0.2.1...v1.0.0) (2026-05-31)
 
 
