@@ -438,16 +438,56 @@ hash = "sha1:70239e6bc5f24b82fa78c859c25fff3cfdef9c20"
 other = "index {{.Index}} out of bounds (0-{{.Max}})"
 
 # ================================================
-# CLI hooks uninstall messages
+# CLI hooks commands (internal/cli/hooks*.go)
 # ================================================
+
+[cli.hooks.short]
+hash = "sha1:dummy"
+other = "Manage git hook wrappers"
+
+[cli.hooks.install.short]
+hash = "sha1:dummy"
+other = "Install all hook wrappers"
+
+[cli.hooks.install.success]
+hash = "sha1:dummy"
+other = "All hooks successfully installed"
+
+[cli.hooks.install.already_installed]
+hash = "sha1:dummy"
+other = "All hooks are already installed"
 
 [cli.hooks.uninstall.short]
 hash = "sha1:dummy"
-other = "Uninstall all shell hooks"
+other = "Remove all hook wrappers"
+
+[cli.hooks.uninstall.success]
+hash = "sha1:dummy"
+other = "All hooks successfully uninstalled"
 
 [cli.hooks.uninstall.none_installed]
 hash = "sha1:dummy"
 other = "No hooks are currently installed"
+
+[cli.hooks.enable.short]
+hash = "sha1:dummy"
+other = "Enable a hook"
+
+[cli.hooks.enable.success]
+hash = "sha1:dummy"
+other = "Hook %s enabled"
+
+[cli.hooks.disable.short]
+hash = "sha1:dummy"
+other = "Disable a hook"
+
+[cli.hooks.disable.success]
+hash = "sha1:dummy"
+other = "Hook %s disabled"
+
+[cli.hooks.invalid_type]
+hash = "sha1:dummy"
+other = "invalid hook type: %q, must be %q, %q, or %q"
 
 # ================================================
 # Gitcmd package messages (internal/gitcmd/)

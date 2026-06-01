@@ -26,11 +26,6 @@ type HookState struct {
 	DisabledTypes  []HookType `json:"disabled_types"`
 }
 
-// defaultShells returns the default list of supported shells (bash and zsh).
-func defaultShells() []ShellType {
-	return []ShellType{ShellTypeBash, ShellTypeZsh}
-}
-
 // GitusrRC represents the .gitusrrc file structure
 type GitusrRC struct {
 	Name  string `json:"name,omitempty"`

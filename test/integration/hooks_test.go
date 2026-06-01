@@ -28,10 +28,10 @@ func TestHooksEnableDisable(t *testing.T) {
 	}
 	writeJSONFile(t, storePath, users)
 
-	// Step 1: Install cd hook
-	output, err := runGitusr(t, env, "hooks", "install", "--type", "cd")
+	// Step 1: Install all hooks (unified)
+	output, err := runGitusr(t, env, "hooks", "install")
 	if err != nil {
-		t.Fatalf("hooks install --type cd failed: %v\noutput: %s", err, output)
+		t.Fatalf("hooks install failed: %v\noutput: %s", err, output)
 	}
 
 	// Step 2: Disable cd hook
@@ -142,10 +142,10 @@ func TestHooksIsDisabled(t *testing.T) {
 	}
 	writeJSONFile(t, storePath, users)
 
-	// Install cd hook
-	output, err := runGitusr(t, env, "hooks", "install", "--type", "cd")
+	// Install hooks (unified)
+	output, err := runGitusr(t, env, "hooks", "install")
 	if err != nil {
-		t.Fatalf("hooks install --type cd failed: %v\noutput: %s", err, output)
+		t.Fatalf("hooks install failed: %v\noutput: %s", err, output)
 	}
 
 	// is-disabled should exit non-zero when the hook is NOT disabled (i.e. enabled)

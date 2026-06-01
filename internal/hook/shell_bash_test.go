@@ -129,7 +129,7 @@ func TestUnifiedBashWrapper_HandlesCommit(t *testing.T) {
 		t.Error("unified wrapper should check for .gitusrrc file")
 	}
 	if !strings.Contains(script, "apply-rc") {
-		t.Error("unified wrapper should call gitusr hook apply-rc")
+		t.Error("unified wrapper should call gitusr hooks apply-rc")
 	}
 	if !strings.Contains(script, "command git commit") {
 		t.Error("unified wrapper should use 'command git commit' for the actual commit")
@@ -230,6 +230,6 @@ func TestGenerateBashWrapper_HandlesCommit(t *testing.T) {
 		t.Error("generated script should check for .gitusrrc file")
 	}
 	if !strings.Contains(script, "apply-rc") {
-		t.Error("generated script should call gitusr hook apply-rc")
+		t.Error("generated script should call gitusr hooks apply-rc")
 	}
 }

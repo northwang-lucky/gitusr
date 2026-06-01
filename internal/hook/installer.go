@@ -12,11 +12,6 @@ var shellGenerators = map[ShellType]func() string{
 	ShellTypeZsh:  GenerateUnifiedZshWrapper,
 }
 
-var cdShellGenerators = map[ShellType]func() string{
-	ShellTypeBash: GenerateUnifiedBashWrapper,
-	ShellTypeZsh:  GenerateUnifiedZshWrapper,
-}
-
 // Install installs hook wrappers for the specified hook type and shells.
 // It is idempotent — if the hook type is already installed, it returns early.
 // For each shell, it generates the wrapper code, writes it to disk via
@@ -37,13 +32,8 @@ func Install(hookType HookType, shells []ShellType) ([]HookInstallResult, error)
 
 	var results []HookInstallResult
 
-	generators := shellGenerators
-	if hookType == HookTypeCD {
-		generators = cdShellGenerators
-	}
-
 	for _, shell := range shells {
-		generate, ok := generators[shell]
+		generate, ok := shellGenerators[shell]
 		if !ok {
 			return results, fmt.Errorf("unsupported shell type: %s", shell)
 		}
@@ -58,12 +48,7 @@ func Install(hookType HookType, shells []ShellType) ([]HookInstallResult, error)
 		}
 
 		// Append source line to shell config
-		if hookType == HookTypeCD {
-			err = AppendCDSourceLine(shell, filePath)
-		} else {
-			err = AppendSourceLine(shell, filePath)
-		}
-		if err != nil {
+		if err := AppendSourceLine(shell, filePath); err != nil {
 			return results, fmt.Errorf("update shell config for %s: %w", shell, err)
 		}
 

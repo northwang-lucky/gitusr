@@ -117,7 +117,7 @@ git() {
         fi
         shift
         if [[ -f .gitusrrc ]]; then
-            gitusr hook apply-rc --silent-if-unchanged
+            gitusr hooks apply-rc --silent-if-unchanged
         fi
         command git commit "$@"
         return $?
@@ -140,7 +140,7 @@ __gitusr_autoload_hook() {
     fi
 
     if [[ -f .gitusrrc ]]; then
-        gitusr hook apply-rc --silent-if-unchanged
+        gitusr hooks apply-rc --silent-if-unchanged
     fi
 }
 
@@ -253,7 +253,7 @@ func GenerateZshWrapper() string {
     if [ "$1" = "commit" ]; then
         shift
         if [ -f ".gitusrrc" ]; then
-            gitusr hook apply-rc --silent-if-unchanged
+            gitusr hooks apply-rc --silent-if-unchanged
         fi
         command git commit "$@"
         return $?

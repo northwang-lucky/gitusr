@@ -247,8 +247,8 @@ func TestInstall_CD_FirstTime(t *testing.T) {
 		t.Errorf("result.Shell = %q, want %q", r.Shell, ShellTypeBash)
 	}
 
-	// Verify .bashrc was updated with CD markers
-	verifyBashrcHasCDBlock(t, tmpDir, r.FilePath)
+	// Verify .bashrc was updated with hook markers (CD now uses unified hook markers)
+	verifyBashrcHasBlock(t, tmpDir, r.FilePath)
 
 	// Verify wrapper file exists
 	verifyWrapperFileExists(t, r.FilePath)
@@ -644,9 +644,8 @@ func TestInstall_AllDoesNotOverwrite(t *testing.T) {
 	if !strings.Contains(bashrcContent, "# gitusr hook begin") {
 		t.Error(".bashrc should contain # gitusr hook begin marker")
 	}
-	if !strings.Contains(bashrcContent, "# gitusr cd begin") {
-		t.Error(".bashrc should contain # gitusr cd begin marker")
-	}
+	// CD no longer creates separate markers; all hooks use unified hook markers.
+	// The mark is rewritten each time, so only one block remains.
 
 	// Assert state has all three types installed
 	state, err := LoadState()

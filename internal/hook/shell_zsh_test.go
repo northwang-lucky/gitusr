@@ -85,7 +85,7 @@ func TestGenerateZshWrapper_HandlesCommit(t *testing.T) {
 		t.Error("generated script should check for .gitusrrc file")
 	}
 	if !strings.Contains(script, "apply-rc") {
-		t.Error("generated script should call gitusr hook apply-rc")
+		t.Error("generated script should call gitusr hooks apply-rc")
 	}
 }
 
@@ -233,7 +233,7 @@ func TestUnifiedZshWrapper_HandlesCommit(t *testing.T) {
 		t.Error("unified wrapper should check for .gitusrrc file")
 	}
 	if !strings.Contains(script, "apply-rc") {
-		t.Error("unified wrapper should call gitusr hook apply-rc")
+		t.Error("unified wrapper should call gitusr hooks apply-rc")
 	}
 	if !strings.Contains(script, "command git commit") {
 		t.Error("unified wrapper should use 'command git commit' for the actual commit")
@@ -250,7 +250,7 @@ func TestUnifiedZshWrapper_ChpwdHookChecksRC(t *testing.T) {
 
 func TestUnifiedZshWrapper_ChpwdHookUsesApplyRC(t *testing.T) {
 	script := GenerateUnifiedZshWrapper()
-	if !strings.Contains(script, "gitusr hook apply-rc --silent-if-unchanged") {
-		t.Error("unified wrapper chpwd hook should call gitusr hook apply-rc --silent-if-unchanged")
+	if !strings.Contains(script, "gitusr hooks apply-rc --silent-if-unchanged") {
+		t.Error("unified wrapper chpwd hook should call gitusr hooks apply-rc --silent-if-unchanged")
 	}
 }

@@ -1,7 +1,6 @@
 package cli
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -11,9 +10,10 @@ import (
 	"github.com/northwang-lucky/gitusr/internal/i18n"
 )
 
-// installFunc and uninstallFunc are package-level variables to allow
-// test code to inject mock implementations.
+// installFunc, installAllFunc and uninstallFunc are package-level variables
+// to allow test code to inject mock implementations.
 var installFunc = hook.Install
+var installAllFunc = hook.InstallAll
 var uninstallFunc func(any, []hook.ShellType) error = func(_ any, shells []hook.ShellType) error {
 	return hook.UninstallAll(shells)
 }
@@ -79,71 +79,28 @@ func newHookIsDisabledCmd() *cobra.Command {
 }
 
 // NewHookInstallCmd creates the "hooks install" command.
+// It installs hook wrappers for all hook types (clone, commit, cd)
+// on the default shells (bash, zsh). The operation is idempotent —
+// if all hooks are already installed, it prints a message and exits.
 func NewHookInstallCmd(store domain.UserStore) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "install",
-		Short: i18n.T("cli.hook.install.short", nil),
+		Short: i18n.T("cli.hooks.install.short", nil),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			typeStr, err := cmd.Flags().GetString("type")
+			results, err := installAllFunc(defaultShells())
 			if err != nil {
 				return err
 			}
 
-			all, err := cmd.Flags().GetBool("all")
-			if err != nil {
-				return err
-			}
-
-			if typeStr != "" && all {
-				return errors.New(i18n.T("cli.hook.install.type_all_exclusive", nil))
-			}
-			if typeStr == "" && !all {
-				return errors.New(i18n.T("cli.hook.install.require_one", nil))
-			}
-
-			if typeStr != "" {
-				hookType := hook.HookType(typeStr)
-				if !isValidHookType(hookType) {
-					return fmt.Errorf("invalid hook type: %q, must be %q, %q, or %q",
-						typeStr, hook.HookTypeClone, hook.HookTypeCommit, hook.HookTypeCD)
-				}
-
-				results, err := installFunc(hookType, defaultShells())
-				if err != nil {
-					return err
-				}
-
-				if results == nil {
-					fmt.Println(i18n.T("cli.hook.install.already_installed",
-						map[string]interface{}{"Type": string(hookType)}))
-					return nil
-				}
-
-				fmt.Println(i18n.T("cli.hook.install.success",
-					map[string]interface{}{"Type": string(hookType)}))
+			if results == nil {
+				fmt.Println(i18n.T("cli.hooks.install.already_installed", nil))
 				return nil
 			}
 
-			for _, hookType := range hook.AllHookTypes {
-				results, err := installFunc(hookType, defaultShells())
-				if err != nil {
-					return err
-				}
-				if results == nil {
-					fmt.Println(i18n.T("cli.hook.install.already_installed",
-						map[string]interface{}{"Type": string(hookType)}))
-					continue
-				}
-				fmt.Println(i18n.T("cli.hook.install.success",
-					map[string]interface{}{"Type": string(hookType)}))
-			}
-			fmt.Println(i18n.T("cli.hook.install.all_success", nil))
+			fmt.Println(i18n.T("cli.hooks.install.success", nil))
 			return nil
 		},
 	}
-
-	cmd.Flags().String("type", "", i18n.T("cli.hook.install.flag_type", nil))
-	cmd.Flags().BoolP("all", "a", false, i18n.T("cli.hook.install.flag_all", nil))
 
 	return cmd
 }

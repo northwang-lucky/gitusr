@@ -26,7 +26,7 @@ func NewHooksUninstallCmd(store domain.UserStore) *cobra.Command {
 				return err
 			}
 
-			fmt.Println(i18n.T("cli.hook.uninstall.all_success", nil))
+			fmt.Println(i18n.T("cli.hooks.uninstall.success", nil))
 			return nil
 		},
 	}
