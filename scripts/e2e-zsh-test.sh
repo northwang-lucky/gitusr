@@ -161,12 +161,9 @@ fi
 # Note: zsh wrapper files use .zsh extension (vs bash .sh extension).
 
 echo ""
-echo "--- Step 9/14: hook install --all ---"
-gitusr hook install --all | tee /tmp/hook-install-all-output.txt
-grep -q "Hook clone successfully installed" /tmp/hook-install-all-output.txt || { echo "  FAIL: clone hook was not installed by --all"; exit 1; }
-grep -q "Hook commit successfully installed" /tmp/hook-install-all-output.txt || { echo "  FAIL: commit hook was not installed by --all"; exit 1; }
-grep -q "Hook cd successfully installed" /tmp/hook-install-all-output.txt || { echo "  FAIL: cd hook was not installed by --all"; exit 1; }
-grep -q "All hooks successfully installed" /tmp/hook-install-all-output.txt || { echo "  FAIL: --all install did not report aggregate success"; exit 1; }
+echo "--- Step 9/14: hooks install ---"
+gitusr hooks install | tee /tmp/hook-install-all-output.txt
+grep -q "All hooks successfully installed" /tmp/hook-install-all-output.txt || { echo "  FAIL: hooks install did not report aggregate success"; exit 1; }
 if [[ -f "$XDG_DATA_HOME/gitusr/hooks/git-wrapper.zsh" ]]; then
     echo "  Step 9 PASSED (all hooks installed, zsh wrapper exists)"
 else
@@ -175,15 +172,13 @@ else
 fi
 
 echo ""
-echo "--- Step 10/14: hook install --all idempotency ---"
-gitusr hook install --all | tee /tmp/hook-install-all-idempotent-output.txt
-grep -q "Hook clone is already installed" /tmp/hook-install-all-idempotent-output.txt || { echo "  FAIL: clone hook was not reported already installed"; exit 1; }
-grep -q "Hook commit is already installed" /tmp/hook-install-all-idempotent-output.txt || { echo "  FAIL: commit hook was not reported already installed"; exit 1; }
-grep -q "Hook cd is already installed" /tmp/hook-install-all-idempotent-output.txt || { echo "  FAIL: cd hook was not reported already installed"; exit 1; }
-echo "  Step 10 PASSED (--all install is idempotent)"
+echo "--- Step 10/14: hooks install idempotency ---"
+gitusr hooks install | tee /tmp/hook-install-all-idempotent-output.txt
+grep -q "All hooks are already installed" /tmp/hook-install-all-idempotent-output.txt || { echo "  FAIL: idempotent install did not report already installed"; exit 1; }
+echo "  Step 10 PASSED (install is idempotent)"
 
 echo ""
-echo "--- Step 11/14: hook install --all state verification ---"
+echo "--- Step 11/14: hooks install state verification ---"
 WRAPPER_FILE="$XDG_DATA_HOME/gitusr/hooks/git-wrapper.zsh"
 HOOK_STATE="$XDG_DATA_HOME/gitusr/hook-state.json"
 if [[ -f "$WRAPPER_FILE" ]] && [[ -f "$HOOK_STATE" ]] && grep -q '"clone"' "$HOOK_STATE" && grep -q '"commit"' "$HOOK_STATE" && grep -q '"cd"' "$HOOK_STATE"; then
@@ -194,28 +189,23 @@ else
 fi
 
 echo ""
-echo "--- Step 12/14: hook uninstall --all ---"
-gitusr hook uninstall --all | tee /tmp/hook-uninstall-all-output.txt
-grep -q "Hook clone successfully uninstalled" /tmp/hook-uninstall-all-output.txt || { echo "  FAIL: clone hook was not uninstalled by --all"; exit 1; }
-grep -q "Hook commit successfully uninstalled" /tmp/hook-uninstall-all-output.txt || { echo "  FAIL: commit hook was not uninstalled by --all"; exit 1; }
-grep -q "Hook cd successfully uninstalled" /tmp/hook-uninstall-all-output.txt || { echo "  FAIL: cd hook was not uninstalled by --all"; exit 1; }
-grep -q "All hooks successfully uninstalled" /tmp/hook-uninstall-all-output.txt || { echo "  FAIL: --all uninstall did not report aggregate success"; exit 1; }
+echo "--- Step 12/14: hooks uninstall ---"
+gitusr hooks uninstall | tee /tmp/hook-uninstall-all-output.txt
+grep -q "All hooks successfully uninstalled" /tmp/hook-uninstall-all-output.txt || { echo "  FAIL: hooks uninstall did not report aggregate success"; exit 1; }
 echo "  Step 12 PASSED (all hooks uninstalled)"
 
 echo ""
-echo "--- Step 13/14: hook uninstall --all idempotency ---"
-gitusr hook uninstall --all | tee /tmp/hook-uninstall-all-idempotent-output.txt
-grep -q "Hook clone is not installed" /tmp/hook-uninstall-all-idempotent-output.txt || { echo "  FAIL: clone hook was not reported not installed"; exit 1; }
-grep -q "Hook commit is not installed" /tmp/hook-uninstall-all-idempotent-output.txt || { echo "  FAIL: commit hook was not reported not installed"; exit 1; }
-grep -q "Hook cd is not installed" /tmp/hook-uninstall-all-idempotent-output.txt || { echo "  FAIL: cd hook was not reported not installed"; exit 1; }
-echo "  Step 13 PASSED (--all uninstall skips missing hooks)"
+echo "--- Step 13/14: hooks uninstall when nothing installed ---"
+gitusr hooks uninstall 2>&1 | tee /tmp/hook-uninstall-none-output.txt || true
+grep -q "No hooks are currently installed" /tmp/hook-uninstall-none-output.txt || { echo "  FAIL: uninstall did not report none installed"; exit 1; }
+echo "  Step 13 PASSED (uninstall reports nothing installed)"
 
 echo ""
-echo "--- Step 14/14: hook uninstall --all cleanup verification ---"
+echo "--- Step 14/14: hooks uninstall cleanup verification ---"
 if [[ ! -f "$XDG_DATA_HOME/gitusr/hooks/git-wrapper.zsh" ]] && ! grep -q '"clone"\|"commit"\|"cd"' "$HOOK_STATE"; then
-    echo "  Step 14 PASSED (--all cleanup removed wrappers and state)"
+    echo "  Step 14 PASSED (cleanup removed wrappers and cleared state)"
 else
-    echo "  FAIL: --all cleanup did not remove wrappers or state"
+    echo "  FAIL: cleanup did not remove wrappers or clear state"
     exit 1
 fi
 
@@ -230,8 +220,8 @@ rm -rf "$TMP_BARE_REPO"
 git init --bare "$TMP_BARE_REPO"
 
 echo ""
-echo "--- Step 15/18: hook actual trigger - clone with --gu-email (zsh) ---"
-gitusr hook install --type=clone
+echo "--- Step 15/18: hooks actual trigger - clone with --gu-email (zsh) ---"
+gitusr hooks install
 WRAPPER_FILE="$XDG_DATA_HOME/gitusr/hooks/git-wrapper.zsh"
 if [[ -f "$WRAPPER_FILE" ]]; then
     source "$WRAPPER_FILE"
@@ -254,8 +244,7 @@ else
 fi
 
 echo ""
-echo "--- Step 16/18: hook actual trigger - commit with .gitusrrc (zsh) ---"
-gitusr hook install --type=commit
+echo "--- Step 16/18: hooks actual trigger - commit with .gitusrrc (zsh) ---"
 cd /tmp
 rm -rf /tmp/rc-test-repo
 git clone "$TMP_BARE_REPO" rc-test-repo 2>&1 || true
@@ -277,8 +266,7 @@ else
 fi
 
 echo ""
-echo "--- Step 17/18: hook actual trigger - cd with chpwd hook (zsh) ---"
-gitusr hook install --type=cd
+echo "--- Step 17/18: hooks actual trigger - cd with chpwd hook (zsh) ---"
 # Create a test repo with .gitusrrc for the cd test
 rm -rf /tmp/cd-test-repo
 git clone "$TMP_BARE_REPO" /tmp/cd-test-repo 2>&1 || true
@@ -306,10 +294,8 @@ else
 fi
 
 echo ""
-echo "--- Step 18/18: hook cleanup verification ---"
-gitusr hook uninstall --type=clone
-gitusr hook uninstall --type=commit
-gitusr hook uninstall --type=cd
+echo "--- Step 18/18: hooks cleanup verification ---"
+gitusr hooks uninstall
 echo "  Step 18 PASSED (all hooks uninstalled)"
 
 # ─── TODO: Extended hook scenario coverage ─────────────────────────────────
