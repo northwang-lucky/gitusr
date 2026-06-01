@@ -148,6 +148,203 @@ func TestUninstall_LastType(t *testing.T) {
 	}
 }
 
+// =============================================================================
+// UninstallAll tests
+// =============================================================================
+
+// TestUninstallAll_Success verifies the full uninstall flow:
+// 1. Install all hooks via InstallAll
+// 2. Uninstall via UninstallAll
+// 3. Verify all RC blocks removed, wrapper files deleted, state cleared
+func TestUninstallAll_Success(t *testing.T) {
+	tmpHome := t.TempDir()
+	t.Setenv("HOME", tmpHome)
+	tmpData := t.TempDir()
+	t.Setenv("XDG_DATA_HOME", tmpData)
+
+	// Install all hooks via InstallAll (bash + zsh)
+	results, err := InstallAll([]ShellType{ShellTypeBash, ShellTypeZsh})
+	if err != nil {
+		t.Fatalf("InstallAll() returned error: %v", err)
+	}
+	if len(results) != 2 {
+		t.Fatalf("expected 2 results from InstallAll, got %d", len(results))
+	}
+
+	// Record wrapper paths for verification
+	bashWrapper := results[0].FilePath
+	zshWrapper := results[1].FilePath
+	if results[0].Shell == ShellTypeZsh {
+		bashWrapper = results[1].FilePath
+		zshWrapper = results[0].FilePath
+	}
+
+	// Verify initial state has all 3 types
+	state, err := LoadState()
+	if err != nil {
+		t.Fatalf("LoadState() before uninstall: %v", err)
+	}
+	if len(state.InstalledTypes) != 3 {
+		t.Fatalf("expected 3 installed types before uninstall, got %d", len(state.InstalledTypes))
+	}
+
+	// Execute UninstallAll
+	if err := UninstallAll([]ShellType{ShellTypeBash, ShellTypeZsh}); err != nil {
+		t.Fatalf("UninstallAll() returned error: %v", err)
+	}
+
+	// Verify: hook blocks removed from .bashrc
+	bashrcPath := filepath.Join(tmpHome, ".bashrc")
+	bashrcData, err := os.ReadFile(bashrcPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	bashrcContent := string(bashrcData)
+	if strings.Contains(bashrcContent, "# gitusr hook begin") {
+		t.Error("expected '# gitusr hook begin' marker to be removed from .bashrc")
+	}
+	if strings.Contains(bashrcContent, "# gitusr cd begin") {
+		t.Error("expected '# gitusr cd begin' marker to be removed from .bashrc")
+	}
+
+	// Verify: hook blocks removed from .zshrc
+	zshrcPath := filepath.Join(tmpHome, ".zshrc")
+	zshrcData, err := os.ReadFile(zshrcPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(string(zshrcData), "# gitusr hook begin") {
+		t.Error("expected '# gitusr hook begin' marker to be removed from .zshrc")
+	}
+
+	// Verify: wrapper files deleted (both shells)
+	for _, wp := range []string{bashWrapper, zshWrapper} {
+		if _, err := os.Stat(wp); !os.IsNotExist(err) {
+			t.Errorf("expected wrapper file %s to be deleted", wp)
+		}
+	}
+
+	// Verify: cd-env wrapper files also cleaned
+	hooksDir := filepath.Join(tmpData, "gitusr", "hooks")
+	for _, ext := range []string{"sh", "zsh"} {
+		cdPath := filepath.Join(hooksDir, "cd-env."+ext)
+		if _, err := os.Stat(cdPath); !os.IsNotExist(err) {
+			t.Errorf("expected cd-env.%s to be deleted", ext)
+		}
+	}
+
+	// Verify: state cleared (no installed types, no disabled types)
+	state, err = LoadState()
+	if err != nil {
+		t.Fatalf("LoadState() after uninstall: %v", err)
+	}
+	if len(state.InstalledTypes) != 0 {
+		t.Errorf("expected empty InstalledTypes, got %v", state.InstalledTypes)
+	}
+	if len(state.DisabledTypes) != 0 {
+		t.Errorf("expected empty DisabledTypes, got %v", state.DisabledTypes)
+	}
+}
+
+// TestUninstallAll_NotInstalled verifies UninstallAll returns an error
+// when no hooks are currently installed.
+func TestUninstallAll_NotInstalled(t *testing.T) {
+	tmpData := t.TempDir()
+	t.Setenv("XDG_DATA_HOME", tmpData)
+
+	// Save empty state
+	state := &HookState{InstalledTypes: []HookType{}}
+	if err := SaveState(state); err != nil {
+		t.Fatal(err)
+	}
+
+	// Execute: should return error since nothing is installed
+	err := UninstallAll([]ShellType{ShellTypeBash})
+
+	// Verify error
+	if err == nil {
+		t.Fatal("expected error when no hooks are installed")
+	}
+	if !strings.Contains(err.Error(), "no hooks are currently installed") {
+		t.Errorf("error should contain 'no hooks are currently installed', got: %v", err)
+	}
+}
+
+// TestUninstallAll_PartialState verifies full cleanup when only some
+// hooks were installed via the legacy Install (not InstallAll).
+// This simulates migrating from old hook installs to the new unified approach.
+func TestUninstallAll_PartialState(t *testing.T) {
+	tmpHome := t.TempDir()
+	t.Setenv("HOME", tmpHome)
+	tmpData := t.TempDir()
+	t.Setenv("XDG_DATA_HOME", tmpData)
+
+	// Install only HookTypeClone via legacy Install (creates git-wrapper.sh)
+	_, err := Install(HookTypeClone, []ShellType{ShellTypeBash})
+	if err != nil {
+		t.Fatalf("Install(HookTypeClone): %v", err)
+	}
+
+	// Install HookTypeCD via legacy Install (creates cd-env.sh + CD source block)
+	_, err = Install(HookTypeCD, []ShellType{ShellTypeBash})
+	if err != nil {
+		t.Fatalf("Install(HookTypeCD): %v", err)
+	}
+
+	// Verify initial state has both types
+	state, err := LoadState()
+	if err != nil {
+		t.Fatalf("LoadState() before uninstall: %v", err)
+	}
+	if len(state.InstalledTypes) != 2 {
+		t.Fatalf("expected 2 installed types, got %d: %v", len(state.InstalledTypes), state.InstalledTypes)
+	}
+
+	// Execute UninstallAll — should clean up everything
+	if err := UninstallAll([]ShellType{ShellTypeBash}); err != nil {
+		t.Fatalf("UninstallAll() returned error: %v", err)
+	}
+
+	// Verify: both hook blocks removed from .bashrc
+	bashrcPath := filepath.Join(tmpHome, ".bashrc")
+	bashrcData, err := os.ReadFile(bashrcPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	bashrcContent := string(bashrcData)
+	if strings.Contains(bashrcContent, "# gitusr hook begin") {
+		t.Error("expected '# gitusr hook begin' marker to be removed from .bashrc")
+	}
+	if strings.Contains(bashrcContent, "# gitusr cd begin") {
+		t.Error("expected '# gitusr cd begin' marker to be removed from .bashrc")
+	}
+
+	// Verify: all wrapper files deleted
+	hooksDir := filepath.Join(tmpData, "gitusr", "hooks")
+	for _, ext := range []string{"sh", "zsh"} {
+		gwPath := filepath.Join(hooksDir, "git-wrapper."+ext)
+		if _, err := os.Stat(gwPath); !os.IsNotExist(err) {
+			t.Errorf("expected git-wrapper.%s to be deleted", ext)
+		}
+		cdPath := filepath.Join(hooksDir, "cd-env."+ext)
+		if _, err := os.Stat(cdPath); !os.IsNotExist(err) {
+			t.Errorf("expected cd-env.%s to be deleted", ext)
+		}
+	}
+
+	// Verify: state fully cleared
+	state, err = LoadState()
+	if err != nil {
+		t.Fatalf("LoadState() after uninstall: %v", err)
+	}
+	if len(state.InstalledTypes) != 0 {
+		t.Errorf("expected empty InstalledTypes, got %v", state.InstalledTypes)
+	}
+	if len(state.DisabledTypes) != 0 {
+		t.Errorf("expected empty DisabledTypes, got %v", state.DisabledTypes)
+	}
+}
+
 // TestUninstall_CD_Cleanup verifies that uninstalling HookTypeCD removes
 // cd-env.sh and cleans up the CD source line from .bashrc, while preserving
 // git-wrapper.sh for the still-installed clone hook.

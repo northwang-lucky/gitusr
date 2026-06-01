@@ -85,6 +85,46 @@ func deleteCDWrapperFiles() error {
 	return nil
 }
 
+// UninstallAll removes all hook types, source blocks, wrapper files, and clears
+// the hook state entirely. It is the counterpart to InstallAll.
+//
+// For each shell it:
+//  1. Removes the main source block (hooks for clone/commit)
+//  2. Removes the CD source block (if it exists from legacy installs)
+//  3. Deletes all wrapper files
+//  4. Clears hook state (InstalledTypes and DisabledTypes both set to [])
+//
+// If no hook types are currently installed, it returns an error.
+//
+// Deprecated: Uninstall is kept for backward compatibility with per-type uninstall.
+func UninstallAll(shells []ShellType) error {
+	state, err := LoadState()
+	if err != nil {
+		return err
+	}
+
+	// Check if ANY hook type is installed
+	if len(state.InstalledTypes) == 0 {
+		return fmt.Errorf("no hooks are currently installed")
+	}
+
+	// Remove source blocks from all shell configs
+	for _, shell := range shells {
+		_ = RemoveSourceBlock(shell)
+		_ = RemoveCDSourceBlock(shell)
+	}
+
+	// Delete all wrapper files (both git-wrapper and cd-env)
+	if err := deleteWrapperFiles(); err != nil {
+		return err
+	}
+
+	// Clear state entirely
+	state.InstalledTypes = []HookType{}
+	state.DisabledTypes = []HookType{}
+	return SaveState(state)
+}
+
 // deleteWrapperFiles removes all git-wrapper scripts from the hooks directory.
 // Non-existent files are silently skipped.
 func deleteWrapperFiles() error {
