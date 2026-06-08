@@ -8,7 +8,7 @@ Embedded translation bundle and locale state for CLI output. It loads `active.*.
 ## WHERE TO LOOK
 | Task | Location | Notes |
 |------|----------|-------|
-| Add or rename message IDs | `active.en.toml`, `active.zh-CN.toml` | Keep both files aligned by key |
+| Add or rename message IDs | `active.en.toml`, `active.zh-CN.toml` | Keep both files aligned by key; command tests assert both locales |
 | Change locale detection | `bundle.go` | Priority is `GITUSR_LANG` > `LANGUAGE` > `LANG` > `en` |
 | Test language behavior | `bundle_test.go`, command package tests | Use `ResetForTesting()` before switching locale |
 | Change help text wording | `active.*.toml`, `internal/cli/root.go` | Root usage template pulls section labels from i18n |
@@ -27,6 +27,7 @@ Embedded translation bundle and locale state for CLI output. It loads `active.*.
 - Message lookup is fail-open: missing initialization or missing key returns the key itself.
 - Tests that change locale must call `ResetForTesting()` and avoid leaking singleton state.
 - Command tests with localized expectations use `_En` / `_ZhCN` suffixes.
+- Root help section labels are translated through `internal/cli/root.go`, not Cobra defaults.
 
 ## ANTI-PATTERNS
 - Do **not** add a message ID to only one locale file.

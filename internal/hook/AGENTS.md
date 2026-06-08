@@ -8,7 +8,7 @@ Shell-hook engine for automatic git user switching. It writes unified bash/zsh w
 ## WHERE TO LOOK
 | Task | Location | Notes |
 |------|----------|-------|
-| Add/remove hook type | `types.go`, `installer.go`, `uninstaller.go` | Update `AllHookTypes`, CLI validation, wrapper generation, tests |
+| Add/remove hook type | `types.go`, `installer.go`, `uninstaller.go` | Update `AllHookTypes`, CLI validation, bash/zsh generation, tests |
 | Change wrapper behavior | `shell_bash.go`, `shell_zsh.go` | Raw shell strings for git clone/commit wrappers |
 | Change cd auto-apply behavior | `shell_bash.go`, `shell_zsh.go` | Bash aliases `cd`; zsh uses `add-zsh-hook chpwd` |
 | Change shell rc mutation | `config_writer.go` | Markers are `# gitusr hook begin/end` |
@@ -32,12 +32,13 @@ Shell-hook engine for automatic git user switching. It writes unified bash/zsh w
 ## CONVENTIONS
 - Install idempotency contract: `InstallAll(...)` returns `nil, nil` when all hook types are already installed.
 - `Install` is legacy/deprecated; new CLI flow should use unified `InstallAll` and `UninstallAll`.
-- Shell snippets call `gitusr list` first and pass through when saved user count is `<= 1`.
+- Clone snippets call `gitusr list` first and pass through when saved user count is `<= 1`.
 - Shell snippets check `gitusr hooks is-disabled <type>` before clone/commit/cd behavior.
 - Bash wrappers use `command git` and `\cd` to avoid function/alias recursion.
 - Zsh cd hooks remove the existing hook with `add-zsh-hook -D` before re-adding it.
 - Shell rc files are mutated only inside the marked block; existing config must be preserved.
 - Tests assert marker counts and wrapper file contents rather than sourcing shell files.
+- `HookState` stores both installed and disabled hook type lists; enable/disable must not remove installation state.
 
 ## ANTI-PATTERNS
 - Do **not** write tests that touch the developer's real `.bashrc`, `.zshrc`, HOME, or XDG data.
