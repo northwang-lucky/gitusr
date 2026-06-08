@@ -25,6 +25,7 @@
 │   └── xdgpath/         # XDG data path resolution and legacy path helpers
 ├── scripts/             # Manual sandbox/E2E shell scripts; not the main test gate
 ├── test/integration/    # Real binary + real git repo workflow tests
+├── .github/workflows/   # Release Please + GoReleaser publishing workflow
 ├── .agents/skills/      # Project-local OpenCode/agent skills shared with this repo
 ├── dist/                # Release artifacts; do not treat as source
 ├── mise.toml            # Build/test/install tasks
@@ -45,7 +46,7 @@
 | Change translations | `internal/i18n/`, `internal/i18n/AGENTS.md` | Keep `active.en.toml` and `active.zh-CN.toml` message IDs aligned |
 | Add unit tests | Package-local `*_test.go` | Most tests override package-level function vars with `t.Cleanup()` |
 | Add full workflow tests | `test/integration/` | Builds binary once, uses temp HOME/XDG and real git repos; see child AGENTS |
-| Release packaging | `.goreleaser.yaml`, `release-please-config.json` | GoReleaser v2 injects `internal/version.Version`; Homebrew tap token comes from env |
+| Release packaging | `.github/workflows/release-please.yml`, `.goreleaser.yaml`, `release-please-config.json` | Release Please runs on `main`; GoReleaser v2 publishes binaries + Homebrew Formula only after a release is created |
 | Publish binary release | `.agents/skills/publish-binary/SKILL.md` | Project-local SOP for branch checks, PR merge, Release Please, GoReleaser, and GitHub Actions follow-up |
 
 ## CODE MAP
@@ -75,7 +76,7 @@
 - Locale detection priority: `GITUSR_LANG` > `LANGUAGE` > `LANG` > `en`; `zh*` normalizes to `zh-CN`, everything else to `en`.
 - Test seams are package-level vars (`askNewUser`, `SelectFunc`, `getConfigFn`, `installFunc`, `uninstallFunc`, etc.) restored with `t.Cleanup()`.
 - Tests that write HOME/XDG/shell rc state use `t.TempDir()` and `t.Setenv()`; do not touch real user files.
-- Release config is split: Release Please controls changelog sections, GoReleaser controls binary archives and Homebrew Formula output.
+- Release config is split: GitHub Actions orchestrates Release Please then GoReleaser; Release Please controls changelog sections, GoReleaser controls binary archives and Homebrew Formula output.
 
 ## ANTI-PATTERNS (THIS PROJECT)
 - Do **not** call `os.Exit` inside command `RunE`.
@@ -113,6 +114,7 @@ mise run uninstall
 mise run clean
 
 # Release packaging config is GoReleaser + Release Please owned
+.github/workflows/release-please.yml
 .goreleaser.yaml
 release-please-config.json
 ```
@@ -122,5 +124,5 @@ release-please-config.json
 - Legacy data path is `~/.gitusr/user-list.json`; migration behavior is in init flow and xdgpath helpers.
 - `replace` requires `git-filter-repo` available in `PATH` and creates a backup branch before rewriting history.
 - Integration tests require `git`; hook tests also exercise shell rc file writes inside temp HOME.
-- No GitHub Actions, Makefile, or golangci config is present; `mise run test` is the project quality gate.
+- No PR test workflow, Makefile, or golangci config is present; `mise run test` is the project quality gate.
 - Existing focused child docs: `internal/cli/AGENTS.md`, `internal/hook/AGENTS.md`, `internal/i18n/AGENTS.md`, `test/integration/AGENTS.md`.
