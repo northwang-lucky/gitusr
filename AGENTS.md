@@ -1,11 +1,11 @@
 # PROJECT KNOWLEDGE BASE
 
-**Generated:** 2026-06-01
-**Commit:** 75070aa
+**Generated:** 2026-06-08
+**Commit:** d37b8b2
 **Branch:** main
 
 ## OVERVIEW
-`gitusr` is a Go 1.26.3 Cobra CLI for managing and switching Git user identities. It stores identities under XDG data, applies them through `git config`, rewrites mistaken author history with `git-filter-repo`, and installs bash/zsh shell hooks for clone/commit/cd workflows.
+`gitusr` is a Go 1.26.3 Cobra CLI for managing and switching Git user identities. It stores identities under XDG data, applies them through `git config`, rewrites mistaken author history with `git-filter-repo`, and installs bash/zsh wrappers for clone/commit/cd workflows.
 
 ## STRUCTURE
 ```
@@ -23,7 +23,7 @@
 │   ├── store/           # JSON persistence for saved users
 │   ├── version/         # Build-time Version ldflag target
 │   └── xdgpath/         # XDG data path resolution and legacy path helpers
-├── scripts/             # Manual sandbox/E2E shell scripts
+├── scripts/             # Manual sandbox/E2E shell scripts; not the main test gate
 ├── test/integration/    # Real binary + real git repo workflow tests
 ├── .agents/skills/      # Project-local OpenCode/agent skills shared with this repo
 ├── dist/                # Release artifacts; do not treat as source
@@ -44,8 +44,8 @@
 | Change formatting | `internal/format/format.go` | Keep stdout success messages separate from stderr errors |
 | Change translations | `internal/i18n/`, `internal/i18n/AGENTS.md` | Keep `active.en.toml` and `active.zh-CN.toml` message IDs aligned |
 | Add unit tests | Package-local `*_test.go` | Most tests override package-level function vars with `t.Cleanup()` |
-| Add full workflow tests | `test/integration/` | Builds binary once, uses temp HOME/XDG and real git repos |
-| Release packaging | `.goreleaser.yaml`, `release-please-config.json` | GoReleaser injects `internal/version.Version`; Homebrew tap token comes from env |
+| Add full workflow tests | `test/integration/` | Builds binary once, uses temp HOME/XDG and real git repos; see child AGENTS |
+| Release packaging | `.goreleaser.yaml`, `release-please-config.json` | GoReleaser v2 injects `internal/version.Version`; Homebrew tap token comes from env |
 | Publish binary release | `.agents/skills/publish-binary/SKILL.md` | Project-local SOP for branch checks, PR merge, Release Please, GoReleaser, and GitHub Actions follow-up |
 
 ## CODE MAP
@@ -93,6 +93,7 @@
 - `hooks install` calls `InstallAll`; nil results mean all hook types are already installed and CLI prints idempotent success.
 - `.gitusrrc` matching uses email priority over name; `hooks apply-rc --silent-if-unchanged` avoids repeated output from shell hooks.
 - `LoadState()` treats missing, empty, and invalid hook-state JSON as an empty state.
+- Integration `TestMain` writes one shared binary to `os.TempDir()` and cleans it after the suite.
 
 ## COMMANDS
 ```bash
@@ -121,5 +122,5 @@ release-please-config.json
 - Legacy data path is `~/.gitusr/user-list.json`; migration behavior is in init flow and xdgpath helpers.
 - `replace` requires `git-filter-repo` available in `PATH` and creates a backup branch before rewriting history.
 - Integration tests require `git`; hook tests also exercise shell rc file writes inside temp HOME.
-- No GitHub Actions or golangci config is present; `mise run test` is the project quality gate.
+- No GitHub Actions, Makefile, or golangci config is present; `mise run test` is the project quality gate.
 - Existing focused child docs: `internal/cli/AGENTS.md`, `internal/hook/AGENTS.md`, `internal/i18n/AGENTS.md`, `test/integration/AGENTS.md`.
