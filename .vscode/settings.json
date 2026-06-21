@@ -1,7 +1,8 @@
 {
-  "go.goroot": "${env:HOME}/.local/share/mise/installs/go/1.26.3",
+  "go.goroot": "${env:HOME}/.local/share/mise/installs/go/latest",
   "go.alternateTools": {
-    "go": "${env:HOME}/.local/share/mise/shims/go",
-    "gopls": "${env:HOME}/.local/share/mise/shims/gopls"
+    "go": "${env:HOME}/.local/share/mise/installs/go/latest/bin/go",
+    "gopls": "${env:HOME}/.local/share/mise/installs/go/latest/bin/gopls",
+    "dlv": "${env:HOME}/.local/share/mise/installs/go/latest/bin/dlv"
   }
 }
