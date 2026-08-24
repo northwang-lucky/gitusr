@@ -18,7 +18,8 @@ Manually editing `git config user.name` and `git config user.email` is tedious a
 Additionally, `gitusr` provides:
 
 - **History author rewriting**: safely fix incorrect author information in past commits
-- **Hook auto-switch**: automatically detect `.gitusrrc` configuration or match the clone URL's host against `hosts` rules and apply the corresponding Git user identity during `git clone`, `git commit` and `cd`
+- **Hook auto-switch**: automatically detect `.gitusrrc` configuration and apply the corresponding Git user identity during `git commit` and `cd`; after `git clone`, apply the user by priority: explicit `--gu-*` args > repo `.gitusrrc` > `hosts` rules > interactive select
+- **Host-based routing**: configure host rules via `gitusr hosts` — e.g. `github.com` uses a personal account while `code.byted.org` uses a work account — and the clone hook matches them automatically
 
 ## Installation
 
