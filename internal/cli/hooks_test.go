@@ -8,9 +8,17 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/northwang-lucky/gitusr/internal/domain"
 	"github.com/northwang-lucky/gitusr/internal/hook"
 	"github.com/northwang-lucky/gitusr/internal/i18n"
+	"github.com/northwang-lucky/gitusr/internal/store"
 )
+
+// newTestHostStore creates an isolated hosts.json-backed rule store.
+func newTestHostStore(t *testing.T) domain.HostRuleStore {
+	t.Helper()
+	return store.NewJSONHostRuleStore(filepath.Join(t.TempDir(), "hosts.json"))
+}
 
 // setupHookState creates a temporary hook state file with the given disabled types
 // and sets XDG_DATA_HOME so that hook.LoadState reads from the temp directory.
@@ -47,11 +55,11 @@ func TestNewHooksCmd_Subcommands(t *testing.T) {
 	i18n.InitWithLocale("en")
 
 	store := &mockStore{}
-	cmd := NewHooksCmd(store)
+	cmd := NewHooksCmd(store, newTestHostStore(t))
 
 	subs := cmd.Commands()
-	if len(subs) != 6 {
-		t.Fatalf("expected 6 subcommands, got %d", len(subs))
+	if len(subs) != 7 {
+		t.Fatalf("expected 7 subcommands, got %d", len(subs))
 	}
 
 	names := make(map[string]bool)
@@ -63,7 +71,7 @@ func TestNewHooksCmd_Subcommands(t *testing.T) {
 		}
 	}
 
-	for _, name := range []string{"install", "uninstall", "enable", "disable", "apply-rc", "is-disabled"} {
+	for _, name := range []string{"install", "uninstall", "enable", "disable", "apply-rc", "apply-host", "is-disabled"} {
 		if !names[name] {
 			t.Errorf("expected subcommand %q", name)
 		}
@@ -71,6 +79,9 @@ func TestNewHooksCmd_Subcommands(t *testing.T) {
 
 	if !hidden["apply-rc"] {
 		t.Error("expected 'apply-rc' subcommand to be hidden")
+	}
+	if !hidden["apply-host"] {
+		t.Error("expected 'apply-host' subcommand to be hidden")
 	}
 	if !hidden["is-disabled"] {
 		t.Error("expected 'is-disabled' subcommand to be hidden")
@@ -84,7 +95,7 @@ func TestNewHooksCmd_Help(t *testing.T) {
 	i18n.InitWithLocale("en")
 
 	store := &mockStore{}
-	cmd := NewHooksCmd(store)
+	cmd := NewHooksCmd(store, newTestHostStore(t))
 
 	help, _, err := executeCmd(cmd, "--help")
 	if err != nil {
@@ -113,7 +124,7 @@ func TestNewHooksCmd_IsDisabled_WhenDisabled(t *testing.T) {
 	setupHookState(t, []hook.HookType{hook.HookTypeClone})
 
 	store := &mockStore{}
-	cmd := NewHooksCmd(store)
+	cmd := NewHooksCmd(store, newTestHostStore(t))
 	_, _, err := executeCmd(cmd, "is-disabled", "clone")
 
 	if err != nil {
@@ -128,7 +139,7 @@ func TestNewHooksCmd_IsDisabled_WhenEnabled(t *testing.T) {
 	setupHookState(t, nil)
 
 	store := &mockStore{}
-	cmd := NewHooksCmd(store)
+	cmd := NewHooksCmd(store, newTestHostStore(t))
 	_, _, err := executeCmd(cmd, "is-disabled", "clone")
 
 	if err == nil {
@@ -144,7 +155,7 @@ func TestNewHooksCmd_IsDisabled_InvalidType(t *testing.T) {
 	i18n.InitWithLocale("en")
 
 	store := &mockStore{}
-	cmd := NewHooksCmd(store)
+	cmd := NewHooksCmd(store, newTestHostStore(t))
 	_, _, err := executeCmd(cmd, "is-disabled", "invalid")
 
 	if err == nil {
@@ -160,7 +171,7 @@ func TestNewHooksCmd_IsDisabled_MissingArg(t *testing.T) {
 	i18n.InitWithLocale("en")
 
 	store := &mockStore{}
-	cmd := NewHooksCmd(store)
+	cmd := NewHooksCmd(store, newTestHostStore(t))
 	_, _, err := executeCmd(cmd, "is-disabled")
 
 	if err == nil {
@@ -175,7 +186,7 @@ func TestNewHooksCmd_Enable_InvalidType(t *testing.T) {
 	i18n.InitWithLocale("en")
 
 	store := &mockStore{}
-	cmd := NewHooksCmd(store)
+	cmd := NewHooksCmd(store, newTestHostStore(t))
 	_, _, err := executeCmd(cmd, "enable", "invalid")
 
 	if err == nil {
@@ -191,7 +202,7 @@ func TestNewHooksCmd_Enable_MissingArg(t *testing.T) {
 	i18n.InitWithLocale("en")
 
 	store := &mockStore{}
-	cmd := NewHooksCmd(store)
+	cmd := NewHooksCmd(store, newTestHostStore(t))
 	_, _, err := executeCmd(cmd, "enable")
 
 	if err == nil {
@@ -218,7 +229,7 @@ func TestNewHooksCmd_Disable_InvalidType(t *testing.T) {
 	i18n.InitWithLocale("en")
 
 	store := &mockStore{}
-	cmd := NewHooksCmd(store)
+	cmd := NewHooksCmd(store, newTestHostStore(t))
 	_, _, err := executeCmd(cmd, "disable", "invalid")
 
 	if err == nil {
@@ -234,7 +245,7 @@ func TestNewHooksCmd_Disable_MissingArg(t *testing.T) {
 	i18n.InitWithLocale("en")
 
 	store := &mockStore{}
-	cmd := NewHooksCmd(store)
+	cmd := NewHooksCmd(store, newTestHostStore(t))
 	_, _, err := executeCmd(cmd, "disable")
 
 	if err == nil {
@@ -251,7 +262,7 @@ func TestNewHooksCmd_Enable_Success(t *testing.T) {
 	setupHookState(t, []hook.HookType{hook.HookTypeClone})
 
 	store := &mockStore{}
-	cmd := NewHooksCmd(store)
+	cmd := NewHooksCmd(store, newTestHostStore(t))
 	stdout, _, err := executeCmd(cmd, "enable", "clone")
 
 	if err != nil {
@@ -277,7 +288,7 @@ func TestNewHooksCmd_Disable_Success(t *testing.T) {
 	setupHookState(t, nil)
 
 	store := &mockStore{}
-	cmd := NewHooksCmd(store)
+	cmd := NewHooksCmd(store, newTestHostStore(t))
 	stdout, _, err := executeCmd(cmd, "disable", "clone")
 
 	if err != nil {
@@ -313,7 +324,7 @@ func TestHooksInstall_Success(t *testing.T) {
 	}
 
 	store := &mockStore{}
-	cmd := NewHooksCmd(store)
+	cmd := NewHooksCmd(store, newTestHostStore(t))
 	stdout, _, err := executeCmd(cmd, "install")
 
 	if err != nil {
@@ -342,7 +353,7 @@ func TestHooksInstall_AlreadyInstalled(t *testing.T) {
 	}
 
 	store := &mockStore{}
-	cmd := NewHooksCmd(store)
+	cmd := NewHooksCmd(store, newTestHostStore(t))
 	stdout, _, err := executeCmd(cmd, "install")
 
 	if err != nil {
@@ -373,7 +384,7 @@ func TestHooksUninstall_Success(t *testing.T) {
 	}
 
 	store := &mockStore{}
-	cmd := NewHooksCmd(store)
+	cmd := NewHooksCmd(store, newTestHostStore(t))
 	stdout, _, err := executeCmd(cmd, "uninstall")
 
 	if err != nil {
@@ -396,7 +407,7 @@ func TestHooksUninstall_NoneInstalled(t *testing.T) {
 	}
 
 	store := &mockStore{}
-	cmd := NewHooksCmd(store)
+	cmd := NewHooksCmd(store, newTestHostStore(t))
 	_, _, err := executeCmd(cmd, "uninstall")
 
 	if err == nil {
@@ -419,7 +430,7 @@ func TestHooksUninstall_NotInstalled(t *testing.T) {
 	}
 
 	store := &mockStore{}
-	cmd := NewHooksCmd(store)
+	cmd := NewHooksCmd(store, newTestHostStore(t))
 	_, _, err := executeCmd(cmd, "uninstall")
 
 	if err == nil {
@@ -442,7 +453,7 @@ func TestHooksUninstall_Error(t *testing.T) {
 	}
 
 	store := &mockStore{}
-	cmd := NewHooksCmd(store)
+	cmd := NewHooksCmd(store, newTestHostStore(t))
 	_, _, err := executeCmd(cmd, "uninstall")
 
 	if err == nil {

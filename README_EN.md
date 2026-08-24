@@ -18,7 +18,8 @@ Manually editing `git config user.name` and `git config user.email` is tedious a
 Additionally, `gitusr` provides:
 
 - **History author rewriting**: safely fix incorrect author information in past commits
-- **Hook auto-switch**: automatically detect `.gitusrrc` configuration and apply the corresponding Git user identity during `git commit` and `cd`; after `git clone`, automatically enter the repository and call `gitusr use` to switch the user
+- **Hook auto-switch**: automatically detect `.gitusrrc` configuration and apply the corresponding Git user identity during `git commit` and `cd`; after `git clone`, apply the user by priority: explicit `--gu-*` args > repo `.gitusrrc` > `hosts` rules > interactive select
+- **Host-based routing**: configure host rules via `gitusr hosts` — e.g. `github.com` uses a personal account while `code.byted.org` uses a work account — and the clone hook matches them automatically
 
 ## Installation
 
@@ -327,7 +328,7 @@ Install auto-switch hooks for the current shell (bash and zsh). The operation is
 
 After installation, three hook types are supported:
 
-- **`clone`** — Automatically enters the cloned repository and calls `gitusr use` to switch the user after `git clone`. Supports specifying the user via `--gu-name` / `--gu-email` arguments for non-TTY environments
+- **`clone`** — After `git clone`, automatically enters the cloned repository and applies the user in this priority order: explicit `--gu-name` / `--gu-email` arguments > a repo-local `.gitusrrc` > `hosts` rules matched against the repository URL's host > interactive `gitusr use`. The explicit arguments support non-TTY environments
 - **`commit`** — Automatically reads `.gitusrrc` during `git commit` and applies the user
 - **`cd`** — Automatically applies the user when `cd`ing into a directory containing `.gitusrrc`
 
@@ -409,6 +410,54 @@ Create a `.gitusrrc` file in the root of a Git repository. When `cd`ing into tha
 ```
 
 Matching priority: **email > name**. Only one field is required.
+
+### `gitusr hosts` — Configure Host Routing Rules
+
+When `git clone` runs, the clone hook reads the repository URL's host and automatically applies the matching Git user from the configured routing rules. This suits scenarios like "`github.com` uses my personal account, `code.byted.org` uses my work account".
+
+**Usage:**
+
+```bash
+gitusr hosts <subcommand> [flags]
+```
+
+**Subcommands:**
+
+| Subcommand | Description |
+|--------|------|
+| `set <host> <email>` | Add or update a rule in place; email must be a saved user |
+| `list` | List rules with a numbered index (used by `move`) |
+| `remove <host>` | Delete the given rule |
+| `move <host> <target>` | Reorder a rule; target is an index, `first`, `last`, `up`, or `down` |
+
+**Matching rules:**
+
+- Hosts are lowercased and ports are ignored; `https://`, `ssh://`, `git://`, and `git@host:path` URL forms are supported
+- `github.com` matches that exact host; `*.byted.org` matches subdomains at any depth
+- When several rules match the same host: **exact matches beat wildcards; at the same level, the first configured rule wins**
+
+**Example:**
+
+```bash
+# github.com uses a personal account
+gitusr hosts set github.com wyb_goodluck@163.com
+
+# code.byted.org and all its subdomains use a work account
+gitusr hosts set *.byted.org wangyubo.1219@bytedance.com
+
+# List and reorder
+gitusr hosts list
+gitusr hosts move code.byted.org first
+
+# Remove
+gitusr hosts remove github.com
+```
+
+**Edge behaviour:**
+
+- If the cloned repository ships a `.gitusrrc`, it takes precedence over host rules
+- If a rule references a user that has been deleted, one warning line is printed and the rule is skipped; the clone is unaffected
+- If `hosts` rules are configured but none match the current URL, the clone skips silently and does not prompt for interactive selection
 
 ---
 

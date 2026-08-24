@@ -13,6 +13,10 @@
 hash = "sha1:14e60b9ae9140b40f60c4c280aee01aad62a0a50"
 other = "gitusr 错误：{{.Msg}}"
 
+[format.warning_prefix]
+hash = "sha1:dummy"
+other = "gitusr 警告：{{.Msg}}"
+
 [format.success_banner]
 hash = "sha1:7ce01f6381463362cf6aef2f843a59261e8f5587"
 other = "成功！"
@@ -488,6 +492,78 @@ other = "Hook %s 已禁用"
 [cli.hooks.invalid_type]
 hash = "sha1:dummy"
 other = "无效的 hook 类型: %q，必须为 %q、%q 或 %q"
+
+[cli.hooks.apply_host.missing_user]
+hash = "sha1:dummy"
+other = "host 规则 \"{{.Host}}\" 指向的邮箱 \"{{.Email}}\" 不是已保存的用户，已跳过"
+
+# ================================================
+# CLI hosts 命令（internal/cli/hosts.go）
+# ================================================
+
+[cli.hosts.short]
+hash = "sha1:dummy"
+other = "管理 host 到用户的路由规则"
+
+[cli.hosts.set.short]
+hash = "sha1:dummy"
+other = "设置 host 规则"
+
+[cli.hosts.set.success]
+hash = "sha1:dummy"
+other = "已设置 host 规则: {{.Host}} -> {{.Email}}"
+
+[cli.hosts.set.invalid_host]
+hash = "sha1:dummy"
+other = "无效的 host \"{{.Host}}\": 请使用裸域名（如 github.com）或通配符（如 *.example.com）"
+
+[cli.hosts.set.email_not_found]
+hash = "sha1:dummy"
+other = "已保存的用户中未找到邮箱 \"{{.Email}}\""
+
+[cli.hosts.list.short]
+hash = "sha1:dummy"
+other = "列出 host 规则"
+
+[cli.hosts.list.empty]
+hash = "sha1:dummy"
+other = "尚未配置 host 规则"
+
+[cli.hosts.list_row]
+hash = "sha1:dummy"
+other = "{{.Index}}: {{.Host}} | Email: {{.Email}}"
+
+[cli.hosts.remove.short]
+hash = "sha1:dummy"
+other = "删除 host 规则"
+
+[cli.hosts.remove.success]
+hash = "sha1:dummy"
+other = "已删除 host 规则: {{.Host}}"
+
+[cli.hosts.remove.not_found]
+hash = "sha1:dummy"
+other = "未找到 host 规则 \"{{.Host}}\""
+
+[cli.hosts.move.short]
+hash = "sha1:dummy"
+other = "调整 host 规则顺序"
+
+[cli.hosts.move.success]
+hash = "sha1:dummy"
+other = "已将 host 规则 \"{{.Host}}\" 移至位置 {{.Index}}"
+
+[cli.hosts.move.invalid_target]
+hash = "sha1:dummy"
+other = "无效的移动目标 \"{{.Target}}\": 请使用从 0 开始的序号、first、last、up 或 down"
+
+[cli.hosts.move.out_of_range]
+hash = "sha1:dummy"
+other = "目标序号 {{.Index}} 超出范围（0-{{.Max}}）"
+
+[cli.hosts.move.at_boundary]
+hash = "sha1:dummy"
+other = "host 规则 \"{{.Host}}\" 已在{{.Boundary}}边界"
 
 # ================================================
 # Gitcmd 包消息（internal/gitcmd/）

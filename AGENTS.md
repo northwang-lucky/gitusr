@@ -5,7 +5,7 @@
 **Branch:** main
 
 ## OVERVIEW
-`gitusr` is a Go 1.26.3 Cobra CLI for managing and switching Git user identities. It stores identities under XDG data, applies them through `git config`, rewrites mistaken author history with `git-filter-repo`, and installs bash/zsh wrappers for clone/commit/cd workflows.
+`gitusr` is a Go 1.26.3 Cobra CLI for managing and switching Git user identities. It stores identities under XDG data, applies them through `git config`, matches clone URLs against host rules, rewrites mistaken author history with `git-filter-repo`, and installs bash/zsh shell wrappers for clone/commit/cd workflows.
 
 ## STRUCTURE
 ```
@@ -13,14 +13,15 @@
 ├── cmd/gitusr/          # Thin main: i18n init, JSONStore wiring, Cobra execute
 ├── internal/
 │   ├── cli/             # Cobra commands, i18n help templates, command tests
-│   ├── domain/          # User, UserFilter, UserStore interface
+│   ├── domain/          # User, UserFilter, HostRule + store interfaces
 │   ├── format/          # User-facing stdout/stderr formatting helpers
 │   ├── gitcmd/          # `git config`, backup branch, git-filter-repo wrappers
 │   ├── hook/            # Shell wrapper install/uninstall + .gitusrrc application
+│   ├── hosts/           # Clone URL parsing and host rule matching logic
 │   ├── i18n/            # Embedded active.*.toml translations and locale state; see child AGENTS
 │   ├── prompt/          # survey/v2 prompts for user creation/selection
 │   ├── select/          # User resolution: index > email > name > interactive
-│   ├── store/           # JSON persistence for saved users
+│   ├── store/           # JSON persistence for saved users and host rules
 │   ├── version/         # Build-time Version ldflag target
 │   └── xdgpath/         # XDG data path resolution and legacy path helpers
 ├── scripts/             # Manual sandbox/E2E shell scripts; not the main test gate
@@ -37,7 +38,8 @@
 | Task | Location | Notes |
 |------|----------|-------|
 | Add or register a CLI command | `internal/cli/` | Register in `root.go`; command constructors are `NewXxxCmd(...)` |
-| Change hook install/cd/commit behavior | `internal/hook/`, `internal/cli/hook*.go` | Shell snippets are generated Go raw strings; CLI has hidden `hooks apply-rc` |
+| Change hook install/cd/commit behavior | `internal/hook/`, `internal/cli/hook*.go` | Shell snippets are generated Go raw strings; CLI has hidden `hooks apply-rc` and `hooks apply-host` |
+| Change host routing rules | `internal/cli/hosts.go`, `internal/hosts/`, `internal/store/hosts.go` | CLI group `hosts`; matching logic is pure functions; rules live in `hosts.json` |
 | Change user data model | `internal/domain/user.go` | Update `UserStore`, `store.JSONStore`, tests, docs |
 | Change persistence path/legacy migration | `internal/xdgpath/`, `internal/store/`, `internal/cli/init.go` | User list and hook state share the XDG gitusr directory |
 | Change git interaction | `internal/gitcmd/runner.go` | Wraps real `git`; replace flow depends on `git-filter-repo` |
@@ -53,9 +55,13 @@
 | Symbol | Type | Location | Role |
 |--------|------|----------|------|
 | `main` | func | `cmd/gitusr/main.go` | Initializes path/i18n/store, derives binary alias, executes root command |
-| `NewRootCmd` | func | `internal/cli/root.go` | Registers add/current/hook/init/list/remove/replace/use and custom i18n usage template |
+| `NewRootCmd` | func | `internal/cli/root.go` | Registers add/current/hook/hosts/init/list/remove/replace/use and custom i18n usage template |
 | `domain.UserStore` | interface | `internal/domain/user.go` | Persistence seam used by CLI, select, hooks apply-rc |
+| `domain.HostRuleStore` | interface | `internal/domain/hostrule.go` | Persistence seam for the ordered host rule list |
 | `store.JSONStore` | struct | `internal/store/store.go` | JSON file implementation; creates empty list on first `List()` |
+| `store.JSONHostRuleStore` | struct | `internal/store/hosts.go` | Reads/writes `hosts.json`; missing file means empty rules |
+| `hosts.MatchHost` | func | `internal/hosts/match.go` | Parses clone URL, matches rules: exact beats wildcard, first-rule-wins |
+| `hosts.ValidateHost` | func | `internal/hosts/validate.go` | Accepts bare hostnames and `*.suffix` wildcards; rejects URLs/ports |
 | `sel.ResolveUser` | func | `internal/select/resolver.go` | Resolution priority: index, email, name, then interactive selection |
 | `gitcmd.SetConfig` | func | `internal/gitcmd/runner.go` | Calls `git config [--global] user.name/user.email` |
 | `gitcmd.FilterRepo` | func | `internal/gitcmd/runner.go` | Runs `git-filter-repo` with inline Python author callback |
@@ -63,8 +69,11 @@
 | `hook.Uninstall` | func | `internal/hook/uninstaller.go` | Removes hook type from state; cleans wrappers only when no hook types remain |
 | `hook.ParseRC` | func | `internal/hook/rc.go` | Reads `.gitusrrc`; nil means absent, error means invalid JSON/empty config |
 | `hook.MatchAndApplyRC` | func | `internal/hook/rc.go` | Matches saved user by email then name, applies repo-local git config |
+| `cli.NewHostsCmd` | func | `internal/cli/hosts.go` | `hosts set/list/remove/move`; rule order is the matching priority |
+| `cli.NewHooksApplyHostCmd` | func | `internal/cli/hooks_apply_host.go` | Hidden bridge: matches host rule, applies user or warns when missing |
 | `i18n.T` | func | `internal/i18n/bundle.go` | Fail-open message lookup; returns msgID if uninitialized/missing |
 | `format.PrintErr` | func | `internal/format/format.go` | Central stderr path used by `main.go` |
+| `format.PrintWarn` | func | `internal/format/format.go` | Non-fatal stderr warning path (e.g. stale host rule) |
 
 ## CONVENTIONS
 - Exported symbols have doc comments; package comments exist where package purpose is non-obvious.
@@ -93,6 +102,8 @@
 - Hook state lives next to `user-list.json` as `hook-state.json`; shell wrappers live in `{XDG_DATA_HOME}/gitusr/hooks/`.
 - `hooks install` calls `InstallAll`; nil results mean all hook types are already installed and CLI prints idempotent success.
 - `.gitusrrc` matching uses email priority over name; `hooks apply-rc --silent-if-unchanged` avoids repeated output from shell hooks.
+- Clone identity resolution in the wrappers: explicit `--gu-*` args > repo `.gitusrrc` > host rules (`hooks apply-host`) > interactive `gitusr use`. Host rules apply only when `hosts.json` exists.
+- Host rules live in `hosts.json` as an ordered array; `hosts set` updates in place, only `hosts move` changes priority.
 - `LoadState()` treats missing, empty, and invalid hook-state JSON as an empty state.
 - Integration `TestMain` writes one shared binary to `os.TempDir()` and cleans it after the suite.
 
@@ -121,6 +132,7 @@ release-please-config.json
 
 ## NOTES
 - Data file path: `$XDG_DATA_HOME/gitusr/user-list.json`, falling back to `~/.local/share/gitusr/user-list.json`.
+- Host rules live at `$XDG_DATA_HOME/gitusr/hosts.json`; matching is exact-first then wildcard, both in configuration order.
 - Legacy data path is `~/.gitusr/user-list.json`; migration behavior is in init flow and xdgpath helpers.
 - `replace` requires `git-filter-repo` available in `PATH` and creates a backup branch before rewriting history.
 - Integration tests require `git`; hook tests also exercise shell rc file writes inside temp HOME.

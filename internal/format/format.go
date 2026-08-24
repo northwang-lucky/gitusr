@@ -15,6 +15,14 @@ func PrintErr(msg string) {
 	fmt.Fprintf(os.Stderr, "%s\n", prefix)
 }
 
+// PrintWarn writes the given message prefixed with a localised warning label
+// to stderr. It is used for non-fatal notices that must not be mistaken for
+// command failure.
+func PrintWarn(msg string) {
+	prefix := i18n.T("format.warning_prefix", map[string]interface{}{"Msg": msg})
+	fmt.Fprintf(os.Stderr, "%s\n", prefix)
+}
+
 // PrintOptions controls the behaviour of PrintUserInfo.
 type PrintOptions struct {
 	Global      bool

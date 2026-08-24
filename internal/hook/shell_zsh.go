@@ -91,13 +91,25 @@ git() {
             fi
         fi
 
-        # Always apply gitusr user identity after clone
+        # Apply gitusr user identity after clone, by priority:
+        #   1. explicit --gu-name/--gu-email args
+        #   2. repo-local .gitusrrc, when present
+        #   3. host rule from hosts.json, matched against the remote URL
+        #   4. interactive gitusr use (legacy behaviour, only without host rules)
         if [[ -n "$gu_name" && -n "$gu_email" ]]; then
             gitusr use --name "$gu_name" --email "$gu_email"
         elif [[ -n "$gu_name" ]]; then
             gitusr use --name "$gu_name"
         elif [[ -n "$gu_email" ]]; then
             gitusr use --email "$gu_email"
+        elif [[ -f .gitusrrc ]]; then
+            gitusr hooks apply-rc --silent-if-unchanged
+        elif [[ -f "$__GITUSR_DATA_DIR/hosts.json" ]]; then
+            local clone_url
+            clone_url=$(git config --local --get-regexp '^remote\..*\.url$' 2>/dev/null | head -1 | cut -f2)
+            if [[ -n "$clone_url" ]]; then
+                gitusr hooks apply-host "$clone_url" --silent-if-unchanged
+            fi
         else
             gitusr use
         fi

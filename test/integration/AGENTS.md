@@ -10,6 +10,7 @@ End-to-end tests build the real `gitusr` binary once and exercise CLI workflows 
 test/integration/
 ├── integration_test.go       # Binary build, helpers, init/use/list/current/remove workflows
 ├── add_test.go               # Add command workflows
+├── host_apply_test.go        # hosts rules + hooks apply-host workflows
 ├── hooks_test.go             # Hook install/enable/disable workflows
 ├── hook_apply_rc_test.go     # .gitusrrc apply workflows
 ├── i18n_test.go              # Locale-visible CLI workflows
@@ -24,6 +25,7 @@ test/integration/
 | Change env isolation | `runGitusr`, `runGitusrInDir` | Pass env map; never rely on real HOME |
 | Assert git config | `gitConfig` helper | Reads raw `git config` in temp repo |
 | Add hook E2E coverage | `hooks_test.go`, `hook_apply_rc_test.go` | Must sandbox shell rc writes with temp HOME/XDG |
+| Add host rule E2E coverage | `host_apply_test.go` | Pre-seed `user-list.json` + `hosts.json`, then run `hooks apply-host` |
 
 ## CONVENTIONS
 - `TestMain` owns binary build and cleanup; individual tests call the built binary.
@@ -47,5 +49,5 @@ mise run test
 ```
 
 ## NOTES
-- Requires `git` in `PATH`; replace/history scenarios require `git-filter-repo`.
+- Requires `git` in `PATH`; replace/history tests run `git-filter-repo` under a temporary HOME, where user-level pip installs stop working — they download a standalone copy to `/tmp` and skip when even that is unavailable.
 - `findModuleRoot()` walks upward to locate `go.mod` for the binary build.
