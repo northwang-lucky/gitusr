@@ -12,17 +12,15 @@ import (
 // TestReplaceAuthor — replace command rewrites commit history
 // ---------------------------------------------------------------------------
 func TestReplaceAuthor(t *testing.T) {
-	// Ensure git-filter-repo is available
-	gitFilterRepo := ensureGitFilterRepo(t)
-
 	homeDir := t.TempDir()
 	xdgDataHome := t.TempDir()
 
 	env := map[string]string{
 		"HOME":          homeDir,
 		"XDG_DATA_HOME": xdgDataHome,
-		"PATH":          filepath.Dir(gitFilterRepo) + ":" + os.Getenv("PATH"),
 	}
+	// Ensure git-filter-repo is usable under the test env (or skip)
+	ensureGitFilterRepo(t, env)
 
 	// Pre-configure store with two users
 	storePath := gitusrStore(xdgDataHome)
@@ -82,16 +80,15 @@ func TestReplaceAuthor(t *testing.T) {
 // TestReplaceWithFlags — replace using --with-name and --with-email
 // ---------------------------------------------------------------------------
 func TestReplaceWithFlags(t *testing.T) {
-	gitFilterRepo := ensureGitFilterRepo(t)
-
 	homeDir := t.TempDir()
 	xdgDataHome := t.TempDir()
 
 	env := map[string]string{
 		"HOME":          homeDir,
 		"XDG_DATA_HOME": xdgDataHome,
-		"PATH":          filepath.Dir(gitFilterRepo) + ":" + os.Getenv("PATH"),
 	}
+	// Ensure git-filter-repo is usable under the test env (or skip)
+	ensureGitFilterRepo(t, env)
 
 	storePath := gitusrStore(xdgDataHome)
 	users := []map[string]string{
@@ -177,40 +174,56 @@ func TestReplaceUncommitted(t *testing.T) {
 // ---------------------------------------------------------------------------
 
 // ensureGitFilterRepo checks for git-filter-repo in PATH or downloads it.
-// Returns the path to the git-filter-repo executable.
-func ensureGitFilterRepo(t *testing.T) string {
+// ensureGitFilterRepo makes a working git-filter-repo available in the test
+// environment, verified under the same temporary HOME the replace tests run
+// with. A PATH-provided install is trusted only when it actually works there,
+// because user-level pip packages depend on $HOME and stop resolving once
+// HOME is swapped. When neither PATH nor a downloaded standalone copy works,
+// the test is skipped.
+func ensureGitFilterRepo(t *testing.T, env map[string]string) {
 	t.Helper()
 
-	// Check if already in PATH
-	if path, err := exec.LookPath("git-filter-repo"); err == nil {
-		return path
+	if gitFilterRepoUsable(t, env) {
+		return
 	}
 
-	// Try the temp location from previous download
+	// Download a standalone copy to /tmp (no $HOME-dependent Python user site)
 	tmpPath := "/tmp/git-filter-repo"
-	if _, err := os.Stat(tmpPath); err == nil {
-		return tmpPath
+	if _, err := os.Stat(tmpPath); err != nil {
+		t.Log("git-filter-repo not usable in test env, downloading standalone copy...")
+		cmd := exec.Command("curl", "-sL",
+			"https://raw.githubusercontent.com/newren/git-filter-repo/main/git-filter-repo",
+			"-o", tmpPath)
+		if out, err := cmd.CombinedOutput(); err != nil {
+			t.Skipf("git-filter-repo not usable and download failed: %v\n%s", err, string(out))
+		}
+		if err := os.Chmod(tmpPath, 0755); err != nil {
+			t.Skipf("failed to chmod git-filter-repo: %v", err)
+		}
 	}
 
-	// Download it
-	t.Log("git-filter-repo not found, downloading...")
-	cmd := exec.Command("curl", "-sL",
-		"https://raw.githubusercontent.com/newren/git-filter-repo/main/git-filter-repo",
-		"-o", tmpPath)
-	if out, err := cmd.CombinedOutput(); err != nil {
-		t.Skipf("git-filter-repo not available and download failed: %v\n%s", err, string(out))
+	env["PATH"] = "/tmp:" + os.Getenv("PATH")
+	if !gitFilterRepoUsable(t, env) {
+		t.Skipf("git-filter-repo not usable in test env (HOME=%s)", env["HOME"])
 	}
-	if err := os.Chmod(tmpPath, 0755); err != nil {
-		t.Skipf("failed to chmod git-filter-repo: %v", err)
-	}
+}
 
-	// Verify it works
-	verifyCmd := exec.Command(tmpPath, "--help")
-	if err := verifyCmd.Run(); err != nil {
-		t.Skipf("downloaded git-filter-repo does not work: %v", err)
-	}
+// gitFilterRepoUsable reports whether `git filter-repo` runs under the given
+// environment — the same env the replace tests pass to the gitusr binary.
+func gitFilterRepoUsable(t *testing.T, env map[string]string) bool {
+	t.Helper()
 
-	return tmpPath
+	cmd := exec.Command("git", "filter-repo", "--version")
+	cmd.Env = append(os.Environ(), "GITUSR_LANG=en")
+	for k, v := range env {
+		cmd.Env = append(cmd.Env, k+"="+v)
+	}
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		t.Logf("git filter-repo --version not usable in test env: %v\n%s", err, string(out))
+		return false
+	}
+	return true
 }
 
 // runGitOutput runs a git command and returns the trimmed stdout.

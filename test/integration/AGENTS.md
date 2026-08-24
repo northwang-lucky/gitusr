@@ -45,5 +45,5 @@ mise run test
 ```
 
 ## NOTES
-- Requires `git` in `PATH`; replace/history scenarios also require `git-filter-repo` when covered.
+- Requires `git` in `PATH`; replace/history tests run `git-filter-repo` under a temporary HOME, where user-level pip installs stop working — they download a standalone copy to `/tmp` and skip when even that is unavailable.
 - `findModuleRoot()` walks upward to locate `go.mod` for the binary build.
