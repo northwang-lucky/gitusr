@@ -18,7 +18,7 @@ internal/cli/
 ├── remove.go           # Remove identity by index/email/name
 ├── replace.go          # git-filter-repo author replacement flow
 ├── use.go              # Apply selected identity repo/global
-├── hooks*.go           # Hook install/uninstall/enable/disable/apply-rc bridge
+├── hooks*.go           # Hook install/uninstall/enable/disable/apply-rc/is-disabled bridge
 └── *_test.go           # Command-local tests and shared mocks/helpers
 ```
 
@@ -42,6 +42,7 @@ internal/cli/
 - i18n-specific tests use `_En` / `_ZhCN` suffixes and reset locale with `i18n.ResetForTesting()`.
 - Function vars used for mocking must be restored with `t.Cleanup()`.
 - Hidden `hooks apply-rc`, `hooks apply-host`, and `hooks is-disabled` must stay hidden; shell wrappers call them directly.
+- `replace` command is the only command path that shells out to `git-filter-repo`; it creates a backup branch before rewrite.
 
 ## ANTI-PATTERNS
 - Do **not** add standalone CLI logic outside this package.

@@ -8,7 +8,7 @@ Shell-hook engine for automatic git user switching. It writes unified bash/zsh w
 ## WHERE TO LOOK
 | Task | Location | Notes |
 |------|----------|-------|
-| Add/remove hook type | `types.go`, `installer.go`, `uninstaller.go` | Update `AllHookTypes`, CLI validation, wrapper generation, tests |
+| Add/remove hook type | `types.go`, `installer.go`, `uninstaller.go` | Update `AllHookTypes`, CLI validation, bash/zsh generation, tests |
 | Change wrapper behavior | `shell_bash.go`, `shell_zsh.go` | Raw shell strings for git clone/commit wrappers |
 | Change clone identity chain | `shell_bash.go`, `shell_zsh.go` | Priority: `--gu-*` args > `.gitusrrc` > `hosts.json` (`apply-host`) > interactive `use` |
 | Change cd auto-apply behavior | `shell_bash.go`, `shell_zsh.go` | Bash aliases `cd`; zsh uses `add-zsh-hook chpwd` |
@@ -33,7 +33,7 @@ Shell-hook engine for automatic git user switching. It writes unified bash/zsh w
 ## CONVENTIONS
 - Install idempotency contract: `InstallAll(...)` returns `nil, nil` when all hook types are already installed.
 - `Install` is legacy/deprecated; new CLI flow should use unified `InstallAll` and `UninstallAll`.
-- Shell snippets call `gitusr list` first and pass through when saved user count is `<= 1`.
+- Clone snippets call `gitusr list` first and pass through when saved user count is `<= 1`.
 - Shell snippets check `gitusr hooks is-disabled <type>` before clone/commit/cd behavior.
 - Clone identity chain: `--gu-*` args > `.gitusrrc` > host rules (`apply-host`, only when `hosts.json` exists) > interactive `gitusr use`.
 - The host rule branch reads the remote URL via `git config --local --get-regexp '^remote\..*\.url$'`; the clone URL is deliberately NOT parsed from argv (branch names look like URLs).
@@ -41,6 +41,7 @@ Shell-hook engine for automatic git user switching. It writes unified bash/zsh w
 - Zsh cd hooks remove the existing hook with `add-zsh-hook -D` before re-adding it.
 - Shell rc files are mutated only inside the marked block; existing config must be preserved.
 - Tests assert marker counts and wrapper file contents rather than sourcing shell files.
+- `HookState` stores both installed and disabled hook type lists; enable/disable must not remove installation state.
 
 ## ANTI-PATTERNS
 - Do **not** write tests that touch the developer's real `.bashrc`, `.zshrc`, HOME, or XDG data.

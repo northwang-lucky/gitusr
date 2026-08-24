@@ -307,6 +307,66 @@ func TestNewHooksCmd_Disable_Success(t *testing.T) {
 	}
 }
 
+// --- hooks install command tests ---
+
+func TestHooksInstall_Success(t *testing.T) {
+	i18n.ResetForTesting()
+	i18n.InitWithLocale("en")
+
+	origInstallAll := installAllFunc
+	t.Cleanup(func() { installAllFunc = origInstallAll })
+
+	installAllFunc = func(shells []hook.ShellType) ([]hook.HookInstallResult, error) {
+		return []hook.HookInstallResult{
+			{Type: hook.HookTypeClone, Shell: hook.ShellTypeBash, FilePath: "/tmp/git-wrapper.sh"},
+			{Type: hook.HookTypeClone, Shell: hook.ShellTypeZsh, FilePath: "/tmp/git-wrapper.zsh"},
+		}, nil
+	}
+
+	store := &mockStore{}
+	cmd := NewHooksCmd(store, newTestHostStore(t))
+	stdout, _, err := executeCmd(cmd, "install")
+
+	if err != nil {
+		t.Fatalf("hooks install unexpected error: %v", err)
+	}
+	if !strings.Contains(stdout, "All hooks successfully installed") {
+		t.Errorf("expected success message, got: %s", stdout)
+	}
+	if !strings.Contains(stdout, ".bashrc") {
+		t.Errorf("expected bash source hint, got: %s", stdout)
+	}
+	if !strings.Contains(stdout, ".zshrc") {
+		t.Errorf("expected zsh source hint, got: %s", stdout)
+	}
+}
+
+func TestHooksInstall_AlreadyInstalled(t *testing.T) {
+	i18n.ResetForTesting()
+	i18n.InitWithLocale("en")
+
+	origInstallAll := installAllFunc
+	t.Cleanup(func() { installAllFunc = origInstallAll })
+
+	installAllFunc = func(shells []hook.ShellType) ([]hook.HookInstallResult, error) {
+		return nil, nil
+	}
+
+	store := &mockStore{}
+	cmd := NewHooksCmd(store, newTestHostStore(t))
+	stdout, _, err := executeCmd(cmd, "install")
+
+	if err != nil {
+		t.Fatalf("hooks install unexpected error: %v", err)
+	}
+	if !strings.Contains(stdout, "All hooks are already installed") {
+		t.Errorf("expected already-installed message, got: %s", stdout)
+	}
+	if strings.Contains(stdout, "source") {
+		t.Errorf("should NOT show source hint when already installed, got: %s", stdout)
+	}
+}
+
 // --- hooks uninstall command tests ---
 
 func TestHooksUninstall_Success(t *testing.T) {

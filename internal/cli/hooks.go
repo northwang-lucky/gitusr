@@ -100,6 +100,16 @@ func NewHookInstallCmd(store domain.UserStore) *cobra.Command {
 			}
 
 			fmt.Println(i18n.T("cli.hooks.install.success", nil))
+			for _, r := range results {
+				rcPath, err := hook.ShellConfigPath(r.Shell)
+				if err != nil {
+					continue
+				}
+				fmt.Println(i18n.T("cli.hooks.install.source_hint", map[string]interface{}{
+					"Shell":  r.Shell,
+					"RcFile": rcPath,
+				}))
+			}
 			return nil
 		},
 	}

@@ -8,19 +8,23 @@ End-to-end tests build the real `gitusr` binary once and exercise CLI workflows 
 ## STRUCTURE
 ```
 test/integration/
-├── integration_test.go       # Binary build, helpers, core workflows
+├── integration_test.go       # Binary build, helpers, init/use/list/current/remove workflows
+├── add_test.go               # Add command workflows
 ├── host_apply_test.go        # hosts rules + hooks apply-host workflows
-└── hook_test.go              # Hook/.gitusrrc workflows
+├── hooks_test.go             # Hook install/enable/disable workflows
+├── hook_apply_rc_test.go     # .gitusrrc apply workflows
+├── i18n_test.go              # Locale-visible CLI workflows
+└── replace_test.go           # History author rewrite workflows
 ```
 
 ## WHERE TO LOOK
 | Task | Location | Notes |
 |------|----------|-------|
-| Add a full CLI scenario | `integration_test.go` | Reuse binary helpers; isolate HOME/XDG |
+| Add a full CLI scenario | `*_test.go` by feature | Reuse binary helpers from `integration_test.go`; isolate HOME/XDG |
 | Change binary build flags | `TestMain` | Builds `./cmd/gitusr` to `os.TempDir()` |
 | Change env isolation | `runGitusr`, `runGitusrInDir` | Pass env map; never rely on real HOME |
 | Assert git config | `gitConfig` helper | Reads raw `git config` in temp repo |
-| Add hook E2E coverage | `hook_test.go` | Must sandbox shell rc writes with temp HOME/XDG |
+| Add hook E2E coverage | `hooks_test.go`, `hook_apply_rc_test.go` | Must sandbox shell rc writes with temp HOME/XDG |
 | Add host rule E2E coverage | `host_apply_test.go` | Pre-seed `user-list.json` + `hosts.json`, then run `hooks apply-host` |
 
 ## CONVENTIONS

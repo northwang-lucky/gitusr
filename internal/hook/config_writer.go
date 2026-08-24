@@ -221,6 +221,12 @@ func hooksDir() (string, error) {
 
 // shellConfigPath returns the path to the shell config file
 // based on the current user's home directory.
+// ShellConfigPath returns the path to the shell configuration file for the
+// given shell type. For bash it returns ~/.bashrc; for zsh it returns ~/.zshrc.
+func ShellConfigPath(shell ShellType) (string, error) {
+	return shellConfigPath(shell)
+}
+
 func shellConfigPath(shell ShellType) (string, error) {
 	home, err := os.UserHomeDir()
 	if err != nil {

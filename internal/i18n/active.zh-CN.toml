@@ -457,6 +457,10 @@ other = "所有 hook 安装成功"
 hash = "sha1:dummy"
 other = "所有 hook 已安装"
 
+[cli.hooks.install.source_hint]
+hash = "sha1:dummy"
+other = "请运行 'source {{.RcFile}}' 以应用 {{.Shell}} hook"
+
 [cli.hooks.uninstall.short]
 hash = "sha1:dummy"
 other = "移除所有 hook 包装器"

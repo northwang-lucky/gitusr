@@ -34,40 +34,58 @@ brew install gitusr
 
 ## 快速上手
 
-以下是一个**最短路径 Demo**，演示如何用 `gitusr` 管理你的 Git 用户：
+以下是一个**从零到自动切换**的完整演示，展示 `gitusr` 最核心的使用体验：
 
 ```bash
 # 1. 初始化 —— 从当前 git 全局配置导入第一个用户
 #    （如果全局没有配置，会交互式提示输入）
 gitusr init
 
-# 2. 添加另一个用户（例如公司身份）
+# 2. 添加另一个用户（例如公司身份）—— 这是体验自动切换的前提
 gitusr add
 # 提示输入 user.name:  Zhang San
 # 提示输入 user.email: zhangsan@company.com
 
-# 3. 查看已保存的所有用户
-gitusr list
+# 3. 安装 shell 钩子（bash + zsh）
+gitusr hooks install
 # 输出：
-# 0：姓名：North Wang       | 邮箱：north@personal.com
-# 1：姓名：Zhang San        | 邮箱：zhangsan@company.com
+# 所有 hook 安装成功
+# 请运行 'source ~/.bashrc' 以应用 bash hook
+# 请运行 'source ~/.zshrc' 以应用 zsh hook
 
-# 4. 切换到公司用户（在当前仓库中）
-cd ~/work/company-project
-gitusr use --index 1
-# 成功！
+# 4. 使钩子在当前终端生效
+source ~/.bashrc    # 或 source ~/.zshrc
+
+# 5. 克隆任意仓库 —— hook 会自动进入目录并调用 gitusr use
+git clone https://github.com/example/repo.git
+# clone 完成后自动进入 repo 目录。
+# 如果有多个用户保存，会弹出交互式选择：
+#
+# ? 选择一个用户:
+#   姓名：North Wang       | 邮箱：north@personal.com
+#   姓名：Zhang San        | 邮箱：zhangsan@company.com
+
+# 6. 查看当前仓库已切换的用户
+gitusr current
+# 输出：
 # 您的 repo git 用户为：
 #
 # user.name  = Zhang San
 # user.email = zhangsan@company.com
-
-# 5. 查看当前仓库使用的用户
-gitusr current
-
-# 6. 也可以直接用索引、姓名或邮箱切换
-gitusr use --email zhangsan@company.com
-gitusr use --name "Zhang San"
 ```
+
+**进阶：为仓库配置 `.gitusrrc`**
+
+在 Git 仓库根目录创建 `.gitusrrc` 文件，当 `cd` 进入该目录或 `git commit` 时，hook 会自动匹配并应用对应的 Git 用户：
+
+```json
+{
+  "name": "Zhang San",
+  "email": "zhangsan@company.com"
+}
+```
+
+匹配优先级：**email > name**。只要提供其中一项即可。
 
 ## CLI 文档
 
