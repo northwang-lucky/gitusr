@@ -61,3 +61,24 @@ func TestDataFilePath_DefaultPath(t *testing.T) {
 		t.Errorf("%q is not a directory", parentDir)
 	}
 }
+
+// ---------------------------------------------------------------------------
+// TestHostsFilePath — hosts.json 与 user-list.json 并列存放
+// ---------------------------------------------------------------------------
+
+func TestHostsFilePath_WithCustomEnv(t *testing.T) {
+	tmpDir := t.TempDir()
+	customDataHome := filepath.Join(tmpDir, "xdgdata")
+
+	t.Setenv("XDG_DATA_HOME", customDataHome)
+
+	got, err := HostsFilePath()
+	if err != nil {
+		t.Fatalf("HostsFilePath() returned error: %v", err)
+	}
+
+	expected := filepath.Join(customDataHome, "gitusr", "hosts.json")
+	if got != expected {
+		t.Errorf("expected %q, got %q", expected, got)
+	}
+}

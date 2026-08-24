@@ -6,14 +6,14 @@ import (
 )
 
 const (
-	dataDir  = "gitusr"
-	dataFile = "user-list.json"
+	dataDir   = "gitusr"
+	dataFile  = "user-list.json"
+	hostsFile = "hosts.json"
 )
 
-// DataFilePath returns the full path to the user-list.json data file.
-// It reads $XDG_DATA_HOME environment variable; if not set, it falls back to
-// ~/.local/share. The parent directory is created if it does not exist.
-func DataFilePath() (string, error) {
+// dataHomeDir returns the gitusr data directory ($XDG_DATA_HOME/gitusr or
+// ~/.local/share/gitusr), creating it if absent.
+func dataHomeDir() (string, error) {
 	dataHome := os.Getenv("XDG_DATA_HOME")
 	if dataHome == "" {
 		home, err := os.UserHomeDir()
@@ -28,5 +28,25 @@ func DataFilePath() (string, error) {
 		return "", err
 	}
 
+	return dir, nil
+}
+
+// DataFilePath returns the full path to the user-list.json data file.
+func DataFilePath() (string, error) {
+	dir, err := dataHomeDir()
+	if err != nil {
+		return "", err
+	}
+
 	return filepath.Join(dir, dataFile), nil
+}
+
+// HostsFilePath returns the full path to the hosts.json routing file.
+func HostsFilePath() (string, error) {
+	dir, err := dataHomeDir()
+	if err != nil {
+		return "", err
+	}
+
+	return filepath.Join(dir, hostsFile), nil
 }
