@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.3.0](https://github.com/northwang-lucky/gitusr/compare/v1.2.0...v1.3.0) (2026-08-24)
+
+
+### Features
+
+* **hooks:** clone hook 支持按仓库 host 自动匹配用户 ([105829e](https://github.com/northwang-lucky/gitusr/commit/105829e3c0b3a783dd05fcee03233a7c73eb93c6))
+* **hosts:** clone hook 自动按仓库 host 匹配 Git 用户 ([9974650](https://github.com/northwang-lucky/gitusr/commit/9974650652ef097abd1d104adcdd67b8d4ed29ca))
+* **hosts:** 新增 host 路由规则模型、匹配逻辑与 JSON 存储 ([00f28dc](https://github.com/northwang-lucky/gitusr/commit/00f28dc7b4710fa6766d8765e4eb26183e39ea4f))
+
+
+### Bug Fixes
+
+* **test:** replace 测试在 git-filter-repo 不可用时自动降级 ([d3b273c](https://github.com/northwang-lucky/gitusr/commit/d3b273c4f579ee71057252d5b92cdf3478274125))
+
 ## [1.2.0](https://github.com/northwang-lucky/gitusr/compare/v1.1.0...v1.2.0) (2026-06-01)
 
 
