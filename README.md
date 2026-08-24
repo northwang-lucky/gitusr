@@ -327,7 +327,7 @@ gitusr hooks <subcommand> [flags]
 
 安装后支持三种钩子类型：
 
-- **`clone`** — `git clone` 结束后自动进入仓库目录并调用 `gitusr use` 切换用户。支持通过 `--gu-name` / `--gu-email` 参数在非 TTY 环境下指定用户
+- **`clone`** — `git clone` 结束后自动进入仓库目录，并按以下优先级应用用户：显式 `--gu-name` / `--gu-email` 参数 > 仓库内 `.gitusrrc` > `hosts` 规则（按仓库 URL 的 host 匹配）> 交互式 `gitusr use`。显式参数可在非 TTY 环境下指定用户
 - **`commit`** — `git commit` 时自动读取 `.gitusrrc` 并应用用户
 - **`cd`** — `cd` 到包含 `.gitusrrc` 的目录时自动应用用户
 
@@ -409,6 +409,54 @@ gitusr hooks disable cd
 ```
 
 匹配优先级：**email > name**。只要提供其中一项即可。
+
+### `gitusr hosts` — 配置 host 路由规则
+
+当 `git clone` 一个仓库时，clone 钩子会读取仓库 URL 的 host，并按配置的路由规则自动应用对应的 Git 用户。适合"`github.com` 用个人账号、`code.byted.org` 用公司账号"这类场景。
+
+**用法：**
+
+```bash
+gitusr hosts <subcommand> [flags]
+```
+
+**子命令：**
+
+| 子命令 | 说明 |
+|--------|------|
+| `set <host> <email>` | 新增或就地更新一条规则；email 必须是已保存的用户 |
+| `list` | 带序号列出所有规则（序号供 `move` 引用） |
+| `remove <host>` | 删除指定规则 |
+| `move <host> <target>` | 调整规则顺序；target 为序号、`first`、`last`、`up` 或 `down` |
+
+**匹配规则：**
+
+- host 统一小写、忽略端口；支持 `https://`、`ssh://`、`git://` 及 `git@host:path` 等 URL 形态
+- `github.com` 精确匹配该 host；`*.byted.org` 匹配任意深度子域
+- 同一 host 命中多条规则时：**精确匹配 > 通配匹配，同级别按配置顺序先配置者胜**
+
+**示例：**
+
+```bash
+# github.com 用个人账号
+gitusr hosts set github.com wyb_goodluck@163.com
+
+# code.byted.org 及其所有子域用公司账号
+gitusr hosts set *.byted.org wangyubo.1219@bytedance.com
+
+# 查看与调整顺序
+gitusr hosts list
+gitusr hosts move code.byted.org first
+
+# 删除
+gitusr hosts remove github.com
+```
+
+**异常行为：**
+
+- clone 后若仓库自带 `.gitusrrc`，以 `.gitusrrc` 为准（优先于 host 规则）
+- 规则引用的用户已被删除时，输出一行警告并跳过，不影响 clone
+- 配置了 hosts 规则但当前 URL 不匹配时静默跳过，不再弹出交互式选择
 
 ---
 

@@ -9,6 +9,7 @@ End-to-end tests build the real `gitusr` binary once and exercise CLI workflows 
 ```
 test/integration/
 ├── integration_test.go       # Binary build, helpers, core workflows
+├── host_apply_test.go        # hosts rules + hooks apply-host workflows
 └── hook_test.go              # Hook/.gitusrrc workflows
 ```
 
@@ -20,6 +21,7 @@ test/integration/
 | Change env isolation | `runGitusr`, `runGitusrInDir` | Pass env map; never rely on real HOME |
 | Assert git config | `gitConfig` helper | Reads raw `git config` in temp repo |
 | Add hook E2E coverage | `hook_test.go` | Must sandbox shell rc writes with temp HOME/XDG |
+| Add host rule E2E coverage | `host_apply_test.go` | Pre-seed `user-list.json` + `hosts.json`, then run `hooks apply-host` |
 
 ## CONVENTIONS
 - `TestMain` owns binary build and cleanup; individual tests call the built binary.

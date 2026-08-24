@@ -3,13 +3,14 @@
 **Scope:** `internal/hook/`
 
 ## OVERVIEW
-Shell-hook engine for automatic git user switching. It writes unified bash/zsh wrapper files, mutates shell rc files with marked blocks, tracks installed/disabled hook types, and applies `.gitusrrc` to repo-local git config.
+Shell-hook engine for automatic git user switching. It writes unified bash/zsh wrapper files, mutates shell rc files with marked blocks, tracks installed/disabled hook types, applies `.gitusrrc` to repo-local git config, and routes clone URLs to saved users via host rules (`hooks apply-host`).
 
 ## WHERE TO LOOK
 | Task | Location | Notes |
 |------|----------|-------|
 | Add/remove hook type | `types.go`, `installer.go`, `uninstaller.go` | Update `AllHookTypes`, CLI validation, wrapper generation, tests |
 | Change wrapper behavior | `shell_bash.go`, `shell_zsh.go` | Raw shell strings for git clone/commit wrappers |
+| Change clone identity chain | `shell_bash.go`, `shell_zsh.go` | Priority: `--gu-*` args > `.gitusrrc` > `hosts.json` (`apply-host`) > interactive `use` |
 | Change cd auto-apply behavior | `shell_bash.go`, `shell_zsh.go` | Bash aliases `cd`; zsh uses `add-zsh-hook chpwd` |
 | Change shell rc mutation | `config_writer.go` | Markers are `# gitusr hook begin/end` |
 | Change persistent hook state | `state.go` | State file is `hook-state.json` next to user list; tracks installed and disabled types |
@@ -34,6 +35,8 @@ Shell-hook engine for automatic git user switching. It writes unified bash/zsh w
 - `Install` is legacy/deprecated; new CLI flow should use unified `InstallAll` and `UninstallAll`.
 - Shell snippets call `gitusr list` first and pass through when saved user count is `<= 1`.
 - Shell snippets check `gitusr hooks is-disabled <type>` before clone/commit/cd behavior.
+- Clone identity chain: `--gu-*` args > `.gitusrrc` > host rules (`apply-host`, only when `hosts.json` exists) > interactive `gitusr use`.
+- The host rule branch reads the remote URL via `git config --local --get-regexp '^remote\..*\.url$'`; the clone URL is deliberately NOT parsed from argv (branch names look like URLs).
 - Bash wrappers use `command git` and `\cd` to avoid function/alias recursion.
 - Zsh cd hooks remove the existing hook with `add-zsh-hook -D` before re-adding it.
 - Shell rc files are mutated only inside the marked block; existing config must be preserved.
@@ -45,7 +48,8 @@ Shell-hook engine for automatic git user switching. It writes unified bash/zsh w
 - Do **not** delete wrapper files while any hook type remains installed.
 - Do **not** make `.gitusrrc` name take priority over email.
 - Do **not** add unsupported shells by only changing generators; update CLI defaults and rc-path handling too.
-- Do **not** break hidden CLI bridge calls: wrappers depend on `hooks apply-rc --silent-if-unchanged` and `hooks is-disabled`.
+- Do **not** break hidden CLI bridge calls: wrappers depend on `hooks apply-rc --silent-if-unchanged`, `hooks apply-host --silent-if-unchanged`, and `hooks is-disabled`.
+- Do **not** reorder the clone identity chain: `--gu-*` args and `.gitusrrc` both override host rules by design.
 
 ## COMMANDS
 ```bash
