@@ -13,6 +13,10 @@
 hash = "sha1:14e60b9ae9140b40f60c4c280aee01aad62a0a50"
 other = "gitusr error: {{.Msg}}"
 
+[format.warning_prefix]
+hash = "sha1:dummy"
+other = "gitusr warning: {{.Msg}}"
+
 [format.success_banner]
 hash = "sha1:7ce01f6381463362cf6aef2f843a59261e8f5587"
 other = "Success!"
@@ -488,6 +492,78 @@ other = "Hook %s disabled"
 [cli.hooks.invalid_type]
 hash = "sha1:dummy"
 other = "invalid hook type: %q, must be %q, %q, or %q"
+
+[cli.hooks.apply_host.missing_user]
+hash = "sha1:dummy"
+other = "host rule \"{{.Host}}\" references email \"{{.Email}}\", which is not a saved user; skipped"
+
+# ================================================
+# CLI hosts commands (internal/cli/hosts.go)
+# ================================================
+
+[cli.hosts.short]
+hash = "sha1:dummy"
+other = "Manage host-to-user routing rules"
+
+[cli.hosts.set.short]
+hash = "sha1:dummy"
+other = "Set a host rule"
+
+[cli.hosts.set.success]
+hash = "sha1:dummy"
+other = "Host rule set: {{.Host}} -> {{.Email}}"
+
+[cli.hosts.set.invalid_host]
+hash = "sha1:dummy"
+other = "invalid host \"{{.Host}}\": use a bare hostname like github.com or a wildcard like *.example.com"
+
+[cli.hosts.set.email_not_found]
+hash = "sha1:dummy"
+other = "email \"{{.Email}}\" not found in saved users"
+
+[cli.hosts.list.short]
+hash = "sha1:dummy"
+other = "List host rules"
+
+[cli.hosts.list.empty]
+hash = "sha1:dummy"
+other = "No host rules configured"
+
+[cli.hosts.list_row]
+hash = "sha1:dummy"
+other = "{{.Index}}: {{.Host}} | Email: {{.Email}}"
+
+[cli.hosts.remove.short]
+hash = "sha1:dummy"
+other = "Remove a host rule"
+
+[cli.hosts.remove.success]
+hash = "sha1:dummy"
+other = "Host rule removed: {{.Host}}"
+
+[cli.hosts.remove.not_found]
+hash = "sha1:dummy"
+other = "host rule \"{{.Host}}\" not found"
+
+[cli.hosts.move.short]
+hash = "sha1:dummy"
+other = "Move a host rule"
+
+[cli.hosts.move.success]
+hash = "sha1:dummy"
+other = "Host rule moved: {{.Host}} -> position {{.Index}}"
+
+[cli.hosts.move.invalid_target]
+hash = "sha1:dummy"
+other = "invalid move target \"{{.Target}}\": use a 0-based index, first, last, up, or down"
+
+[cli.hosts.move.out_of_range]
+hash = "sha1:dummy"
+other = "target index {{.Index}} out of range (0-{{.Max}})"
+
+[cli.hosts.move.at_boundary]
+hash = "sha1:dummy"
+other = "host rule \"{{.Host}}\" is already at the {{.Boundary}} boundary"
 
 # ================================================
 # Gitcmd package messages (internal/gitcmd/)

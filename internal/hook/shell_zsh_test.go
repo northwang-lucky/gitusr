@@ -254,3 +254,23 @@ func TestUnifiedZshWrapper_ChpwdHookUsesApplyRC(t *testing.T) {
 		t.Error("unified wrapper chpwd hook should call gitusr hooks apply-rc --silent-if-unchanged")
 	}
 }
+
+// ---------------------------------------------------------------------------
+// Host rule chain (clone 后按优先级:显式参数 > .gitusrrc > host 规则)
+// ---------------------------------------------------------------------------
+
+func TestUnifiedZshWrapper_HostRuleChain(t *testing.T) {
+	script := GenerateUnifiedZshWrapper()
+	if !strings.Contains(script, "apply-host") {
+		t.Error("unified wrapper should call hooks apply-host after clone")
+	}
+	if !strings.Contains(script, "hosts.json") {
+		t.Error("unified wrapper should check for hosts.json")
+	}
+	if !strings.Contains(script, "apply-rc --silent-if-unchanged") {
+		t.Error("unified wrapper should apply .gitusrrc before host rules")
+	}
+	if !strings.Contains(script, "'^remote\\..*\\.url$'") {
+		t.Error("unified wrapper should read the remote URL from git config")
+	}
+}

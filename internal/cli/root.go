@@ -11,10 +11,11 @@ import (
 )
 
 // NewRootCmd creates the root cobra command for gitusr and registers all
-// subcommands. The store parameter is injected into every subcommand that
-// requires persistence. The name parameter controls the command's Use field,
-// allowing "gitusr" or "gu" depending on the invocation alias.
-func NewRootCmd(store domain.UserStore, name string) *cobra.Command {
+// subcommands. The store and hostStore parameters are injected into every
+// subcommand that requires persistence. The name parameter controls the
+// command's Use field, allowing "gitusr" or "gu" depending on the invocation
+// alias.
+func NewRootCmd(store domain.UserStore, hostStore domain.HostRuleStore, name string) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:           name,
 		Short:         i18n.T("cli.root.short", nil),
@@ -26,7 +27,8 @@ func NewRootCmd(store domain.UserStore, name string) *cobra.Command {
 	cmd.AddCommand(
 		NewAddCmd(store),
 		NewCurrentCmd(),
-		NewHooksCmd(store),
+		NewHooksCmd(store, hostStore),
+		NewHostsCmd(store, hostStore),
 		NewInitCmd(store),
 		NewListCmd(store),
 		NewRemoveCmd(store),

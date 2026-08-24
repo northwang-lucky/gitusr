@@ -12,7 +12,7 @@ func TestRootHelp_En(t *testing.T) {
 	i18n.InitWithLocale("en")
 
 	store := &mockStore{}
-	cmd := NewRootCmd(store, "gitusr")
+	cmd := NewRootCmd(store, newTestHostStore(t), "gitusr")
 
 	stdout, stderr, err := executeCmd(cmd, "--help")
 	if err != nil {
@@ -32,7 +32,7 @@ func TestRootHelp_ZhCN(t *testing.T) {
 	i18n.InitWithLocale("zh-CN")
 
 	store := &mockStore{}
-	cmd := NewRootCmd(store, "gitusr")
+	cmd := NewRootCmd(store, newTestHostStore(t), "gitusr")
 
 	stdout, stderr, err := executeCmd(cmd, "--help")
 	if err != nil {

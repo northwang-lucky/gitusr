@@ -12,7 +12,13 @@ import (
 )
 
 func main() {
-	path, err := xdgpath.DataFilePath()
+	userPath, err := xdgpath.DataFilePath()
+	if err != nil {
+		format.PrintErr(err.Error())
+		os.Exit(1)
+	}
+
+	hostPath, err := xdgpath.HostsFilePath()
 	if err != nil {
 		format.PrintErr(err.Error())
 		os.Exit(1)
@@ -20,10 +26,11 @@ func main() {
 
 	i18n.Init()
 
-	s := store.NewJSONStore(path)
+	s := store.NewJSONStore(userPath)
+	hostStore := store.NewJSONHostRuleStore(hostPath)
 
 	cmdName := filepath.Base(os.Args[0])
-	rootCmd := cli.NewRootCmd(s, cmdName)
+	rootCmd := cli.NewRootCmd(s, hostStore, cmdName)
 
 	if err := rootCmd.Execute(); err != nil {
 		format.PrintErr(err.Error())
