@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.1](https://github.com/northwang-lucky/gitusr/compare/v1.3.0...v1.3.1) (2026-09-09)
+
+
+### Bug Fixes
+
+* **hook:** 修复 clone hook 对 https 链接识别失效 ([de037c4](https://github.com/northwang-lucky/gitusr/commit/de037c415f907eef17d110fef3874419aa2d44f2))
+
 ## [1.3.0](https://github.com/northwang-lucky/gitusr/compare/v1.2.0...v1.3.0) (2026-08-24)
 
 
