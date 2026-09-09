@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.0](https://github.com/northwang-lucky/gitusr/compare/v1.3.1...v1.4.0) (2026-09-09)
+
+
+### Features
+
+* **cli:** 新增 gitusr hooks status 命令展示各 hook 安装与开关状态 ([724362f](https://github.com/northwang-lucky/gitusr/commit/724362f88caba0d1a2f4eb239b2dd85a38e98666))
+
 ## [1.3.1](https://github.com/northwang-lucky/gitusr/compare/v1.3.0...v1.3.1) (2026-09-09)
 
 
