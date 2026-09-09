@@ -12,6 +12,7 @@ test/integration/
 ├── add_test.go               # Add command workflows
 ├── host_apply_test.go        # hosts rules + hooks apply-host workflows
 ├── hooks_test.go             # Hook install/enable/disable workflows
+├── hooks_status_test.go      # hooks status lifecycle workflow
 ├── hook_apply_rc_test.go     # .gitusrrc apply workflows
 ├── i18n_test.go              # Locale-visible CLI workflows
 ├── replace_test.go           # History author rewrite workflows

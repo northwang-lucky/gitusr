@@ -493,6 +493,26 @@ other = "Disable a hook"
 hash = "sha1:dummy"
 other = "Hook %s disabled"
 
+[cli.hooks.status.short]
+hash = "sha1:dummy"
+other = "Show installation and enable status of hooks"
+
+[cli.hooks.status.row]
+hash = "sha1:dummy"
+other = "{{.Type}}: {{.Status}}"
+
+[cli.hooks.status.enabled]
+hash = "sha1:dummy"
+other = "enabled"
+
+[cli.hooks.status.disabled]
+hash = "sha1:dummy"
+other = "disabled"
+
+[cli.hooks.status.not_installed]
+hash = "sha1:dummy"
+other = "not installed"
+
 [cli.hooks.invalid_type]
 hash = "sha1:dummy"
 other = "invalid hook type: %q, must be %q, %q, or %q"

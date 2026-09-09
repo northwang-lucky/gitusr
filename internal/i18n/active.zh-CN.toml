@@ -489,6 +489,26 @@ other = "禁用一个 hook"
 hash = "sha1:dummy"
 other = "Hook %s 已禁用"
 
+[cli.hooks.status.short]
+hash = "sha1:dummy"
+other = "查看 hooks 的安装与开关状态"
+
+[cli.hooks.status.row]
+hash = "sha1:dummy"
+other = "{{.Type}}: {{.Status}}"
+
+[cli.hooks.status.enabled]
+hash = "sha1:dummy"
+other = "已启用"
+
+[cli.hooks.status.disabled]
+hash = "sha1:dummy"
+other = "已禁用"
+
+[cli.hooks.status.not_installed]
+hash = "sha1:dummy"
+other = "未安装"
+
 [cli.hooks.invalid_type]
 hash = "sha1:dummy"
 other = "无效的 hook 类型: %q，必须为 %q、%q 或 %q"
