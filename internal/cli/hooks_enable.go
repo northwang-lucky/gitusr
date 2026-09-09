@@ -29,7 +29,7 @@ func NewHooksEnableCmd() *cobra.Command {
 				return err
 			}
 
-			fmt.Printf(i18n.T("cli.hooks.enable.success", nil), hookType)
+			fmt.Println(fmt.Sprintf(i18n.T("cli.hooks.enable.success", nil), hookType))
 			return nil
 		},
 	}

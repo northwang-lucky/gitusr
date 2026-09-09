@@ -29,7 +29,7 @@ func isValidHookType(ht hook.HookType) bool {
 }
 
 // NewHooksCmd creates the parent "hooks" command that groups all hook-related
-// subcommands including install, uninstall, enable, disable, apply-rc,
+// subcommands including install, uninstall, status, enable, disable, apply-rc,
 // apply-host, and is-disabled.
 func NewHooksCmd(store domain.UserStore, hostStore domain.HostRuleStore) *cobra.Command {
 	cmd := &cobra.Command{
@@ -40,6 +40,7 @@ func NewHooksCmd(store domain.UserStore, hostStore domain.HostRuleStore) *cobra.
 	cmd.AddCommand(
 		NewHookInstallCmd(store),
 		NewHooksUninstallCmd(store),
+		NewHooksStatusCmd(),
 		NewHooksEnableCmd(),
 		NewHooksDisableCmd(),
 		NewHooksApplyRCCmd(store),

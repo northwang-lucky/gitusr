@@ -18,7 +18,7 @@ internal/cli/
 ├── remove.go           # Remove identity by index/email/name
 ├── replace.go          # git-filter-repo author replacement flow
 ├── use.go              # Apply selected identity repo/global
-├── hooks*.go           # Hook install/uninstall/enable/disable/apply-rc/is-disabled bridge
+├── hooks*.go           # Hook install/uninstall/status/enable/disable/apply-rc/is-disabled bridge
 └── *_test.go           # Command-local tests and shared mocks/helpers
 ```
 

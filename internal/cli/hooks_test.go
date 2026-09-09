@@ -58,8 +58,8 @@ func TestNewHooksCmd_Subcommands(t *testing.T) {
 	cmd := NewHooksCmd(store, newTestHostStore(t))
 
 	subs := cmd.Commands()
-	if len(subs) != 7 {
-		t.Fatalf("expected 7 subcommands, got %d", len(subs))
+	if len(subs) != 8 {
+		t.Fatalf("expected 8 subcommands, got %d", len(subs))
 	}
 
 	names := make(map[string]bool)
@@ -71,10 +71,14 @@ func TestNewHooksCmd_Subcommands(t *testing.T) {
 		}
 	}
 
-	for _, name := range []string{"install", "uninstall", "enable", "disable", "apply-rc", "apply-host", "is-disabled"} {
+	for _, name := range []string{"install", "uninstall", "status", "enable", "disable", "apply-rc", "apply-host", "is-disabled"} {
 		if !names[name] {
 			t.Errorf("expected subcommand %q", name)
 		}
+	}
+
+	if hidden["status"] {
+		t.Error("expected 'status' subcommand to be visible")
 	}
 
 	if !hidden["apply-rc"] {
