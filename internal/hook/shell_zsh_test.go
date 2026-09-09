@@ -270,7 +270,13 @@ func TestUnifiedZshWrapper_HostRuleChain(t *testing.T) {
 	if !strings.Contains(script, "apply-rc --silent-if-unchanged") {
 		t.Error("unified wrapper should apply .gitusrrc before host rules")
 	}
-	if !strings.Contains(script, "'^remote\\..*\\.url$'") {
-		t.Error("unified wrapper should read the remote URL from git config")
+	if !strings.Contains(script, `sed 's/^[^ ]* //'`) {
+		t.Error("clone URL extraction must strip the config key at the first space")
+	}
+	if strings.Contains(script, "cut -f2") {
+		t.Error("must not slice git config --get-regexp output with cut (key/value are space-separated, cut defaults to TAB)")
+	}
+	if strings.Contains(script, "git remote get-url") {
+		t.Error("must not use git remote get-url: it resolves url.<base>.insteadOf and hides the configured host")
 	}
 }

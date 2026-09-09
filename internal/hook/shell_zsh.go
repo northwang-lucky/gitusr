@@ -106,7 +106,7 @@ git() {
             gitusr hooks apply-rc --silent-if-unchanged
         elif [[ -f "$__GITUSR_DATA_DIR/hosts.json" ]]; then
             local clone_url
-            clone_url=$(git config --local --get-regexp '^remote\..*\.url$' 2>/dev/null | head -1 | cut -f2)
+            clone_url=$(command git config --local --get-regexp '^remote\..*\.url$' 2>/dev/null | head -1 | sed 's/^[^ ]* //')
             if [[ -n "$clone_url" ]]; then
                 gitusr hooks apply-host "$clone_url" --silent-if-unchanged
             fi

@@ -14,7 +14,8 @@ test/integration/
 ├── hooks_test.go             # Hook install/enable/disable workflows
 ├── hook_apply_rc_test.go     # .gitusrrc apply workflows
 ├── i18n_test.go              # Locale-visible CLI workflows
-└── replace_test.go           # History author rewrite workflows
+├── replace_test.go           # History author rewrite workflows
+└── wrapper_clone_test.go     # Sources the installed bash wrapper; offline clone via insteadOf
 ```
 
 ## WHERE TO LOOK

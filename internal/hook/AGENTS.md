@@ -36,7 +36,7 @@ Shell-hook engine for automatic git user switching. It writes unified bash/zsh w
 - Clone snippets call `gitusr list` first and pass through when saved user count is `<= 1`.
 - Shell snippets check `gitusr hooks is-disabled <type>` before clone/commit/cd behavior.
 - Clone identity chain: `--gu-*` args > `.gitusrrc` > host rules (`apply-host`, only when `hosts.json` exists) > interactive `gitusr use`.
-- The host rule branch reads the remote URL via `git config --local --get-regexp '^remote\..*\.url$'`; the clone URL is deliberately NOT parsed from argv (branch names look like URLs).
+- The host rule branch reads the first remote's raw URL via `command git config --local --get-regexp '^remote\..*\.url$' | head -1 | sed 's/^[^ ]* //'`; the clone URL is deliberately NOT parsed from argv (branch names look like URLs). Never `cut -f` that output (key and value are space-separated while `cut` defaults to TAB, so the leaked `remote.origin.url ` prefix silently breaks `ParseHost`), and never use `git remote get-url` (it resolves `url.<base>.insteadOf` and reports the rewritten mirror URL instead of the configured host).
 - Bash wrappers use `command git` and `\cd` to avoid function/alias recursion.
 - Zsh cd hooks remove the existing hook with `add-zsh-hook -D` before re-adding it.
 - Shell rc files are mutated only inside the marked block; existing config must be preserved.
